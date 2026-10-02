@@ -1,7 +1,16 @@
 import type { DragEvent } from 'react';
-import type { Build } from '../build/build';
+import { MUTAGEN_GROUPS, type Build } from '../build/build';
 import type { Skill } from '../catalog/catalog';
 import type { MutagenId, MutationId } from '../data/mutations';
+import {
+  BOARD_CENTRE,
+  MUTAGEN_SLOT_SIZE,
+  MUTATION_SLOT_RADIUS,
+  SLOT_SIZE,
+  mutagenSlotCentre,
+  slotCentre,
+  type Point,
+} from './geometry';
 
 // What is being dragged. An item that comes from the board carries where it sits there in "from",
 // one picked up from a pane carries null.
@@ -27,12 +36,61 @@ export const dropTargetKey = (target: DropTarget): string => {
 };
 
 // Only the icon follows the pointer, centred on it, so an item looks dropped exactly where the pointer is.
-// A mutagen keeps the browser's own image, its diamond is rotated.
-export function centreDragImage(event: DragEvent): void {
-  const icon = event.currentTarget.querySelector('.tile, .mutation-ring, .disc');
-  if (icon === null) return;
+// Returns the icon's size, which decides how much of a slot the dragged icon covers.
+export function centreDragImage(event: DragEvent): number {
+  const icon = event.currentTarget.querySelector('.tile, .mutation-ring, .disc, .gem img');
+  if (icon === null) return SLOT_SIZE;
   const box = icon.getBoundingClientRect();
   event.dataTransfer.setDragImage(icon, box.width / 2, box.height / 2);
+  return Math.max(box.width, box.height);
+}
+
+type SnapBox = { readonly target: DropTarget; readonly centre: Point; readonly size: number };
+
+// Every place on the board a drag can end, as a square of about its own area: a diamond as its square,
+// the mutation's circle as the square of the same area.
+const snapBoxes = (slotCount: number): readonly SnapBox[] => [
+  ...Array.from({ length: slotCount }, (_, index): SnapBox => ({
+    target: { kind: 'slot', index },
+    centre: slotCentre(index),
+    size: SLOT_SIZE,
+  })),
+  ...Array.from({ length: MUTAGEN_GROUPS }, (_, group): SnapBox => ({
+    target: { kind: 'mutagen-slot', group },
+    centre: mutagenSlotCentre(group),
+    size: MUTAGEN_SLOT_SIZE,
+  })),
+  {
+    target: { kind: 'mutation-slot' },
+    centre: BOARD_CENTRE,
+    size: MUTATION_SLOT_RADIUS * Math.sqrt(Math.PI),
+  },
+];
+
+// How far two squares on one axis overlap, given the distance of their centres and their sizes.
+const axisOverlap = (distance: number, a: number, b: number): number =>
+  Math.max(0, Math.min(a, b, (a + b) / 2 - Math.abs(distance)));
+
+// Below this share of the dragged icon, an overlap is a brush past, not a drop.
+const MIN_COVER = 0.1;
+
+// The drop target under a dragged icon centred on the given board point: of the targets that accept it,
+// the one the icon covers most, so the snap follows the icon's size and not only the pointer.
+export function snapTarget(
+  point: Point,
+  icon: number,
+  slotCount: number,
+  accepts: (target: DropTarget) => boolean,
+): DropTarget | null {
+  let best: { readonly target: DropTarget; readonly area: number } | null = null;
+  for (const box of snapBoxes(slotCount)) {
+    const area =
+      axisOverlap(point[0] - box.centre[0], icon, box.size) *
+      axisOverlap(point[1] - box.centre[1], icon, box.size);
+    if (area < MIN_COVER * icon * icon || (best !== null && area <= best.area)) continue;
+    if (accepts(box.target)) best = { target: box.target, area };
+  }
+  return best?.target ?? null;
 }
 
 export const isFromBoard = (item: DragItem): boolean =>

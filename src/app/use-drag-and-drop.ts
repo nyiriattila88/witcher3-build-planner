@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type DragEvent, type RefObject } from 'react';
 import type { Build } from '../build/build';
 import {
   acceptsDrop,
@@ -7,41 +7,68 @@ import {
   centreDragImage,
   dropTargetKey,
   isFromBoard,
+  snapTarget,
   type DragItem,
   type DropTarget,
 } from '../planner/drag-and-drop';
 
 export type DragAndDrop = {
   readonly overKey: string | null;
+  // The slot board, which the drop targets are measured against.
+  readonly boardRef: RefObject<HTMLDivElement | null>;
   readonly start: (item: DragItem, event: DragEvent) => void;
-  readonly over: (target: DropTarget, event: DragEvent) => void;
-  readonly leave: (target: DropTarget) => void;
-  readonly drop: (target: DropTarget, event: DragEvent) => void;
 };
+
+type Drag = { readonly item: DragItem; readonly icon: number };
 
 export function useDragAndDrop(
   build: Build,
   apply: (change: (draft: Build) => void) => void,
 ): DragAndDrop {
-  const dragged = useRef<DragItem | null>(null);
+  const dragged = useRef<Drag | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const latestBuild = useRef(build);
   const [overKey, setOverKey] = useState<string | null>(null);
 
-  // A board item dropped anywhere but an accepting slot leaves the board, so the whole page takes it.
-  // React runs the slots' own handlers first, and a slot that took the drop has cleared the item.
   useEffect(() => {
-    const allowBoardItems = (event: globalThis.DragEvent): void => {
-      const item = dragged.current;
-      if (item !== null && isFromBoard(item)) event.preventDefault();
+    latestBuild.current = build;
+  }, [build]);
+
+  // The whole page follows the drag, so the target comes from where the dragged icon covers the board,
+  // not from the element under the pointer. A board item let go off the board leaves the build.
+  useEffect(() => {
+    const targetOf = (event: globalThis.DragEvent, drag: Drag): DropTarget | null => {
+      const board = boardRef.current?.getBoundingClientRect();
+      if (board === undefined) return null;
+      const current = latestBuild.current;
+      return snapTarget(
+        [event.clientX - board.left, event.clientY - board.top],
+        drag.icon,
+        current.slotCount,
+        (target) => acceptsDrop(current, drag.item, target),
+      );
     };
-    const discard = (event: globalThis.DragEvent): void => {
-      const item = dragged.current;
-      if (item === null) return;
+    const over = (event: globalThis.DragEvent): void => {
+      const drag = dragged.current;
+      if (drag === null) return;
+      const target = targetOf(event, drag);
+      setOverKey(target === null ? null : dropTargetKey(target));
+      if (target !== null || isFromBoard(drag.item)) event.preventDefault();
+    };
+    const drop = (event: globalThis.DragEvent): void => {
+      const drag = dragged.current;
+      if (drag === null) return;
       event.preventDefault();
+      const target = targetOf(event, drag);
       dragged.current = null;
       setOverKey(null);
-      if (isFromBoard(item)) {
+      if (target !== null) {
         apply((draft) => {
-          applyDiscard(draft, item);
+          applyDrop(draft, drag.item, target);
+        });
+      } else if (isFromBoard(drag.item)) {
+        apply((draft) => {
+          applyDiscard(draft, drag.item);
         });
       }
     };
@@ -49,50 +76,21 @@ export function useDragAndDrop(
       dragged.current = null;
       setOverKey(null);
     };
-    document.addEventListener('dragover', allowBoardItems);
-    document.addEventListener('drop', discard);
+    document.addEventListener('dragover', over);
+    document.addEventListener('drop', drop);
     document.addEventListener('dragend', finish);
     return () => {
-      document.removeEventListener('dragover', allowBoardItems);
-      document.removeEventListener('drop', discard);
+      document.removeEventListener('dragover', over);
+      document.removeEventListener('drop', drop);
       document.removeEventListener('dragend', finish);
     };
   }, [apply]);
 
   const start = useCallback((item: DragItem, event: DragEvent) => {
-    dragged.current = item;
     event.dataTransfer.setData('text/plain', item.kind);
     event.dataTransfer.effectAllowed = 'move';
-    centreDragImage(event);
+    dragged.current = { item, icon: centreDragImage(event) };
   }, []);
 
-  const over = useCallback(
-    (target: DropTarget, event: DragEvent) => {
-      const item = dragged.current;
-      if (item === null || !acceptsDrop(build, item, target)) return;
-      event.preventDefault();
-      setOverKey(dropTargetKey(target));
-    },
-    [build],
-  );
-
-  const leave = useCallback((target: DropTarget) => {
-    setOverKey((key) => (key === dropTargetKey(target) ? null : key));
-  }, []);
-
-  const drop = useCallback(
-    (target: DropTarget, event: DragEvent) => {
-      const item = dragged.current;
-      if (item === null || !acceptsDrop(build, item, target)) return;
-      event.preventDefault();
-      dragged.current = null;
-      setOverKey(null);
-      apply((draft) => {
-        applyDrop(draft, item, target);
-      });
-    },
-    [build, apply],
-  );
-
-  return { overKey, start, over, leave, drop };
+  return { overKey, boardRef, start };
 }

@@ -964,28 +964,6 @@ button:hover {
   color: var(--muted);
 }
 
-/* A drop zone reaches halfway to the next slot, so a dragged icon snaps in before the pointer is
-   exactly over the tile. The zones of neighbouring slots meet but never overlap. */
-.slot::before,
-.mutagen-slot::before,
-.mutation-slot::before {
-  content: '';
-  position: absolute;
-}
-
-.slot::before {
-  inset: -10px -14px;
-}
-
-.mutagen-slot::before {
-  inset: -8px;
-}
-
-.mutation-slot::before {
-  inset: -10px;
-  border-radius: 50%;
-}
-
 .over {
   border-color: var(--gold) !important;
   background: rgba(217, 183, 104, 0.15) !important;

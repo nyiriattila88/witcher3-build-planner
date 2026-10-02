@@ -1,4 +1,4 @@
-import { useState, type DragEvent, type JSX } from 'react';
+import { useState, type DragEvent, type JSX, type RefObject } from 'react';
 import { BASE_SLOTS, MUTAGEN_GROUPS, SLOTS_PER_GROUP, slotGroup, type Build } from '../build/build';
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
 import { helixUrl, iconUrl, mutagenColour, mutagenIconUrl, treeColour } from './appearance';
@@ -24,36 +24,22 @@ import { SkillTooltip } from './skill-tooltip';
 type BoardHandlers = {
   readonly overKey: string | null;
   readonly onDragStart: (item: DragItem, event: DragEvent) => void;
-  readonly onDragOver: (target: DropTarget, event: DragEvent) => void;
-  readonly onDragLeave: (target: DropTarget) => void;
-  readonly onDrop: (target: DropTarget, event: DragEvent) => void;
   readonly onRemove: (item: DragItem) => void;
   readonly onHoverSkill: (skill: Skill) => void;
   readonly onHoverMutagen: (mutagen: Mutagen) => void;
   readonly onHoverMutation: (mutation: Mutation) => void;
 };
 
-type SlotBoardProps = BoardHandlers & { readonly catalog: Catalog; readonly build: Build };
+type SlotBoardProps = BoardHandlers & {
+  readonly catalog: Catalog;
+  readonly build: Build;
+  // Drops are measured against the board, see useDragAndDrop.
+  readonly boardRef: RefObject<HTMLDivElement | null>;
+};
 
 const groups = Array.from({ length: MUTAGEN_GROUPS }, (_, group) => group);
 
 const REMOVE_TIP = 'Drag to move, double-click to remove';
-
-// Drop-target props shared by every slot of the board.
-const dropTargetProps = (target: DropTarget, handlers: BoardHandlers) => ({
-  onDragOver: (event: DragEvent) => {
-    handlers.onDragOver(target, event);
-  },
-  onDragLeave: (event: DragEvent) => {
-    // Moving onto the slot's own icon or pips is no leaving.
-    const to = event.relatedTarget;
-    if (to instanceof Node && event.currentTarget.contains(to)) return;
-    handlers.onDragLeave(target);
-  },
-  onDrop: (event: DragEvent) => {
-    handlers.onDrop(target, event);
-  },
-});
 
 // Props of a board item: dragging moves it, a double click takes it off the board.
 const boardItemProps = (item: DragItem, handlers: BoardHandlers, onPickUp?: () => void) => ({
@@ -67,11 +53,11 @@ const boardItemProps = (item: DragItem, handlers: BoardHandlers, onPickUp?: () =
   },
 });
 
-export function SlotBoard({ catalog, build, ...handlers }: SlotBoardProps): JSX.Element {
+export function SlotBoard({ catalog, build, boardRef, ...handlers }: SlotBoardProps): JSX.Element {
   const [tipSlot, setTipSlot] = useState<number | null>(null);
   const tipSkill = tipSlot === null ? null : build.slotAt(tipSlot);
   return (
-    <div className="board" style={BOARD_SIZE}>
+    <div ref={boardRef} className="board" style={BOARD_SIZE}>
       <img className="board-helix" src={helixUrl} alt="" draggable={false} />
       <svg width={BOARD_SIZE.width} height={BOARD_SIZE.height}>
         {groups.map((group) => (
@@ -222,7 +208,6 @@ function SkillSlot({
         style={
           mutagen === undefined ? position : { ...position, borderColor: mutagenColour(mutagen) }
         }
-        {...dropTargetProps(target, handlers)}
       >
         {accepts}
       </div>
@@ -249,7 +234,6 @@ function SkillSlot({
       {...boardItemProps({ kind: 'skill', skill, from: index }, handlers, () => {
         onTip(null);
       })}
-      {...dropTargetProps(target, handlers)}
     >
       <span className="tile" style={glow}>
         <img src={iconUrl(skill)} alt="" draggable={false} />
@@ -283,12 +267,7 @@ function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }):
 
   if (bonus === null) {
     return (
-      <div
-        className={`mutagen-slot${over}`}
-        style={position}
-        aria-label="Empty mutagen slot"
-        {...dropTargetProps(target, handlers)}
-      />
+      <div className={`mutagen-slot${over}`} style={position} aria-label="Empty mutagen slot" />
     );
   }
 
@@ -304,7 +283,6 @@ function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }):
           handlers.onHoverMutagen(mutagen);
         }}
         {...boardItemProps({ kind: 'mutagen', mutagen: mutagen.id, from: group }, handlers)}
-        {...dropTargetProps(target, handlers)}
       >
         <MutagenGem mutagen={mutagen} />
       </div>
@@ -338,12 +316,7 @@ function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catal
   if (mutation === undefined) {
     return (
       <>
-        <div
-          className={`mutation-slot${over}`}
-          style={circle}
-          aria-label="Empty mutation slot"
-          {...dropTargetProps(target, handlers)}
-        >
+        <div className={`mutation-slot${over}`} style={circle} aria-label="Empty mutation slot">
           {innate !== undefined && <MutationDisc mutation={innate} />}
         </div>
         <div className="mutation-title empty" style={nameBox}>
@@ -369,7 +342,6 @@ function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catal
           handlers.onHoverMutation(mutation);
         }}
         {...boardItemProps({ kind: 'mutation', mutation: mutation.id, fromBoard: true }, handlers)}
-        {...dropTargetProps(target, handlers)}
       >
         <MutationDisc mutation={mutation} />
       </div>

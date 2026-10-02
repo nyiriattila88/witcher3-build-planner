@@ -158,10 +158,8 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
           catalog={catalog}
           build={build}
           overKey={drag.overKey}
+          boardRef={drag.boardRef}
           onDragStart={drag.start}
-          onDragOver={drag.over}
-          onDragLeave={drag.leave}
-          onDrop={drag.drop}
           onRemove={(item) => {
             apply((draft) => {
               if (item.kind === 'skill' && item.from !== null) draft.unslot(item.from);

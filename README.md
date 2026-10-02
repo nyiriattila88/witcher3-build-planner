@@ -16,7 +16,7 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
 
 **[Open the planner](https://nyiriattila88.github.io/witcher3-build-planner/)**
 
-![A Combat build with Bloodbath: the tree, the slotted skills under red mutagens around the mutation, and the extra slots 13 and 14](docs/screenshot.png)
+![A Combat build with Bloodbath: the tree, the slotted skills under red mutagens around the mutation, and two of the extra slots](docs/screenshot.png)
 
 ## Features
 
@@ -26,7 +26,7 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
   skill unlocked cannot be taken back.
 - **Skill slots and mutagens.** Drag skills into twelve slots in four groups. A mutagen's bonus grows with
   every matching skill in its group and with Synergy, and the board shows which slots count.
-- **Mutations.** Research them in order, slot one in the centre, and fill slots 13-16, which open with
+- **Mutations.** Research them in order, slot one in the centre, and fill the four extra slots around it, which open with
   research and take only the mutation's colours.
 - **The in-game character screen.** Tooltips with the current and the next level, mutagen orbs in their
   diamonds, mutation emblems and the bonus of each slot group, as the game shows them. A double click

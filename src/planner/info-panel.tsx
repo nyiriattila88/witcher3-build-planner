@@ -71,7 +71,7 @@ const names = (skills: readonly Skill[]): string | null =>
 
 function SkillInfo({ skill, build }: { skill: Skill; build: Build }): JSX.Element {
   const rank = build.rank(skill);
-  const slot = build.slotOf(skill);
+  const slotted = build.slotOf(skill) >= 0;
   const icon = (
     <span className="tile" style={{ color: treeColour(skill.tree) }}>
       <img src={iconUrl(skill)} alt="" draggable={false} />
@@ -80,7 +80,7 @@ function SkillInfo({ skill, build }: { skill: Skill; build: Build }): JSX.Elemen
   const meta = (
     <>
       {skill.tree} skill · Rank {rank}/{MAX_RANK}
-      {slot >= 0 ? ` · Slot ${slot + 1}` : ''}
+      {slotted ? ' · Slotted' : ''}
       <br />
       Unlocked by: {names(skill.requires) ?? 'starting skill'} · Unlocks:{' '}
       {names(skill.unlocks) ?? 'none'}

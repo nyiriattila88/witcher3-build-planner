@@ -337,8 +337,8 @@ function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catal
           <span>{build.researchedCount} researched</span>
         </div>
         <p className="mutation-text empty" style={textBox}>
-          Drag a researched mutation onto the circle. Its colours decide which trees slots 13-16
-          take.
+          Drag a researched mutation onto the circle. Its colours decide which skills the four extra
+          slots around it take.
         </p>
       </>
     );

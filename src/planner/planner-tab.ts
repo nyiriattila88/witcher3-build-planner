@@ -32,6 +32,6 @@ export const tabTip = (tab: PlannerTab): string => {
     case 'mutagens':
       return 'Witchers can assign mutagens to their skill slots. Each mutagen provides a passive bonus, increased by every skill of the matching colour in the same slot group. Drag a mutagen (diamond) to a mutagen slot.';
     case 'mutations':
-      return "To slot a mutation, it must first be researched. Research costs skill points and requires every linked mutation below it. Strengthened Synapses is always researched: it unlocks slots 13–16 at 2, 4, 8 and 12 researched mutations, and those slots only take skills matching the slotted mutation's colours.";
+      return "To slot a mutation, it must first be researched. Research costs skill points and requires every linked mutation below it. Strengthened Synapses is always researched. The four extra slots around the mutation open at 2, 4, 8 and all 12 researched mutations, and they only take skills of the slotted mutation's colours.";
   }
 };

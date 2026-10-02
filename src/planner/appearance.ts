@@ -2,7 +2,10 @@ import type { Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { TreeName } from '../data/skills';
 
 // Files under public/ are served below the base path, which is the repository name on GitHub Pages.
-const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}`;
+// GitHub Pages lets a browser keep a file for ten minutes, so the release in the query makes it fetch
+// an image a release has replaced under the same name.
+const assetUrl = (path: string): string =>
+  `${import.meta.env.BASE_URL}${path}?v=${__APP_VERSION__}`;
 
 const slug = (text: string): string =>
   text

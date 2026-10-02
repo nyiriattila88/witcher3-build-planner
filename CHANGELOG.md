@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.5 - 2026-10-02
+
+- After a release the browser loads the images again. A replaced image no longer shows its old version
+  for up to ten minutes, which made the new mutation discs look broken right after 2.1.4.
+
 ## 2.1.4 - 2026-10-02
 
 - Mutations look as in the game: a disc in the mutation's colour, gold for those of more than one

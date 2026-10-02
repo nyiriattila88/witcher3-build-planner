@@ -14,9 +14,10 @@
   --mut-combat: #e0262c;
   --mut-signs: #3d55e0;
   --mut-alchemy: #2c9a2c;
-  --mut-combat-signs: #8a2bb0;
-  --mut-combat-alchemy: #c9c400;
-  --mut-combat-signs-alchemy: #c4c4c4;
+  /* The game draws every mutation of more than one colour in gold. */
+  --mut-combat-signs: #d29a2e;
+  --mut-combat-alchemy: #d29a2e;
+  --mut-combat-signs-alchemy: #d29a2e;
 }
 
 * {
@@ -270,7 +271,7 @@ button:hover {
   display: block;
   width: 100%;
   height: 100%;
-  mix-blend-mode: screen;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
   pointer-events: none;
 }
 
@@ -555,15 +556,12 @@ button:hover {
   position: relative;
   width: 76px;
   height: 76px;
-  padding: 3px;
-  border: 2px solid #4b5056;
   border-radius: 50%;
-  background: #0b0d10;
-  box-shadow: 0 0 0 1px #000;
 }
+/* Below the emblem badge, which hangs under the disc. */
 
 .mutation-name {
-  margin-top: 5px;
+  margin-top: 15px;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.05;
@@ -585,8 +583,7 @@ button:hover {
 }
 
 .mutation.available .mutation-ring {
-  border-color: #8a8f96;
-  filter: saturate(0.7) brightness(0.85);
+  filter: saturate(0.45) brightness(0.8);
 }
 
 .mutation.researched {
@@ -594,8 +591,7 @@ button:hover {
 }
 
 .mutation.researched .mutation-ring {
-  border-color: #f2eee6;
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.45);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
 }
 
 .mutation.slotted .mutation-ring::after {
@@ -619,40 +615,16 @@ button:hover {
   stroke-width: 5;
 }
 
-/* A flex box centres the emblem: a margin on it would collapse through the disc and push it down. */
-.disc {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 50% 38%,
-    color-mix(in srgb, currentColor 65%, #fff) 0%,
-    currentColor 42%,
-    color-mix(in srgb, currentColor 40%, #000) 100%
-  );
-  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.65);
-}
-
-.disc img {
-  display: block;
-  width: 62%;
-  height: 62%;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+/* The in-game node: its disc fills three quarters of the image and the emblem badge hangs below, so
+   the image is a third wider than the circle it stands for and is centred on it. */
+img.disc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 132%;
+  height: 132%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
-}
-
-.disc.innate {
-  background: none;
-  box-shadow: none;
-}
-
-.disc.innate img {
-  width: 100%;
-  height: 100%;
-  filter: none;
 }
 
 /* --- Info panel: fixed height, so the board below stays put while the pointer moves.
@@ -676,6 +648,7 @@ button:hover {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+  position: relative;
 .info-icon {
   display: flex;
   flex: none;
@@ -896,27 +869,20 @@ button:hover {
   line-height: 1.15;
   text-align: center;
 }
+/* The disc image brings its own ring, the border only lights up as a drop target. */
 
 .mutation-slot {
   position: absolute;
-  padding: 4px;
-  border: 2px solid #4e535a;
+  border: 2px solid transparent;
   border-radius: 50%;
-  background: #0b0d10;
-  box-shadow:
-    0 0 0 1px #000,
-    0 0 30px rgba(0, 0, 0, 0.85);
 }
 
 .mutation-slot:not(.filled) .disc {
-  filter: saturate(0.6) brightness(0.8);
+  filter: grayscale(0.7) brightness(0.65);
 }
 
 .mutation-slot.filled {
-  border-color: #ece7dd;
-  box-shadow:
-    0 0 0 1px #000,
-    0 0 24px rgba(255, 255, 255, 0.35);
+  filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.25));
   cursor: grab;
 }
 

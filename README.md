@@ -85,7 +85,8 @@ Agent instructions for AI-assisted changes are in [AGENTS.md](AGENTS.md). Change
   guide.
 - Tree layout, links, icons and backdrops: in-game screenshots published by Mobalytics.
 - Mutations, mutagens and the extra slot rules: the rpg-gaming.com Witcher 3 build planner.
-- Mutation emblems, mutagen orbs and the mutation disc: The Witcher Wiki on Fandom, from the game.
+- Mutation discs: cut from an in-game screenshot on the Improved Mutations page on Nexus Mods. Mutagen
+  orbs: The Witcher Wiki on Fandom.
 - Game version: the Remastered patch notes on thewitcher.com. Patches 5.00b and 5.00c changed no
   skills.
 

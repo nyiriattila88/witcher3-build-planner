@@ -19,8 +19,9 @@ export type DecoctionData = ElixirTier & { readonly name: string };
 export const BASE_MAX_TOXICITY = 100;
 // Since patch 4.0 an overdose starts above half of the maximum Toxicity.
 export const SAFE_TOXICITY_SHARE = 0.5;
-// Every alchemy formula on The Witcher Wiki, which is what Acquired Tolerance counts.
-export const ALCHEMY_RECIPES = 149;
+// Every alchemy formula of the game, which is what Acquired Tolerance counts: 148 in the base game, 150
+// with Hearts of Stone and 167 with Blood and Wine, as players measured it since patch 4.0.
+export const ALCHEMY_RECIPES = 167;
 // Each piece of Manticore armor raises maximum Toxicity, by 5 since patch 4.0.
 export const MANTICORE_ARMOR = { pieces: 4, toxicity: 5 } as const;
 

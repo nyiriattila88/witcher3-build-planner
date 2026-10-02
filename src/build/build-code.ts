@@ -9,7 +9,8 @@ export type BuildCodec = {
   readonly decode: (text: string) => Build | null;
 };
 
-const PREFIX = '2.';
+// 2.1.0 wrote the same codes behind this marker, which read like a version, so it is only read.
+const MARKER = '2.';
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 // Longer than any build code, so pasted text never turns into a huge number.
 const MAX_BODY_LENGTH = 80;
@@ -56,7 +57,7 @@ function requirementsFirst<T>(items: readonly T[], requires: (item: T) => readon
   return ordered;
 }
 
-// A build code is "2." and one mixed-radix number in base64url. The digits follow the build field by
+// A build code is one mixed-radix number in base64url. The digits follow the build field by
 // field, and each field offers only what the rules of Build allow once the fields before it are known:
 // a rank only for a skill that is available, a slot only the learned skills it accepts and that no
 // earlier slot holds. A field with a single option costs nothing, and empty fields at the end cost
@@ -114,7 +115,7 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
       digits.push([index, options.length]);
       return held;
     });
-    return PREFIX + toBase64Url(pack(digits));
+    return toBase64Url(pack(digits));
   }
 
   function decodeBody(body: string): Build | null {
@@ -138,10 +139,10 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
       const snapshot = decodeLegacy(code.slice(LEGACY_PREFIX.length));
       return snapshot === null ? null : Build.fromSnapshot(catalog, snapshot);
     }
-    if (!code.startsWith(PREFIX)) return null;
-    const build = decodeBody(code.slice(PREFIX.length));
+    const body = code.startsWith(MARKER) ? code.slice(MARKER.length) : code;
+    const build = decodeBody(body);
     // Only the code a build encodes back to is accepted, so a tree flagged without points is refused.
-    return build !== null && encode(build) === code ? build : null;
+    return build !== null && encode(build) === body ? build : null;
   }
 
   return { encode, decode };

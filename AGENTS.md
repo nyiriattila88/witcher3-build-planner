@@ -29,11 +29,11 @@ Each layer only imports from the layers above it in this list. The model knows n
 
 ## What is easy to break
 
-- **Build codes follow the data and the rules.** A `2.` code walks the skills, mutagens and mutations
-  in the order of `src/data/`, and each field offers only what `Build` allows at that point. Reordering
-  the data, changing a link or changing a rule silently changes what every shared code means. Such a
-  change needs a new prefix (`3.`) that keeps decoding `2.`, the way `W3R1.` codes still decode through
-  `src/build/legacy-build-code.ts`. The pinned codes in `src/build/build-code.test.ts` guard this, never
+- **Build codes follow the data and the rules.** A code walks the skills, mutagens and mutations in
+  the order of `src/data/`, and each field offers only what `Build` allows at that point. Reordering the
+  data, changing a link or changing a rule silently changes what every shared code means. Such a change
+  needs a new format behind a marker today's codes cannot contain, such as `3.`, and must keep decoding
+  the unmarked codes, the way `W3R1.` codes still decode through `src/build/legacy-build-code.ts`. The pinned codes in `src/build/build-code.test.ts` guard this, never
   change them to make a test pass.
 - **The address is the only state.** The build lives in the `build` parameter of the page address
   (`src/app/build-address.ts`), nothing is stored in the browser. A plain address opens an empty build,

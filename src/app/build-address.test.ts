@@ -5,9 +5,9 @@ const PAGE = 'https://nyiriattila88.github.io/witcher3-build-planner/';
 
 describe('buildCodeIn', () => {
   it('takes the build parameter of a shared link', () => {
-    const code = buildCodeIn(`${PAGE}?build=2.OB66AAAcCDjM`);
+    const code = buildCodeIn(`${PAGE}?build=OB66AAAcCDjM`);
 
-    expect(code).toBe('2.OB66AAAcCDjM');
+    expect(code).toBe('OB66AAAcCDjM');
   });
 
   it('takes the hash of a 1.x link', () => {
@@ -23,8 +23,8 @@ describe('buildCodeIn', () => {
   });
 
   it('keeps pasted text that is not a link, without the surrounding spaces', () => {
-    const code = buildCodeIn('  2.OB66AAAcCDjM \n');
+    const code = buildCodeIn('  OB66AAAcCDjM \n');
 
-    expect(code).toBe('2.OB66AAAcCDjM');
+    expect(code).toBe('OB66AAAcCDjM');
   });
 });

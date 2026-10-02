@@ -67,18 +67,18 @@ const aRandomBuild = (random: () => number): Build => {
 };
 
 describe('createBuildCodec', () => {
-  it('writes an empty build as 2.A', () => {
+  it('writes an empty build as A', () => {
     const code = codec.encode(new Build(catalog));
 
-    expect(code).toBe('2.A');
+    expect(code).toBe('A');
   });
 
-  it('writes the 1.x example builds as their pinned 2.x codes', () => {
+  it('writes the 1.x example builds as their pinned codes', () => {
     const oldCodes = [COMBAT_SIGNS_CODE, ALCHEMY_GENERAL_CODE];
 
     const newCodes = oldCodes.map((code) => codec.encode(decodeBuild(code)));
 
-    expect(newCodes).toEqual(['2.5yx4ZhzLhrAAYAECABY7', '2.OB66AAAcCDjM']);
+    expect(newCodes).toEqual(['5yx4ZhzLhrAAYAECABY7', 'OB66AAAcCDjM']);
     expect(newCodes.map((code) => fingerprint(decodeBuild(code)))).toEqual(
       oldCodes.map((code) => fingerprint(decodeBuild(code))),
     );
@@ -145,7 +145,7 @@ describe('createBuildCodec', () => {
 
   it('rejects a second spelling of a build', () => {
     // A leading zero digit, and a tree marked as having points without any.
-    const spellings = ['2.AA', '2.AB', '2.B'];
+    const spellings = ['AA', 'AB', 'B'];
 
     const decoded = spellings.map((code) => codec.decode(code));
 
@@ -153,10 +153,19 @@ describe('createBuildCodec', () => {
   });
 
   it('rejects text that is not a whole build code', () => {
-    const inputs = ['garbage', COMBAT_SIGNS_CODE.slice(0, -1), '2.', '2.!', `2.${'z'.repeat(100)}`];
+    const inputs = ['', 'not a code', COMBAT_SIGNS_CODE.slice(0, -1), '2.', '!', 'z'.repeat(100)];
 
     const decoded = inputs.map((input) => codec.decode(input));
 
-    expect(decoded).toEqual([null, null, null, null, null]);
+    expect(decoded).toEqual([null, null, null, null, null, null]);
+  });
+
+  it('still opens the codes 2.1.0 wrote with a "2." in front', () => {
+    const code = '2.OB66AAAcCDjM';
+
+    const build = decodeBuild(code);
+
+    expect(fingerprint(build)).toBe(fingerprint(decodeBuild(ALCHEMY_GENERAL_CODE)));
+    expect(codec.encode(build)).toBe('OB66AAAcCDjM');
   });
 });

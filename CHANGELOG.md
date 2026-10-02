@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.2 - 2026-10-02
+
+- A drop snaps to the slot the dragged icon covers most, so the icon only has to cover a slot, not the
+  pointer reach it. Where the icon covers two slots, the one it covers more wins.
+- A mutagen colours only the lines from the slots that match it. The rest of its bracket and the empty
+  slots of its group keep their grey.
+
 ## 2.1.1 - 2026-10-02
 
 - A mutation's disc sits centred in its ring again, in the tree, in the middle of the board and in the

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.3 - 2026-10-02
+
+- A slot takes the dragged icon as soon as the icon overlaps it at all, and of two slots the one it
+  covers more.
+- The dragged image is the bare tile. The hover frame and the glow no longer go into it, since they
+  made the image bigger and moved the tile off the pointer.
+
 ## 2.1.2 - 2026-10-02
 
 - A drop snaps to the slot the dragged icon covers most, so the icon only has to cover a slot, not the

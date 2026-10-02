@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1 - 2026-10-02
+
+- A two-line skill name in slots 13-16 is no longer cut off by the colour bar.
+- The mutagen bonus text no longer crosses the line of its slot group.
+- The README shows a screenshot of the planner.
+
 ## 2.0.0 - 2026-10-02
 
 - Rebuilt as a React and TypeScript single-page app with Vite, deployed to GitHub Pages by GitHub Actions.

@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+*.local
+*.log
+.DS_Store
+
+# Personal Claude Code settings, the shared ones are in .claude/settings.json.
+.claude/settings.local.json

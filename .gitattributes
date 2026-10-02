@@ -1,0 +1,4 @@
+# LF everywhere, so a Windows checkout passes the same Prettier check as CI.
+* text=auto eol=lf
+*.png binary
+*.jpg binary

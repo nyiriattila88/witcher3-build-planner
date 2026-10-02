@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.1 - 2026-10-02
+
+- A mutation's disc sits centred in its ring again, in the tree, in the middle of the board and in the
+  info panel.
+
 ## 2.1.0 - 2026-10-02
 
 - The header names The Witcher 3: Wild Hunt Remastered, with the planner version and the game version

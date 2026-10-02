@@ -256,7 +256,8 @@ function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }):
       <div
         className="mutagen-bonus"
         style={{
-          left: cx - 60,
+          // Narrower than the gap to the bracket, so the text never crosses its line.
+          left: cx - 54,
           top: cy + MUTAGEN_SLOT_SIZE / Math.SQRT2 + 4,
           color: mutagenColour(mutagen),
         }}

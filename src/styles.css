@@ -466,9 +466,9 @@ h1 {
 .slot-accepts {
   position: absolute;
   right: 6px;
-  bottom: 5px;
+  bottom: 2px;
   left: 6px;
-  height: 5px;
+  height: 4px;
   display: flex;
   gap: 2px;
 }
@@ -532,7 +532,7 @@ h1 {
 
 .mutagen-bonus {
   position: absolute;
-  width: 120px;
+  width: 108px;
   font-size: 12px;
   font-weight: 600;
   text-align: center;

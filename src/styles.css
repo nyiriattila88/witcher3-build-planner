@@ -257,13 +257,13 @@ button:hover {
   border: 2px solid color-mix(in srgb, currentColor 50%, #fff);
   background: linear-gradient(
     160deg,
-    color-mix(in srgb, currentColor 80%, #fff) 0%,
-    currentColor 45%,
-    color-mix(in srgb, currentColor 50%, #000) 100%
+    color-mix(in srgb, currentColor 90%, #fff) 0%,
+    currentColor 50%,
+    color-mix(in srgb, currentColor 72%, #000) 100%
   );
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.55),
-    inset 0 0 12px rgba(0, 0, 0, 0.45);
+    inset 0 0 10px rgba(0, 0, 0, 0.35);
 }
 
 .tile img {
@@ -411,17 +411,23 @@ button:hover {
   cursor: not-allowed;
 }
 
+/* As in the game, a skill without points is a grey tile. Its icon stays white while the skill can take
+   a point, and only dims once it cannot, so every icon keeps its contrast. */
+.node .node-icon {
+  color: #4f545b;
+}
+
 .node.locked .node-icon {
-  filter: grayscale(1) brightness(0.35);
+  border-color: #474c52;
+  color: #25292d;
+}
+
+.node.locked .node-icon img {
+  opacity: 0.5;
 }
 
 .node.locked .node-name {
   color: #78736a;
-}
-
-/* As in the game, a skill without points is a dark tile, brighter when it can take a point. */
-.node.available .node-icon {
-  filter: grayscale(1) brightness(0.62);
 }
 
 .node.learned {
@@ -571,7 +577,7 @@ button:hover {
 }
 
 .mutation.locked .mutation-ring {
-  filter: grayscale(1) brightness(0.42);
+  filter: grayscale(1) brightness(0.55);
 }
 
 .mutation.locked .mutation-name {
@@ -580,7 +586,7 @@ button:hover {
 
 .mutation.available .mutation-ring {
   border-color: #8a8f96;
-  filter: saturate(0.6) brightness(0.72);
+  filter: saturate(0.7) brightness(0.85);
 }
 
 .mutation.researched {
@@ -958,12 +964,6 @@ button:hover {
   color: var(--muted);
 }
 
-.over {
-  border-color: var(--gold) !important;
-  background: rgba(217, 183, 104, 0.15) !important;
-}
-
-/* --- Help text, build summary and the share box */
 /* A drop zone reaches halfway to the next slot, so a dragged icon snaps in before the pointer is
    exactly over the tile. The zones of neighbouring slots meet but never overlap. */
 .slot::before,
@@ -986,6 +986,12 @@ button:hover {
   border-radius: 50%;
 }
 
+.over {
+  border-color: var(--gold) !important;
+  background: rgba(217, 183, 104, 0.15) !important;
+}
+
+/* --- Help text, build summary and the share box */
 
 .help {
   margin: 0;

@@ -143,7 +143,10 @@ function SkillNode({
         onDragStart({ kind: 'skill', skill, from: null }, event);
       }}
     >
-      <span className="node-icon tile" style={{ color: treeColour(skill.tree) }}>
+      <span
+        className="node-icon tile"
+        style={rank > 0 ? { color: treeColour(skill.tree) } : undefined}
+      >
         <img src={iconUrl(skill)} alt="" draggable={false} />
       </span>
       <RankPips rank={rank} />

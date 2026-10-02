@@ -449,8 +449,8 @@ export const SKILL_TREES: readonly SkillTreeData[] = [
         name: 'Delayed Recovery',
         ranks: [
           "When Toxicity is above 70%, each consumed potion increases the duration of active potions' effects by 5 seconds, up to their maximum duration.\nPotion duration time and bomb damage: +2%",
-          "When Toxicity is above 70%, each consumed potion increases the duration of active potions' effects by 5 seconds, up to their maximum duration.\nPotion duration time and bomb damage: +4%",
-          "When Toxicity is above 70%, each consumed potion increases the duration of active potions' effects by 5 seconds, up to their maximum duration.\nPotion duration time and bomb damage: +6%",
+          "When Toxicity is above 65%, each consumed potion increases the duration of active potions' effects by 5 seconds, up to their maximum duration.\nPotion duration time and bomb damage: +4%",
+          "When Toxicity is above 60%, each consumed potion increases the duration of active potions' effects by 5 seconds, up to their maximum duration.\nPotion duration time and bomb damage: +6%",
         ],
       },
       {

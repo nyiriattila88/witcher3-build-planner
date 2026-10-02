@@ -4,6 +4,7 @@
 
 - After a release the browser loads the images again. A replaced image no longer shows its old version
   for up to ten minutes, which made the new mutation discs look broken right after 2.1.4.
+- Delayed Recovery works from 65% Toxicity at rank 2 and from 60% at rank 3, not from 70% at every rank.
 
 ## 2.1.4 - 2026-10-02
 

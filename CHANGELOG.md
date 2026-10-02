@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.4 - 2026-10-02
+
+- Mutations look as in the game: a disc in the mutation's colour, gold for those of more than one
+  colour, with the emblem in a badge below. The discs are cut from an in-game screenshot.
+- Skill icons sit in their tiles with the game's margins instead of touching the frame. The original
+  skills use the game's icons from The Witcher Wiki, the skills new in the Remastered got the same
+  margins.
+- No text numbers the extra slots any more, since the board does not number them either.
+
 ## 2.1.3 - 2026-10-02
 
 - A slot takes the dragged icon as soon as the icon overlaps it at all, and of two slots the one it

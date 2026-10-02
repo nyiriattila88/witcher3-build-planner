@@ -10,14 +10,23 @@ type SkillData = {
   readonly ranks: readonly [string, string, string];
 };
 
+// The same for every skill of a tree: the last line of each rank text states it for that rank.
+export type TreeBonus = {
+  readonly stat: string;
+  readonly perRank: number;
+  readonly unit: '%' | '/s';
+};
+
 export type SkillTreeData = {
   readonly tree: TreeName;
+  readonly bonus: TreeBonus;
   readonly skills: readonly SkillData[];
 };
 
 export const SKILL_TREES: readonly SkillTreeData[] = [
   {
     tree: 'Combat',
+    bonus: { stat: 'Adrenaline Point gain', perRank: 1, unit: '%' },
     skills: [
       {
         name: 'Muscle Memory',
@@ -183,6 +192,7 @@ export const SKILL_TREES: readonly SkillTreeData[] = [
   },
   {
     tree: 'Signs',
+    bonus: { stat: 'Stamina regeneration in combat', perRank: 0.5, unit: '/s' },
     skills: [
       {
         name: 'Far-reaching Aard',
@@ -348,6 +358,7 @@ export const SKILL_TREES: readonly SkillTreeData[] = [
   },
   {
     tree: 'Alchemy',
+    bonus: { stat: 'Potion duration time and bomb damage', perRank: 2, unit: '%' },
     skills: [
       {
         name: 'Refreshment',
@@ -513,6 +524,7 @@ export const SKILL_TREES: readonly SkillTreeData[] = [
   },
   {
     tree: 'General',
+    bonus: { stat: 'Vitality Gain', perRank: 1, unit: '%' },
     skills: [
       {
         name: 'Cat School Techniques',

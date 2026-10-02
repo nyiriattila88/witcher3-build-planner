@@ -1,5 +1,5 @@
 import type { JSX, ReactNode } from 'react';
-import { MAX_RANK, MUTAGEN_GROUPS, type Build } from '../build/build';
+import { MAX_RANK, MUTAGEN_GROUPS, type Build, type MutagenBonus } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import { mutagenColour, mutagenEffect, potionTierName, treeColour } from './appearance';
 
@@ -10,8 +10,54 @@ const marker = (slotted: boolean): string => (slotted ? '◆ ' : '');
 // The board does not number its slots, so a mutagen is named after the corner of its group.
 const GROUP_NAMES = ['Top left', 'Top right', 'Bottom left', 'Bottom right'];
 
+// One line per stat, in tree order: the tree bonuses of the slotted skills, then the mutagens. A
+// mutagen's colour decides the stat it raises, so the bonuses of one colour add up.
+function totalBonuses(
+  build: Build,
+  catalog: Catalog,
+  mutagens: readonly MutagenBonus[],
+): ReactNode[] {
+  const lines: ReactNode[] = [];
+  for (const tree of catalog.trees) {
+    const value = build.treeBonus(tree.name);
+    if (value === 0) continue;
+    lines.push(
+      <>
+        <span style={{ color: treeColour(tree.name) }}>{tree.bonus.stat}</span> +{value}
+        {tree.bonus.unit}
+      </>,
+    );
+  }
+  for (const tree of catalog.trees) {
+    const ofColour = mutagens.filter(({ mutagen }) => mutagen.tree === tree.name);
+    const mutagen = ofColour[0]?.mutagen;
+    if (mutagen === undefined) continue;
+    const value = ofColour.reduce((sum, bonus) => sum + bonus.value, 0);
+    lines.push(
+      <>
+        <span style={{ color: mutagenColour(mutagen) }}>{mutagen.effect}</span> +{value}
+        {mutagen.unit}
+      </>,
+    );
+  }
+  return lines;
+}
+
 export function BuildSummary({ build, catalog }: BuildSummaryProps): JSX.Element | null {
   const sections: { title: string; colour: string; lines: ReactNode[] }[] = [];
+  const placed = Array.from({ length: MUTAGEN_GROUPS }, (_, group) => ({
+    group,
+    bonus: build.mutagenBonus(group),
+  })).flatMap(({ group, bonus }) => (bonus === null ? [] : [{ group, bonus }]));
+
+  const bonuses = totalBonuses(
+    build,
+    catalog,
+    placed.map(({ bonus }) => bonus),
+  );
+  if (bonuses.length > 0) {
+    sections.push({ title: 'Total bonuses', colour: 'var(--gold)', lines: bonuses });
+  }
 
   for (const tree of catalog.trees) {
     const learned = tree.skills.filter((skill) => build.rank(skill) > 0);
@@ -26,11 +72,6 @@ export function BuildSummary({ build, catalog }: BuildSummaryProps): JSX.Element
     });
   }
 
-  const bonuses = Array.from({ length: MUTAGEN_GROUPS }, (_, group) => ({
-    group,
-    bonus: build.mutagenBonus(group),
-  }));
-  const placed = bonuses.flatMap(({ group, bonus }) => (bonus === null ? [] : [{ group, bonus }]));
   if (placed.length > 0) {
     sections.push({
       title: 'Mutagens',

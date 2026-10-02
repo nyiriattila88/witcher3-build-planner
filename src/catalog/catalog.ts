@@ -6,7 +6,7 @@ import type {
   MutationData,
   MutationId,
 } from '../data/mutations';
-import type { SkillTreeData, TreeName } from '../data/skills';
+import type { SkillTreeData, TreeBonus, TreeName } from '../data/skills';
 import type { TreeLayout } from '../data/tree-layout';
 
 export type Skill = {
@@ -21,6 +21,7 @@ export type Skill = {
 
 export type SkillTree = {
   readonly name: TreeName;
+  readonly bonus: TreeBonus;
   readonly skills: readonly Skill[];
   readonly links: readonly (readonly [Skill, Skill])[];
 };
@@ -99,7 +100,7 @@ export function createCatalog(sources: CatalogSources): Catalog {
       return [parent, child];
     });
 
-    return { name: treeData.tree, skills: treeSkills, links };
+    return { name: treeData.tree, bonus: treeData.bonus, skills: treeSkills, links };
   });
 
   // Object.keys returns string[] even for a record keyed by a union of literal ids.

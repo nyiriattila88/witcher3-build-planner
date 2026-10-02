@@ -51,7 +51,8 @@ Each layer only imports from the layers above it in this list. The model knows n
   wrong ones (Razor Focus does not unlock Flood of Anger). `src/catalog/catalog.test.ts` pins examples.
 - **Rank texts follow the game.** Rank 1 is the in-game tooltip wording, ranks 2 and 3 put the
   per-rank values into it. The tree bonus of a rank is on its own line after a `\n`, which the info
-  panel keeps.
+  panel keeps. The `bonus` of each tree in `src/data/skills.ts` states the same value as a number for
+  the summary's totals, and `src/catalog/catalog.test.ts` checks that the two agree.
 - **Assets are served under the base path.** `public/images/` is referenced at runtime through
   `import.meta.env.BASE_URL` in `src/planner/appearance.ts`, because GitHub Pages serves the site under
   `/witcher3-build-planner/`. The base itself is set once, in `vite.config.ts`. Mutation and mutagen

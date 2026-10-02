@@ -26,6 +26,8 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
   skill also takes every skill that only it kept unlocked, so a branch unwinds in one go.
 - **Skill slots and mutagens.** Drag skills into twelve slots in four groups. A mutagen's bonus grows with
   every matching skill in its group and with Synergy, and the board shows which slots count.
+- **Total bonuses.** The build summary adds up what the slotted skills give through their tree, such as
+  Adrenaline Point gain for Combat, and what the mutagens give, one line per stat.
 - **Mutations.** Research them in order, slot one in the centre, and fill the four extra slots around it, which open with
   research and take only the mutation's colours. Unresearching a mutation also takes the ones that need it.
 - **The in-game character screen.** Tooltips with the current and the next level, mutagen orbs in their

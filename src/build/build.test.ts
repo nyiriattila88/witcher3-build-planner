@@ -128,6 +128,18 @@ describe('Build skill slots', () => {
 
     expect(build.slotAt(0)).toBeNull();
   });
+
+  it('adds the tree bonus of every slotted rank, but nothing for a skill outside the slots', () => {
+    const muscleMemory = skill('Combat', 'Muscle Memory');
+    const threeStrikes = skill('Combat', 'Three Strikes');
+    const build = withPoints(muscleMemory, muscleMemory, muscleMemory, threeStrikes, threeStrikes);
+    build.placeSkill(muscleMemory, 0);
+
+    const withOneSlotted = build.treeBonus('Combat');
+    build.placeSkill(threeStrikes, 1);
+
+    expect([withOneSlotted, build.treeBonus('Combat')]).toEqual([3, 5]);
+  });
 });
 
 describe('Build mutations', () => {

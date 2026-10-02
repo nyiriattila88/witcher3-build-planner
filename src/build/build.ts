@@ -208,6 +208,13 @@ export class Build {
     this.#slots[index] = null;
   }
 
+  // Every slotted skill adds its tree's bonus once per rank, and these stack across all slots.
+  treeBonus(tree: TreeName): number {
+    let ranks = 0;
+    for (const skill of this.#slots) if (skill?.tree === tree) ranks += this.rank(skill);
+    return ranks * this.#catalog.tree(tree).bonus.perRank;
+  }
+
   // --- Mutagens
 
   get mutagenCount(): number {

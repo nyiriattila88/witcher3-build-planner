@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.0 - 2026-10-02
+
+- A Toxicity tab plans the potions and decoctions active at the same time: all 27 decoctions and 16
+  potions with their Toxicity, duration and effects in every version.
+- The maximum Toxicity counts the base 100, Acquired Tolerance for the known recipes (all 149 by default),
+  Metabolic Control and up to four pieces of Manticore armor. The skills count only while they sit in a
+  slot, as in the game.
+- The bar marks the overdose threshold at half of the maximum, and the thresholds of a slotted Delayed
+  Recovery or High Tolerance. The plan is part of the build code, and older codes still open.
+- Taking the last point from a skill also takes every skill that only it kept unlocked, so a branch of a
+  tree unwinds in one go.
+- The build summary names a mutagen's group by its corner instead of slot numbers.
+
 ## 2.1.5 - 2026-10-02
 
 - After a release the browser loads the images again. A replaced image no longer shows its old version

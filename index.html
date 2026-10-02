@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Witcher 3 Remastered Skill Planner</title>
+<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<div class="page">
+  <main class="planner">
+    <h1 id="title"></h1>
+    <nav class="tabs" id="tabs"></nav>
+    <div class="totals">
+      <span>Total Points Allocated: <span id="total">0</span></span>
+      <span>Total Unslotted: <span id="unslotted">0</span></span>
+    </div>
+    <div class="branch" id="branch"><span id="branch-name"></span><span id="branch-label"></span></div>
+    <div class="pane"><div id="pane"></div></div>
+    <div class="buttons">
+      <button id="reset-tab">Reset Tree</button>
+      <button id="reset-all">Reset All</button>
+    </div>
+    <section class="share">
+      <label for="code">Build code</label>
+      <div class="share-row"><input id="code" readonly><button id="copy">Copy</button></div>
+      <div class="share-row"><input id="paste" placeholder="Paste a build code here" spellcheck="false"><button id="load">Load</button></div>
+      <div class="share-message" id="share-message">The code holds the whole build: skill points, slots, mutagens, researched and slotted mutation. The page URL carries it too.</div>
+    </section>
+  </main>
+  <aside class="side">
+    <div class="info" id="info"></div>
+    <div class="board" id="board"></div>
+    <p class="help">
+      Skills: left click +1 rank, right click −1 rank, drag a skill with points onto a slot. Mutagens: drag a diamond onto a mutagen slot.
+      Mutations: left click researches, right click un-researches, drag a researched mutation into the centre circle.
+      Drag anything off the board (or click ×) to remove it.
+    </p>
+    <div class="summary" id="summary"></div>
+    <footer class="footer">Skill planner for The Witcher 3: Wild Hunt Remastered · <span id="version"></span></footer>
+  </aside>
+</div>
+<script src="src/data/skills.js"></script>
+<script src="src/data/trees.js"></script>
+<script src="src/data/mutations.js"></script>
+<script src="src/version.js"></script>
+<script src="src/catalog.js"></script>
+<script src="src/build.js"></script>
+<script src="src/build-code.js"></script>
+<script src="src/view.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>

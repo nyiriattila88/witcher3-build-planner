@@ -4,6 +4,10 @@
 
 - A mutation's disc sits centred in its ring again, in the tree, in the middle of the board and in the
   info panel.
+- A dragged skill or mutation follows the pointer as its icon alone, and a slot takes it from a little
+  further away, so it snaps in where it looks dropped.
+- A skill without points keeps a white icon on its grey tile, so every icon keeps its contrast.
+- Build codes no longer start with "2.", which read like a version. Links with it still open.
 
 ## 2.1.0 - 2026-10-02
 

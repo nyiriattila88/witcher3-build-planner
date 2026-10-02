@@ -16,6 +16,8 @@ mutagens and mutations, and a build code that carries a whole build.
 
 **[Open the planner](https://nyiriattila88.github.io/witcher3-build-planner/)**
 
+![A Combat build with Bloodbath: the tree, the slotted skills glowing under red mutagens and the extra slots 13 and 14](docs/screenshot.png)
+
 ## Features
 
 - **The remastered trees as the game draws them.** Combat, Signs, Alchemy and General with the in-game

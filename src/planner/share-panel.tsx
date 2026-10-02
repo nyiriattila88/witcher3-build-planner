@@ -2,29 +2,29 @@ import { useState, type JSX } from 'react';
 
 type SharePanelProps = {
   readonly code: string;
-  // Returns false when the text is not a build code.
+  readonly link: string;
+  // Takes a build code or a shared link. Returns false when the text holds no build code.
   readonly onLoad: (text: string) => boolean;
 };
 
 const INTRO =
-  'The code holds the whole build: skill points, slots, mutagens, researched and slotted mutation. The page URL carries it too.';
+  'The code holds the whole build: skill points, slots, mutagens, researched and slotted mutation. The page address carries it too, so a copied link opens the same build.';
 
-export function SharePanel({ code, onLoad }: SharePanelProps): JSX.Element {
+export function SharePanel({ code, link, onLoad }: SharePanelProps): JSX.Element {
   const [pasted, setPasted] = useState('');
   const [message, setMessage] = useState(INTRO);
 
-  const copy = async (): Promise<void> => {
+  const copy = async (text: string, copied: string): Promise<void> => {
     try {
-      await navigator.clipboard.writeText(code);
-      setMessage('Build code copied to the clipboard.');
+      await navigator.clipboard.writeText(text);
+      setMessage(copied);
     } catch {
       setMessage('The browser blocked the clipboard: select the code and copy it by hand.');
     }
   };
 
   const load = (): void => {
-    // A whole shared link works too: the code is the part after "#".
-    if (onLoad(pasted.replace(/^.*#/, ''))) {
+    if (onLoad(pasted)) {
       setPasted('');
       setMessage('Build loaded.');
     } else {
@@ -44,8 +44,14 @@ export function SharePanel({ code, onLoad }: SharePanelProps): JSX.Element {
             event.currentTarget.select();
           }}
         />
-        <button type="button" onClick={() => void copy()}>
+        <button
+          type="button"
+          onClick={() => void copy(code, 'Build code copied to the clipboard.')}
+        >
           Copy
+        </button>
+        <button type="button" onClick={() => void copy(link, 'Link copied to the clipboard.')}>
+          Copy link
         </button>
       </div>
       <div className="share-row">

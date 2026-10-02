@@ -12,7 +12,7 @@ import { PlannerTabs } from '../planner/planner-tabs';
 import { SharePanel } from '../planner/share-panel';
 import { SlotBoard } from '../planner/slot-board';
 import { TreePane } from '../planner/tree-pane';
-import type { BuildStorage } from './build-storage';
+import type { BuildAddress } from './build-address';
 import { RELEASE } from './release';
 import { useBuild } from './use-build';
 import { useDragAndDrop } from './use-drag-and-drop';
@@ -20,7 +20,7 @@ import { useDragAndDrop } from './use-drag-and-drop';
 type AppProps = {
   readonly catalog: Catalog;
   readonly codec: BuildCodec;
-  readonly storage: BuildStorage;
+  readonly address: BuildAddress;
 };
 
 const REPOSITORY_URL = 'https://github.com/nyiriattila88/witcher3-build-planner';
@@ -28,8 +28,8 @@ const REPOSITORY_URL = 'https://github.com/nyiriattila88/witcher3-build-planner'
 const tabColour = (tab: PlannerTab): string =>
   tab.kind === 'tree' ? treeColour(tab.tree) : `var(--tab-${tab.kind})`;
 
-export function App({ catalog, codec, storage }: AppProps): JSX.Element {
-  const { build, code, apply, load, reset } = useBuild(catalog, codec, storage);
+export function App({ catalog, codec, address }: AppProps): JSX.Element {
+  const { build, code, link, apply, load, reset } = useBuild(catalog, codec, address);
   const tabs = useMemo(() => plannerTabs(catalog), [catalog]);
   const [tab, setTab] = useState<PlannerTab>(() => tabs[0] ?? { kind: 'mutagens' });
   const [info, setInfo] = useState<InfoTarget>({ kind: 'tab', tab });
@@ -139,7 +139,7 @@ export function App({ catalog, codec, storage }: AppProps): JSX.Element {
             Reset All
           </button>
         </div>
-        <SharePanel code={code} onLoad={load} />
+        <SharePanel code={code} link={link} onLoad={load} />
       </main>
       <aside className="side">
         <InfoPanel target={info} build={build} catalog={catalog} />

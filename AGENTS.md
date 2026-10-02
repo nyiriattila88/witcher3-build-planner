@@ -24,25 +24,26 @@ Each layer only imports from the layers above it in this list. The model knows n
 | `src/catalog/` | Joins the data into lookups (prerequisites, unlocks, ids). Fails fast on a broken reference. |
 | `src/build/`   | The `Build` model with every game rule, its snapshot form and the build code.                |
 | `src/planner/` | React components and the pure UI logic beside them (colours, geometry, drag and drop).       |
-| `src/app/`     | State, persistence and the page layout: `useBuild`, `useDragAndDrop`, `App`.                 |
-| `src/main.tsx` | The composition root: builds the catalog, codec and storage and renders `App`.               |
+| `src/app/`     | State, the address bar and the page layout: `useBuild`, `useDragAndDrop`, `App`.             |
+| `src/main.tsx` | The composition root: builds the catalog, codec and address and renders `App`.               |
 
 ## What is easy to break
 
-- **Build codes are positional.** A code addresses skills by their position in `src/data/skills.ts`,
-  mutagens and mutations by their position in `src/data/mutations.ts`, and slots by index. Reordering
-  any of these silently changes every shared build. Append, never reorder. A format change needs a new
-  prefix (`W3R2.`) and must keep decoding `W3R1.`. The 1.x codes in `src/build/build-code.test.ts` guard
-  this, never change them to make a test pass.
-- **Saved builds survive releases.** The browser keeps the build under `w3r-skill-planner` in the
-  `BuildSnapshot` shape of `src/build/build-snapshot.ts`. Renaming the key or a field loses everyone's
-  saved build.
+- **Build codes follow the data and the rules.** A `2.` code walks the skills, mutagens and mutations
+  in the order of `src/data/`, and each field offers only what `Build` allows at that point. Reordering
+  the data, changing a link or changing a rule silently changes what every shared code means. Such a
+  change needs a new prefix (`3.`) that keeps decoding `2.`, the way `W3R1.` codes still decode through
+  `src/build/legacy-build-code.ts`. The pinned codes in `src/build/build-code.test.ts` guard this, never
+  change them to make a test pass.
+- **The address is the only state.** The build lives in the `build` parameter of the page address
+  (`src/app/build-address.ts`), nothing is stored in the browser. A plain address opens an empty build,
+  and a 1.x link with the code in its hash is moved into the parameter.
 - **Every rule lives in `Build`.** Components call its commands and never decide what is allowed.
   Every command leaves the build valid (`#normalize`), so a new rule goes into `Build` with a test, not
   into a component.
 - **React only sees a new build.** `Build` is mutable inside, so a change always goes through
   `apply(draft => ...)` from `useBuild`, which works on a clone. Mutating the build held in state skips
-  the render and the save.
+  the render and the address update.
 - **The tree links come from the in-game screenshots**, not from the Reddit text, which lists a few
   wrong ones (Razor Focus does not unlock Flood of Anger). `src/catalog/catalog.test.ts` pins examples.
 - **Rank texts follow the game.** Rank 1 is the in-game tooltip wording, ranks 2 and 3 put the

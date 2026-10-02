@@ -28,8 +28,9 @@ mutagens and mutations, and a build code that carries a whole build.
   every matching skill in its group and with Synergy, and the board shows which slots count.
 - **Mutations.** Research them in order, slot one in the centre, and fill slots 13-16, which open with
   research and take only the mutation's colours.
-- **Shareable builds.** A compact build code, also kept in the page URL, restores everything: points,
-  slots, mutagens and mutations. The browser remembers the last build.
+- **Shareable builds.** A short build code restores everything: points, slots, mutagens and
+  mutations. The page address carries it as `?build=`, so a copied link opens the same build, and a plain
+  address starts empty.
 - **Always know what is live.** The footer shows the version, the commit and the build date.
 
 ## Built with
@@ -47,14 +48,16 @@ The game rules know nothing about React. Each layer only imports from the ones a
 | -------------- | --------------------------------------------------------------------------------- |
 | `src/data/`    | The game data as typed values: skills, tree layout and links, mutagens, mutations |
 | `src/catalog/` | The data joined into lookups, with prerequisites and unlocks resolved at startup  |
-| `src/build/`   | The `Build` model and every rule, its saved form, and the build code              |
+| `src/build/`   | The `Build` model and every rule, and the build code                              |
 | `src/planner/` | React components and the pure UI logic beside them                                |
-| `src/app/`     | State, persistence, drag and drop and the page layout                             |
+| `src/app/`     | State, the address bar, drag and drop and the page layout                         |
 
 A `Build` keeps itself valid after every command, so the components never decide what is allowed. The
-build code is a fixed-width base64url string: skill ranks as base-4 digits, then the slots, the mutagens,
-a research bitmask and the slotted mutation. Tests pin codes made by earlier versions, so a shared build
-keeps opening the same way.
+build code is one mixed-radix number in base64url. It walks the build field by field, and each field
+offers only what the rules allow at that point: a rank only for a skill that is available, a slot only the
+learned skills it accepts and no earlier slot holds. A build with a few points gets a code of a dozen
+characters, one with every skill, slot, mutagen and mutation filled about 50. Every build has exactly one
+code, and tests pin codes made by earlier versions, so a shared build keeps opening the same way.
 
 ## Development
 

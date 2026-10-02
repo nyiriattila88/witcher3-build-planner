@@ -70,18 +70,9 @@ export class Build {
     return copy;
   }
 
-  toSnapshot(): BuildSnapshot {
-    const points: Record<string, Record<string, number>> = {};
-    for (const [skill, rank] of this.#ranks) (points[skill.tree] ??= {})[skill.name] = rank;
-    return {
-      points,
-      slots: this.#slots.map((skill) =>
-        skill === null ? null : { tree: skill.tree, name: skill.name },
-      ),
-      mutagens: [...this.#mutagens],
-      researched: [...this.#researched],
-      mutation: this.#mutation,
-    };
+  // Slots and the slotted mutation need points and research, so these three cover everything.
+  isEmpty(): boolean {
+    return this.#ranks.size === 0 && this.#researched.size === 0 && this.mutagenCount === 0;
   }
 
   // --- Skill points

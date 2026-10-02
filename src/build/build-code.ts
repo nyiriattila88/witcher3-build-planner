@@ -1,78 +1,147 @@
 import type { Catalog } from '../catalog/catalog';
-import { BASE_SLOTS, MUTAGEN_GROUPS, type Build } from './build';
-import type { BuildSnapshot, SlotEntry } from './build-snapshot';
+import type { TreeName } from '../data/skills';
+import { Build, MAX_RANK, MUTAGEN_GROUPS } from './build';
+import { createLegacyDecoder, LEGACY_PREFIX } from './legacy-build-code';
 
 export type BuildCodec = {
   readonly encode: (build: Build) => string;
-  readonly decode: (text: string) => BuildSnapshot | null;
+  // Returns null for anything but the one code a build encodes to.
+  readonly decode: (text: string) => Build | null;
 };
 
+const PREFIX = '2.';
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-const PREFIX = 'W3R1.';
+// Longer than any build code, so pasted text never turns into a huge number.
+const MAX_BODY_LENGTH = 80;
+const FLAGS: readonly boolean[] = [false, true];
+const RANKS = Array.from({ length: MAX_RANK + 1 }, (_, rank) => rank);
 
-// A build code is "W3R1." and a fixed-width base64url body: the skill ranks as base-4 digits, three per
-// character, then every slot as skill index + 1 (two characters), every mutagen group as mutagen
-// index + 1, the research bitmask (two characters) and the slotted mutation's index + 1.
-export function createBuildCodec(catalog: Catalog): BuildCodec {
-  const skills = catalog.skills;
-  const mutagenIds = catalog.mutagens.map((mutagen) => mutagen.id);
-  const mutationIds = catalog.mutations.filter((mutation) => !mutation.innate).map((m) => m.id);
-  const slotCount = BASE_SLOTS + catalog.extraSlotUnlocks.length;
-  const rankChars = Math.ceil(skills.length / 3);
-  const bodyLength = rankChars + slotCount * 2 + MUTAGEN_GROUPS + 2 + 1;
+// Picks one of the options the rules leave open: the encoder writes which one the build holds, the
+// decoder reads it back.
+type Choose = <T>(options: readonly T[], held: T) => T;
 
-  const single = (value: number): string => ALPHABET.charAt(value);
-  const double = (value: number): string =>
-    ALPHABET.charAt(value >> 6) + ALPHABET.charAt(value & 63);
+type Digit = readonly [value: number, base: number];
 
-  function encode(build: Build): string {
-    const ranks = skills.map((skill) => build.rank(skill));
-    let body = '';
-    for (let i = 0; i < ranks.length; i += 3) {
-      body += single(16 * (ranks[i] ?? 0) + 4 * (ranks[i + 1] ?? 0) + (ranks[i + 2] ?? 0));
-    }
-    for (let i = 0; i < slotCount; i++) body += double((build.slotAt(i)?.index ?? -1) + 1);
-    for (let group = 0; group < MUTAGEN_GROUPS; group++) {
-      const id = build.mutagenAt(group);
-      body += single(id === null ? 0 : mutagenIds.indexOf(id) + 1);
-    }
-    body += double(
-      mutationIds.reduce((mask, id, bit) => (build.isResearched(id) ? mask | (1 << bit) : mask), 0),
+const pack = (digits: readonly Digit[]): bigint =>
+  digits.reduceRight((value, [digit, base]) => value * BigInt(base) + BigInt(digit), 0n);
+
+const toBase64Url = (value: bigint): string => {
+  if (value === 0n) return ALPHABET.charAt(0);
+  let text = '';
+  for (let rest = value; rest > 0n; rest /= 64n) text = ALPHABET.charAt(Number(rest % 64n)) + text;
+  return text;
+};
+
+const fromBase64Url = (text: string): bigint | null => {
+  if (text.length === 0 || text.length > MAX_BODY_LENGTH || !/^[A-Za-z0-9_-]+$/.test(text))
+    return null;
+  // A leading zero digit would be a second spelling of the same number.
+  if (text.length > 1 && text.startsWith(ALPHABET.charAt(0))) return null;
+  let value = 0n;
+  for (const char of text) value = value * 64n + BigInt(ALPHABET.indexOf(char));
+  return value;
+};
+
+// Orders items so that each comes after everything it requires, otherwise keeping their order.
+function requirementsFirst<T>(items: readonly T[], requires: (item: T) => readonly T[]): T[] {
+  const ordered: T[] = [];
+  const pending = [...items];
+  while (pending.length > 0) {
+    const next = pending.findIndex((item) =>
+      requires(item).every((required) => ordered.includes(required) || !items.includes(required)),
     );
-    const slotted = build.slottedMutation;
-    body += single(slotted === null ? 0 : mutationIds.indexOf(slotted) + 1);
-    return PREFIX + body;
+    if (next < 0) throw new Error('The requirements form a cycle');
+    ordered.push(...pending.splice(next, 1));
+  }
+  return ordered;
+}
+
+// A build code is "2." and one mixed-radix number in base64url. The digits follow the build field by
+// field, and each field offers only what the rules of Build allow once the fields before it are known:
+// a rank only for a skill that is available, a slot only the learned skills it accepts and that no
+// earlier slot holds. A field with a single option costs nothing, and empty fields at the end cost
+// nothing either, so a code is only as long as the build is full.
+export function createBuildCodec(catalog: Catalog): BuildCodec {
+  const skills = requirementsFirst(catalog.skills, (skill) => skill.requires);
+  const researchable = catalog.mutations.filter((mutation) => !mutation.innate);
+  const mutations = requirementsFirst(researchable, (mutation) =>
+    researchable.filter((other) => mutation.requires.includes(other.id)),
+  );
+  const mutagenIds = catalog.mutagens.map((mutagen) => mutagen.id);
+  const decodeLegacy = createLegacyDecoder(catalog);
+
+  // The encoder walks a copy of a full build, the decoder an empty one that the walk fills in.
+  function walk(build: Build, choose: Choose): void {
+    const usedTrees = new Set<TreeName>();
+    for (const tree of catalog.trees) {
+      if (choose(FLAGS, build.treePoints(tree.name) > 0)) usedTrees.add(tree.name);
+    }
+    for (const skill of skills) {
+      if (!usedTrees.has(skill.tree) || !build.isAvailable(skill)) continue;
+      const rank = choose(RANKS, build.rank(skill));
+      for (let added = build.rank(skill); added < rank; added++) build.addPoint(skill);
+    }
+    for (const mutation of mutations) {
+      const researched = build.isResearched(mutation.id);
+      if (!researched && !build.canResearch(mutation.id)) continue;
+      if (choose(FLAGS, researched)) build.research(mutation.id);
+    }
+    const slottable = catalog.mutations.filter((mutation) => build.canSlotMutation(mutation.id));
+    const slotted = choose(
+      [null, ...slottable.map((mutation) => mutation.id)],
+      build.slottedMutation,
+    );
+    if (slotted !== null) build.slotMutation(slotted);
+    for (let index = 0; index < build.slotCount; index++) {
+      const candidates = catalog.skills.filter((skill) => {
+        const slot = build.slotOf(skill);
+        return build.slotAccepts(index, skill) && (slot < 0 || slot >= index);
+      });
+      const skill = choose([null, ...candidates], build.slotAt(index));
+      if (skill !== null) build.placeSkill(skill, index);
+    }
+    for (let group = 0; group < MUTAGEN_GROUPS; group++) {
+      const id = choose([null, ...mutagenIds], build.mutagenAt(group));
+      if (id !== null) build.placeMutagen(id, group);
+    }
   }
 
-  function decode(text: string): BuildSnapshot | null {
-    const code = text.trim();
-    if (!code.startsWith(PREFIX)) return null;
-    const body = code.slice(PREFIX.length);
-    if (body.length !== bodyLength || !/^[A-Za-z0-9_-]*$/.test(body)) return null;
-
-    const singleAt = (position: number): number => ALPHABET.indexOf(body.charAt(position));
-    const doubleAt = (position: number): number => singleAt(position) * 64 + singleAt(position + 1);
-
-    const points: Record<string, Record<string, number>> = {};
-    skills.forEach((skill, i) => {
-      // The first of three skills is the highest base-4 digit of its character.
-      const rank = Math.floor(singleAt(Math.floor(i / 3)) / 4 ** (2 - (i % 3))) % 4;
-      if (rank > 0) (points[skill.tree] ??= {})[skill.name] = rank;
+  function encode(build: Build): string {
+    const digits: Digit[] = [];
+    walk(build.clone(), (options, held) => {
+      const index = options.indexOf(held);
+      if (index < 0) throw new Error('The build holds something its own rules do not allow');
+      digits.push([index, options.length]);
+      return held;
     });
-    let position = rankChars;
-    const slots: (SlotEntry | null)[] = [];
-    for (let i = 0; i < slotCount; i++, position += 2) {
-      const skill = skills[doubleAt(position) - 1];
-      slots.push(skill === undefined ? null : { tree: skill.tree, name: skill.name });
+    return PREFIX + toBase64Url(pack(digits));
+  }
+
+  function decodeBody(body: string): Build | null {
+    const value = fromBase64Url(body);
+    if (value === null) return null;
+    let rest = value;
+    const build = new Build(catalog);
+    walk(build, (options) => {
+      const base = BigInt(options.length);
+      const option = options[Number(rest % base)];
+      rest /= base;
+      if (option === undefined) throw new Error('A digit is always below its base');
+      return option;
+    });
+    return rest === 0n ? build : null;
+  }
+
+  function decode(text: string): Build | null {
+    const code = text.trim();
+    if (code.startsWith(LEGACY_PREFIX)) {
+      const snapshot = decodeLegacy(code.slice(LEGACY_PREFIX.length));
+      return snapshot === null ? null : Build.fromSnapshot(catalog, snapshot);
     }
-    const mutagens: (string | null)[] = [];
-    for (let group = 0; group < MUTAGEN_GROUPS; group++, position++) {
-      mutagens.push(mutagenIds[singleAt(position) - 1] ?? null);
-    }
-    const mask = doubleAt(position);
-    const mutation = mutationIds[singleAt(position + 2) - 1] ?? null;
-    const researched = mutationIds.filter((_, bit) => (mask & (1 << bit)) !== 0);
-    return { points, slots, mutagens, researched, mutation };
+    if (!code.startsWith(PREFIX)) return null;
+    const build = decodeBody(code.slice(PREFIX.length));
+    // Only the code a build encodes back to is accepted, so a tree flagged without points is refused.
+    return build !== null && encode(build) === code ? build : null;
   }
 
   return { encode, decode };

@@ -3,7 +3,7 @@ import type { Skill } from '../catalog/catalog';
 import { createGameCatalog } from '../catalog/game-catalog';
 import type { TreeName } from '../data/skills';
 import { Build } from './build';
-import { parseSnapshot, type BuildSnapshot } from './build-snapshot';
+import type { BuildSnapshot } from './build-snapshot';
 
 const catalog = createGameCatalog();
 
@@ -167,9 +167,29 @@ describe('Build mutagens', () => {
   });
 });
 
+describe('Build emptiness', () => {
+  it('counts a build with only a mutagen as not empty', () => {
+    const build = new Build(catalog);
+    build.placeMutagen('green', 0);
+
+    const empty = [new Build(catalog).isEmpty(), build.isEmpty()];
+
+    expect(empty).toEqual([true, false]);
+  });
+
+  it('is empty again once its last point is removed', () => {
+    const muscleMemory = skill('Combat', 'Muscle Memory');
+    const build = withPoints(muscleMemory);
+
+    build.removePoint(muscleMemory);
+
+    expect(build.isEmpty()).toBe(true);
+  });
+});
+
 describe('Build snapshots', () => {
   it('ignores unknown names and anything against the rules', () => {
-    const stored = parseSnapshot({
+    const snapshot = aSnapshot({
       points: { Combat: { 'Flood of Anger': 3, Nope: 2 } },
       researched: ['second-life', 'not-a-mutation'],
       mutation: 'second-life',
@@ -177,22 +197,12 @@ describe('Build snapshots', () => {
       mutagens: ['bogus'],
     });
 
-    const build = Build.fromSnapshot(catalog, stored ?? aSnapshot());
+    const build = Build.fromSnapshot(catalog, snapshot);
 
     expect(build.totalPoints()).toBe(0);
     expect(build.slotAt(0)).toBeNull();
     expect(build.mutagenAt(0)).toBeNull();
     expect(build.slottedMutation).toBeNull();
-  });
-
-  it('reads back what it wrote', () => {
-    const muscleMemory = skill('Combat', 'Muscle Memory');
-    const build = withPoints(muscleMemory, muscleMemory);
-    build.placeSkill(muscleMemory, 4);
-
-    const copy = Build.fromSnapshot(catalog, build.toSnapshot());
-
-    expect(copy.toSnapshot()).toEqual(build.toSnapshot());
   });
 
   it('leaves the original untouched when a clone changes', () => {

@@ -1,29 +1,123 @@
 import { describe, expect, it } from 'vitest';
 import { createGameCatalog } from '../catalog/game-catalog';
-import { Build } from './build';
+import { Build, MUTAGEN_GROUPS } from './build';
 import { createBuildCodec } from './build-code';
 
 const catalog = createGameCatalog();
 const codec = createBuildCodec(catalog);
 
-// Codes made by the 1.x vanilla planner. They must keep opening the same build.
+// Codes made by the 1.x planner. They must keep opening the same build.
 const COMBAT_SIGNS_CODE = 'W3R1.yAEABAAgBAAAAAAAAAAAAAEAACAABAbAAAAAAAIAAAAAAAAAABOADAAAAAADAAHBrG';
 const ALCHEMY_GENERAL_CODE =
   'W3R1.AAAAAAAAAAAAADAsIAAAAQAAAMAAvAqAyBNBAAAAuAAAAAAAAAAAAAAAAAAJCHAAAA';
 
 const decodeBuild = (code: string): Build => {
-  const snapshot = codec.decode(code);
-  if (snapshot === null) throw new Error(`Test code does not decode: ${code}`);
-  return Build.fromSnapshot(catalog, snapshot);
+  const build = codec.decode(code);
+  if (build === null) throw new Error(`Test code does not decode: ${code}`);
+  return build;
+};
+
+// Everything a build holds, in a form that two equal builds share regardless of how they were made.
+const fingerprint = (build: Build): string =>
+  JSON.stringify({
+    ranks: catalog.skills.map((skill) => build.rank(skill)),
+    slots: Array.from({ length: build.slotCount }, (_, i) => build.slotAt(i)?.index ?? null),
+    mutagens: Array.from({ length: MUTAGEN_GROUPS }, (_, group) => build.mutagenAt(group)),
+    researched: catalog.mutations.map((mutation) => build.isResearched(mutation.id)),
+    mutation: build.slottedMutation,
+  });
+
+// A small seeded generator, so the random builds are the same on every run.
+const seededRandom = (seed: number): (() => number) => {
+  let state = seed;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let mixed = Math.imul(state ^ (state >>> 15), 1 | state);
+    mixed = (mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed)) ^ mixed;
+    return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const aRandomBuild = (random: () => number): Build => {
+  const build = new Build(catalog);
+  const pick = <T>(items: readonly T[]): T | undefined =>
+    items[Math.floor(random() * items.length)];
+  const pointCount = Math.floor(random() * 70);
+  for (let i = 0; i < pointCount; i++) {
+    const skill = pick(catalog.skills.filter((candidate) => build.canAddPoint(candidate)));
+    if (skill !== undefined) build.addPoint(skill);
+  }
+  for (let i = 0; i < 8; i++) {
+    const mutation = pick(catalog.mutations.filter((candidate) => build.canResearch(candidate.id)));
+    if (mutation !== undefined && random() < 0.6) build.research(mutation.id);
+  }
+  const slottable = pick(
+    catalog.mutations.filter((candidate) => build.canSlotMutation(candidate.id)),
+  );
+  if (slottable !== undefined && random() < 0.6) build.slotMutation(slottable.id);
+  for (let i = 0; i < build.slotCount; i++) {
+    const skill = pick(catalog.skills.filter((candidate) => build.rank(candidate) > 0));
+    if (skill !== undefined && random() < 0.7) build.placeSkill(skill, i);
+  }
+  for (let group = 0; group < MUTAGEN_GROUPS; group++) {
+    const mutagen = pick(catalog.mutagens);
+    if (mutagen !== undefined && random() < 0.6) build.placeMutagen(mutagen.id, group);
+  }
+  return build;
 };
 
 describe('createBuildCodec', () => {
-  it('encodes a 1.x code back to the same characters', () => {
-    const codes = [COMBAT_SIGNS_CODE, ALCHEMY_GENERAL_CODE];
+  it('writes an empty build as 2.A', () => {
+    const code = codec.encode(new Build(catalog));
 
-    const reencoded = codes.map((code) => codec.encode(decodeBuild(code)));
+    expect(code).toBe('2.A');
+  });
 
-    expect(reencoded).toEqual(codes);
+  it('writes the 1.x example builds as their pinned 2.x codes', () => {
+    const oldCodes = [COMBAT_SIGNS_CODE, ALCHEMY_GENERAL_CODE];
+
+    const newCodes = oldCodes.map((code) => codec.encode(decodeBuild(code)));
+
+    expect(newCodes).toEqual(['2.5yx4ZhzLhrAAYAECABY7', '2.OB66AAAcCDjM']);
+    expect(newCodes.map((code) => fingerprint(decodeBuild(code)))).toEqual(
+      oldCodes.map((code) => fingerprint(decodeBuild(code))),
+    );
+  });
+
+  it('writes a build with everything filled shorter than a 1.x code', () => {
+    const build = new Build(catalog);
+    // Repeated passes, because a skill or mutation only opens once what it requires is in.
+    for (let pass = 0; pass < 12; pass++) {
+      for (const skill of catalog.skills) build.addPoint(skill);
+      for (const mutation of catalog.mutations) build.research(mutation.id);
+    }
+    build.slotMutation('metamorphosis');
+    for (let i = 0; i < build.slotCount; i++) {
+      const skill = catalog.skills.find((s) => build.slotOf(s) < 0 && build.slotAccepts(i, s));
+      if (skill !== undefined) build.placeSkill(skill, i);
+    }
+    for (let group = 0; group < MUTAGEN_GROUPS; group++) {
+      const mutagen = catalog.mutagens[group];
+      if (mutagen !== undefined) build.placeMutagen(mutagen.id, group);
+    }
+
+    const code = codec.encode(build);
+
+    expect(
+      Array.from({ length: build.slotCount }, (_, i) => build.slotAt(i) !== null),
+    ).not.toContain(false);
+    expect(code.length).toBeLessThan(COMBAT_SIGNS_CODE.length);
+  });
+
+  it('gives every build exactly one code and every code exactly one build', () => {
+    const random = seededRandom(20261002);
+    const builds = Array.from({ length: 300 }, () => aRandomBuild(random));
+
+    const codes = builds.map((build) => codec.encode(build));
+    const reopened = codes.map((code) => fingerprint(decodeBuild(code)));
+
+    expect(reopened).toEqual(builds.map(fingerprint));
+    expect(new Set(codes).size).toBe(new Set(builds.map(fingerprint)).size);
   });
 
   it('opens a 1.x combat and signs code as the same build', () => {
@@ -49,11 +143,20 @@ describe('createBuildCodec', () => {
     expect(bonuses).toEqual([600, 7, 100]);
   });
 
+  it('rejects a second spelling of a build', () => {
+    // A leading zero digit, and a tree marked as having points without any.
+    const spellings = ['2.AA', '2.AB', '2.B'];
+
+    const decoded = spellings.map((code) => codec.decode(code));
+
+    expect(decoded).toEqual([null, null, null]);
+  });
+
   it('rejects text that is not a whole build code', () => {
-    const inputs = ['garbage', COMBAT_SIGNS_CODE.slice(0, -1), `${COMBAT_SIGNS_CODE}A`, 'W3R1.!'];
+    const inputs = ['garbage', COMBAT_SIGNS_CODE.slice(0, -1), '2.', '2.!', `2.${'z'.repeat(100)}`];
 
     const decoded = inputs.map((input) => codec.decode(input));
 
-    expect(decoded).toEqual([null, null, null, null]);
+    expect(decoded).toEqual([null, null, null, null, null]);
   });
 });

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.3.0 - 2026-10-02
+
+- The build summary opens with the total bonuses: the tree bonus of every slotted skill, added up per
+  rank (three Combat skills at rank 3 give Adrenaline Point gain +9%), and the mutagen bonuses per stat.
+  Only slotted skills count, as in the game.
+- The Toxicity tab shows the share of the maximum in large digits beside the bar. On the bar the
+  overdose line ran through it.
+- Hovering Acquired Tolerance, Metabolic Control or a skill's threshold mark on the Toxicity tab opens
+  the skill's in-game tooltip, and the info panel shows all its ranks.
+
 ## 2.2.1 - 2026-10-02
 
 - Acquired Tolerance counts all 167 alchemy recipes of the game, not 149. With every recipe and the skill

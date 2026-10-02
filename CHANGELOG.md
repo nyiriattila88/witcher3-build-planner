@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.1.0 - 2026-10-02
+
+- The header names The Witcher 3: Wild Hunt Remastered, with the planner version and the game version
+  the data matches (5.00c). The build title above the tree is gone.
+- Build codes are short: a few points take a dozen characters, a full build about 50 instead of 71.
+  Codes and links from 1.x and 2.0 keep opening the same build.
+- The build lives in the page address as `?build=`, and nothing is stored in the browser. A plain
+  address, Reset All or an empty build leave the address without a code. A Copy link button sits next to
+  Copy.
+- The slot board follows the in-game character screen: each group has a bar with its mutagen bonus,
+  mutagens are orbs in silver diamonds, and the slotted mutation sits in the middle with its name and
+  description beside it.
+- Skills show their rank as three pips, links take the tree's colour, and a skill without points is a
+  dark tile as in the game.
+- Hovering a skill in a tree or on the board opens the in-game tooltip with the current and next level,
+  and the info panel still lists all three ranks with more room and larger text.
+- Mutations show their in-game emblems, with the name under the disc, so long names fit.
+- A double click takes a skill, mutagen or mutation off the board, the small remove buttons are gone.
+- The mutagen bonus caption reads "3 matching" over "Combat skills" and keeps clear of the bracket.
+
 ## 2.0.1 - 2026-10-02
 
 - A two-line skill name in slots 13-16 is no longer cut off by the colour bar.

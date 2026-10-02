@@ -1,3 +1,4 @@
+import type { DragEvent } from 'react';
 import type { Build } from '../build/build';
 import type { Skill } from '../catalog/catalog';
 import type { MutagenId, MutationId } from '../data/mutations';
@@ -24,6 +25,15 @@ export const dropTargetKey = (target: DropTarget): string => {
       return 'mutation-slot';
   }
 };
+
+// Only the icon follows the pointer, centred on it, so an item looks dropped exactly where the pointer is.
+// A mutagen keeps the browser's own image, its diamond is rotated.
+export function centreDragImage(event: DragEvent): void {
+  const icon = event.currentTarget.querySelector('.tile, .mutation-ring, .disc');
+  if (icon === null) return;
+  const box = icon.getBoundingClientRect();
+  event.dataTransfer.setDragImage(icon, box.width / 2, box.height / 2);
+}
 
 export const isFromBoard = (item: DragItem): boolean =>
   item.kind === 'mutation' ? item.fromBoard : item.from !== null;

@@ -44,7 +44,10 @@ const dropTargetProps = (target: DropTarget, handlers: BoardHandlers) => ({
   onDragOver: (event: DragEvent) => {
     handlers.onDragOver(target, event);
   },
-  onDragLeave: () => {
+  onDragLeave: (event: DragEvent) => {
+    // Moving onto the slot's own icon or pips is no leaving.
+    const to = event.relatedTarget;
+    if (to instanceof Node && event.currentTarget.contains(to)) return;
     handlers.onDragLeave(target);
   },
   onDrop: (event: DragEvent) => {

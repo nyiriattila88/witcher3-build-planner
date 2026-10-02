@@ -4,6 +4,7 @@ import {
   acceptsDrop,
   applyDiscard,
   applyDrop,
+  centreDragImage,
   dropTargetKey,
   isFromBoard,
   type DragItem,
@@ -62,6 +63,7 @@ export function useDragAndDrop(
     dragged.current = item;
     event.dataTransfer.setData('text/plain', item.kind);
     event.dataTransfer.effectAllowed = 'move';
+    centreDragImage(event);
   }, []);
 
   const over = useCallback(

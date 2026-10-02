@@ -64,6 +64,7 @@ export function SlotBoard({ catalog, build, boardRef, ...handlers }: SlotBoardPr
           <GroupBracket
             key={group}
             group={group}
+            build={build}
             mutagen={catalog.mutagen(build.mutagenAt(group))}
           />
         ))}
@@ -97,28 +98,45 @@ export function SlotBoard({ catalog, build, boardRef, ...handlers }: SlotBoardPr
   );
 }
 
-// The bracket joins a group's three slots to its mutagen, in the mutagen's colour once one is placed.
+// The bracket joins a group's three slots to its mutagen. The way from each slot that matches the
+// mutagen takes the mutagen's colour, the rest of the bracket stays grey.
 function GroupBracket({
   group,
+  build,
   mutagen,
 }: {
   group: number;
+  build: Build;
   mutagen: Mutagen | undefined;
 }): JSX.Element {
   const side = isRightGroup(group) ? 1 : -1;
-  const rows = [0, 1, 2].map((i) => slotCentre(group * SLOTS_PER_GROUP + i)[1]);
-  const [top = 0, middle = 0, bottom = 0] = rows;
-  const [slotX] = slotCentre(group * SLOTS_PER_GROUP);
-  const edge = slotX + (side * SLOT_SIZE) / 2;
+  const first = group * SLOTS_PER_GROUP;
+  const [top = 0, middle = 0, bottom = 0] = [0, 1, 2].map((i) => slotCentre(first + i)[1]);
+  const edge = slotCentre(first)[0] + (side * SLOT_SIZE) / 2;
   const spine = bracketX(group);
   // The diamond's corner that faces the slots.
   const corner = mutagenSlotCentre(group)[0] - (side * MUTAGEN_SLOT_SIZE) / Math.SQRT2;
+  const [topMatches = false, middleMatches = false, bottomMatches = false] = [0, 1, 2].map(
+    (i) => mutagen !== undefined && build.slotMatchesMutagen(first + i),
+  );
+  const segments: readonly (readonly [path: string, matches: boolean])[] = [
+    [`M${edge} ${top} H${spine} V${middle}`, topMatches],
+    [`M${edge} ${bottom} H${spine} V${middle}`, bottomMatches],
+    [`M${edge} ${middle} H${spine}`, middleMatches],
+    [`M${spine} ${middle} H${corner}`, topMatches || middleMatches || bottomMatches],
+  ];
+  const lit = segments.filter(([, matches]) => matches).map(([path]) => path);
   return (
-    <path
-      className={mutagen === undefined ? 'bracket' : 'bracket filled'}
-      style={mutagen === undefined ? undefined : { stroke: mutagenColour(mutagen) }}
-      d={`M${edge} ${top} H${spine} V${bottom} H${edge} M${edge} ${middle} H${corner}`}
-    />
+    <>
+      <path className="bracket" d={segments.map(([path]) => path).join(' ')} />
+      {mutagen !== undefined && lit.length > 0 && (
+        <path
+          className="bracket filled"
+          style={{ stroke: mutagenColour(mutagen) }}
+          d={lit.join(' ')}
+        />
+      )}
+    </>
   );
 }
 
@@ -203,12 +221,7 @@ function SkillSlot({
   const skill = build.slotAt(index);
   if (skill === null) {
     return (
-      <div
-        className={`slot${over}`}
-        style={
-          mutagen === undefined ? position : { ...position, borderColor: mutagenColour(mutagen) }
-        }
-      >
+      <div className={`slot${over}`} style={position}>
         {accepts}
       </div>
     );

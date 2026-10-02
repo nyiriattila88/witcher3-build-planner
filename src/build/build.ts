@@ -279,14 +279,6 @@ export class Build {
     return !this.isResearched(id) && this.#requirementsResearched(id);
   }
 
-  // A mutation stays while another researched mutation requires it.
-  canUnresearch(id: MutationId): boolean {
-    return (
-      this.#researched.has(id) &&
-      ![...this.#researched].some((other) => this.#mutationById(other).requires.includes(id))
-    );
-  }
-
   canSlotMutation(id: MutationId): boolean {
     return this.#researched.has(id);
   }
@@ -295,8 +287,9 @@ export class Build {
     if (this.canResearch(id)) this.#researched.add(id);
   }
 
+  // Takes along every researched mutation that needed this one, the way a skill's last point does.
   unresearch(id: MutationId): void {
-    if (!this.canUnresearch(id)) return;
+    if (!this.#researched.has(id)) return;
     this.#researched.delete(id);
     this.#normalize();
   }

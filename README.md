@@ -27,7 +27,7 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
 - **Skill slots and mutagens.** Drag skills into twelve slots in four groups. A mutagen's bonus grows with
   every matching skill in its group and with Synergy, and the board shows which slots count.
 - **Mutations.** Research them in order, slot one in the centre, and fill the four extra slots around it, which open with
-  research and take only the mutation's colours.
+  research and take only the mutation's colours. Unresearching a mutation also takes the ones that need it.
 - **The in-game character screen.** Tooltips with the current and the next level, mutagen orbs in their
   diamonds, mutation emblems and the bonus of each slot group, as the game shows them. A double click
   takes a skill, mutagen or mutation off the board.

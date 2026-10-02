@@ -170,14 +170,25 @@ describe('Build mutations', () => {
     expect(build.slotAt(12)).toBeNull();
   });
 
-  it('keeps a mutation another researched mutation requires', () => {
+  it('takes the mutations that need it along when one is unresearched', () => {
     const build = new Build(catalog);
-    build.research('deadly-counter');
-    build.research('bloodbath');
+    for (const id of [
+      'magic-sensibilities',
+      'piercing-cold',
+      'deadly-counter',
+      'bloodbath',
+      'adrenaline-rush',
+    ] as const) {
+      build.research(id);
+    }
+    build.slotMutation('adrenaline-rush');
 
     build.unresearch('deadly-counter');
 
-    expect(build.isResearched('deadly-counter')).toBe(true);
+    const left = (['piercing-cold', 'bloodbath', 'adrenaline-rush'] as const).map((id) =>
+      build.isResearched(id),
+    );
+    expect([...left, build.slottedMutation]).toEqual([true, false, false, null]);
   });
 });
 

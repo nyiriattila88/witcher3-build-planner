@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.1 - 2026-10-02
+
+- Acquired Tolerance counts all 167 alchemy recipes of the game, not 149. With every recipe and the skill
+  at rank 3 in a slot, the maximum Toxicity is 601.
+- Hovering a potion or decoction opens the in-game tooltip with its Toxicity, duration and effects.
+- The Toxicity bar shows the share of the maximum, and its colour turns red once the overdose threshold is
+  passed. The red never showed before, the board's drop highlight covered it.
+- Unresearching a mutation also takes the mutations that need it, the way a skill's last point does.
+
 ## 2.2.0 - 2026-10-02
 
 - A Toxicity tab plans the potions and decoctions active at the same time: all 27 decoctions and 16

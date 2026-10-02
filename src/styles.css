@@ -249,8 +249,7 @@ button:hover {
   margin-top: 14px;
 }
 
-/* --- Skill tiles and rank pips, shared by the trees, the board and the info panel.
-   The icons are white on black, so screen blending lays them over the tree colour. */
+/* --- Skill tiles and rank pips, shared by the trees, the board and the info panel. */
 
 .tile {
   position: relative;
@@ -558,8 +557,8 @@ button:hover {
   height: 76px;
   border-radius: 50%;
 }
-/* Below the emblem badge, which hangs under the disc. */
 
+/* Below the emblem badge, which hangs under the disc. */
 .mutation-name {
   margin-top: 15px;
   font-size: 14px;
@@ -648,8 +647,8 @@ img.disc {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-  position: relative;
 .info-icon {
+  position: relative;
   display: flex;
   flex: none;
   width: 56px;
@@ -869,8 +868,8 @@ img.disc {
   line-height: 1.15;
   text-align: center;
 }
-/* The disc image brings its own ring, the border only lights up as a drop target. */
 
+/* The disc image brings its own ring, the border only lights up as a drop target. */
 .mutation-slot {
   position: absolute;
   border: 2px solid transparent;

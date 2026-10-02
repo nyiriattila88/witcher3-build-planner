@@ -83,7 +83,8 @@ Agent instructions for AI-assisted changes are in [AGENTS.md](AGENTS.md). Change
 - Skill names and per-rank values: LAMBKING's "Complete Skill Tree Reference" posts on r/witcher.
 - Tooltip wording: the Fextralife Witcher 3 wiki, checked against Hack the Minotaur's remaster skill tree
   guide.
-- Tree layout, links, icons and backdrops: in-game screenshots published by Mobalytics.
+- Tree layout, links and backdrops: in-game screenshots published by Mobalytics, which also give the icons
+  of the skills that are new in the Remastered. The other skill icons: The Witcher Wiki on Fandom.
 - Mutations, mutagens and the extra slot rules: the rpg-gaming.com Witcher 3 build planner.
 - Mutation discs: cut from an in-game screenshot on the Improved Mutations page on Nexus Mods. Mutagen
   orbs: The Witcher Wiki on Fandom.

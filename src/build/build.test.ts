@@ -37,12 +37,28 @@ describe('Build skill points', () => {
     expect(build.rank(skill('Combat', 'Strength Training'))).toBe(0);
   });
 
-  it('keeps the last point of a skill another learned skill depends on', () => {
-    const build = withPoints(skill('Combat', 'Muscle Memory'), skill('Combat', 'Three Strikes'));
+  it('takes the skills only it unlocked along with its last point', () => {
+    const branch = ['Muscle Memory', 'Strength Training', 'Crushing Blow', 'Sunder Armor'];
+    const build = withPoints(...branch.map((name) => skill('Combat', name)));
 
     build.removePoint(skill('Combat', 'Muscle Memory'));
 
-    expect(build.rank(skill('Combat', 'Muscle Memory'))).toBe(1);
+    expect(branch.map((name) => build.rank(skill('Combat', name)))).toEqual([0, 0, 0, 0]);
+  });
+
+  it('keeps a skill that another learned parent still unlocks', () => {
+    const build = withPoints(
+      ...['Muscle Memory', 'Three Strikes', 'Arrow Deflection', 'Resolve', 'Undying'].map((name) =>
+        skill('Combat', name),
+      ),
+    );
+
+    build.removePoint(skill('Combat', 'Muscle Memory'));
+
+    expect([
+      build.rank(skill('Combat', 'Three Strikes')),
+      build.rank(skill('Combat', 'Undying')),
+    ]).toEqual([0, 1]);
   });
 
   it('stops at the third rank', () => {

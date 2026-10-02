@@ -105,24 +105,13 @@ export class Build {
     return this.rank(skill) < MAX_RANK && this.isAvailable(skill);
   }
 
-  // The last point stays while a learned skill has no other learned parent to keep it unlocked.
-  canRemovePoint(skill: Skill): boolean {
-    const rank = this.rank(skill);
-    if (rank === 0) return false;
-    if (rank > 1) return true;
-    return skill.unlocks.every(
-      (child) =>
-        this.rank(child) === 0 ||
-        child.requires.some((parent) => parent !== skill && this.rank(parent) > 0),
-    );
-  }
-
   addPoint(skill: Skill): void {
     if (this.canAddPoint(skill)) this.#ranks.set(skill, this.rank(skill) + 1);
   }
 
+  // The last point takes along every skill that only this one kept unlocked, so a branch unwinds in one go.
   removePoint(skill: Skill): void {
-    if (!this.canRemovePoint(skill)) return;
+    if (this.rank(skill) === 0) return;
     const rank = this.rank(skill) - 1;
     if (rank > 0) this.#ranks.set(skill, rank);
     else this.#ranks.delete(skill);

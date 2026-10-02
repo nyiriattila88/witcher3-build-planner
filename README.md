@@ -22,8 +22,8 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
 
 - **The remastered trees as the game draws them.** Combat, Signs, Alchemy and General with the in-game
   layout, links, icons and backdrops, three ranks per skill and the tooltip wording of the game.
-- **The unlock rules.** A skill opens once a linked parent has a point, and a point that keeps another
-  skill unlocked cannot be taken back.
+- **The unlock rules.** A skill opens once a linked parent has a point. Taking the last point from a
+  skill also takes every skill that only it kept unlocked, so a branch unwinds in one go.
 - **Skill slots and mutagens.** Drag skills into twelve slots in four groups. A mutagen's bonus grows with
   every matching skill in its group and with Synergy, and the board shows which slots count.
 - **Mutations.** Research them in order, slot one in the centre, and fill the four extra slots around it, which open with

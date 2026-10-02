@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.0 - 2026-10-02
+
+- Rebuilt as a React and TypeScript single-page app with Vite, deployed to GitHub Pages by GitHub Actions.
+- Build codes and saved builds from 1.x keep working, and tests guard the code format.
+- The footer shows the live version, commit and build date.
+- The tabs show the tree names only.
+- The trees work from the keyboard too: Enter adds a rank, Delete removes one.
+- Local use changed: run `pnpm dev`, or use the live page. Opening `index.html` directly no longer works.
+
 ## 1.1.1 - 2026-10-02
 
 - The Mutagens and Mutations tabs get backdrops in the trees' style: a purple one with a mutagen diamond, an olive one with a helix.

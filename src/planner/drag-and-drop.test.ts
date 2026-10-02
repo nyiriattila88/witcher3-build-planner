@@ -18,13 +18,13 @@ describe('snapTarget', () => {
     expect(slotIndex(target)).toBe(1);
   });
 
-  it('takes a slot the icon covers well off-centre, not one it only brushes', () => {
+  it('takes a slot the icon overlaps by a pixel, and none the icon misses', () => {
     const [x, y] = slotCentre(0);
+    // The icon and the slot are 62 and 60 pixels wide, so their centres touch 61 pixels apart.
+    const overlapping = snapTarget([x + 60, y], ICON, 16, anywhere);
+    const missing = snapTarget([x + 62, y], ICON, 16, anywhere);
 
-    const covered = snapTarget([x + 45, y], ICON, 16, anywhere);
-    const brushed = snapTarget([x + 55, y], ICON, 16, anywhere);
-
-    expect([slotIndex(covered), brushed]).toEqual([0, null]);
+    expect([slotIndex(overlapping), missing]).toEqual([0, null]);
   });
 
   it('passes over a slot that refuses the item for the next one it covers', () => {

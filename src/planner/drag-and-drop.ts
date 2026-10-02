@@ -35,11 +35,18 @@ export const dropTargetKey = (target: DropTarget): string => {
   }
 };
 
-// Only the icon follows the pointer, centred on it, so an item looks dropped exactly where the pointer is.
-// Returns the icon's size, which decides how much of a slot the dragged icon covers.
+// Only the icon follows the pointer, centred on it, so what the user drags is the square a drop is
+// measured with. Returns the icon's size.
 export function centreDragImage(event: DragEvent): number {
-  const icon = event.currentTarget.querySelector('.tile, .mutation-ring, .disc, .gem img');
+  const host = event.currentTarget;
+  const icon = host.querySelector('.tile, .mutation-ring, .disc, .gem img');
   if (icon === null) return SLOT_SIZE;
+  // The browser draws a hover frame or a glow into the image and shifts the icon off the pointer, so
+  // they are left out until the image is taken, which happens before the next task.
+  host.classList.add('lifted');
+  setTimeout(() => {
+    host.classList.remove('lifted');
+  }, 0);
   const box = icon.getBoundingClientRect();
   event.dataTransfer.setDragImage(icon, box.width / 2, box.height / 2);
   return Math.max(box.width, box.height);
@@ -71,11 +78,9 @@ const snapBoxes = (slotCount: number): readonly SnapBox[] => [
 const axisOverlap = (distance: number, a: number, b: number): number =>
   Math.max(0, Math.min(a, b, (a + b) / 2 - Math.abs(distance)));
 
-// Below this share of the dragged icon, an overlap is a brush past, not a drop.
-const MIN_COVER = 0.1;
-
-// The drop target under a dragged icon centred on the given board point: of the targets that accept it,
-// the one the icon covers most, so the snap follows the icon's size and not only the pointer.
+// The drop target under a dragged icon centred on the given board point: of the targets that accept it
+// and that the icon overlaps at all, the one it covers most. The snap follows the whole icon, not only
+// the pointer.
 export function snapTarget(
   point: Point,
   icon: number,
@@ -87,7 +92,7 @@ export function snapTarget(
     const area =
       axisOverlap(point[0] - box.centre[0], icon, box.size) *
       axisOverlap(point[1] - box.centre[1], icon, box.size);
-    if (area < MIN_COVER * icon * icon || (best !== null && area <= best.area)) continue;
+    if (area <= 0 || (best !== null && area <= best.area)) continue;
     if (accepts(box.target)) best = { target: box.target, area };
   }
   return best?.target ?? null;

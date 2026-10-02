@@ -318,7 +318,7 @@ button:hover {
 }
 
 /* The in-game skill tooltip: name and rank, then the current and the next level. */
-.skill-tooltip {
+.game-tooltip {
   position: absolute;
   z-index: 10;
   width: 300px;
@@ -333,14 +333,14 @@ button:hover {
   pointer-events: none;
 }
 
-.skill-tooltip-head {
+.game-tooltip-head {
   margin-bottom: 2px;
   padding: 7px 12px;
   border-bottom: 1px solid #45494f;
   background: rgba(255, 255, 255, 0.05);
 }
 
-.skill-tooltip-head b {
+.game-tooltip-head b {
   display: block;
   font-size: 17px;
   font-weight: 600;
@@ -348,25 +348,25 @@ button:hover {
   text-transform: uppercase;
 }
 
-.skill-tooltip-head span {
+.game-tooltip-head span {
   color: #b9b3a7;
 }
 
-.skill-tooltip p {
+.game-tooltip p {
   margin: 0;
   padding: 0 12px;
   white-space: pre-line;
 }
 
-.skill-tooltip .skill-tooltip-label {
+.game-tooltip .game-tooltip-label {
   padding-top: 7px;
 }
 
-.skill-tooltip .next {
+.game-tooltip .next {
   color: #9b968c;
 }
 
-.skill-tooltip .skill-tooltip-hint {
+.game-tooltip .game-tooltip-hint {
   margin-top: 8px;
   padding-top: 7px;
   border-top: 1px solid #3c4046;
@@ -642,7 +642,7 @@ img.disc {
 
 .toxicity-bar {
   position: relative;
-  height: 18px;
+  height: 22px;
   border: 1px solid #4a5a3e;
   background: #0d120b;
   box-shadow: inset 0 0 0 1px #000;
@@ -657,7 +657,7 @@ img.disc {
   box-shadow: 0 0 10px rgba(142, 208, 79, 0.45);
 }
 
-.toxicity-fill.over {
+.toxicity-fill.overdosed {
   background: linear-gradient(90deg, #7f2525, #d04f4f);
   box-shadow: 0 0 10px rgba(208, 79, 79, 0.5);
 }
@@ -673,6 +673,23 @@ img.disc {
 
 .toxicity-mark.skill {
   background: var(--gold);
+}
+
+.toxicity-percent {
+  position: absolute;
+  inset: 0;
+  color: var(--bright);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+  text-align: center;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 4px #000;
+}
+
+.toxicity-percent.overdosed {
+  color: #ffb3a8;
 }
 
 .toxicity-line {

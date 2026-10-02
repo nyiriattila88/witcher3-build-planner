@@ -15,8 +15,8 @@ export function SkillTooltip({ skill, rank, placement, hint }: SkillTooltipProps
   const current = skill.ranks[rank - 1];
   const next = skill.ranks[rank];
   return (
-    <div className="skill-tooltip" style={placement} role="tooltip">
-      <div className="skill-tooltip-head">
+    <div className="game-tooltip" style={placement} role="tooltip">
+      <div className="game-tooltip-head">
         <b>{skill.name}</b>
         <span>
           {rank}/{MAX_RANK}
@@ -24,17 +24,17 @@ export function SkillTooltip({ skill, rank, placement, hint }: SkillTooltipProps
       </div>
       {current !== undefined && (
         <>
-          <p className="skill-tooltip-label">Current level:</p>
+          <p className="game-tooltip-label">Current level:</p>
           <p>{current}</p>
         </>
       )}
       {next !== undefined && (
         <>
-          <p className="skill-tooltip-label next">Next level:</p>
+          <p className="game-tooltip-label next">Next level:</p>
           <p className="next">{next}</p>
         </>
       )}
-      {hint !== undefined && <p className="skill-tooltip-hint">{hint}</p>}
+      {hint !== undefined && <p className="game-tooltip-hint">{hint}</p>}
     </div>
   );
 }

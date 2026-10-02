@@ -1,4 +1,5 @@
 import type { Mutagen, Mutation, Skill } from '../catalog/catalog';
+import type { DecoctionData, PotionData } from '../data/alchemy';
 import type { TreeName } from '../data/skills';
 
 // Files under public/ are served below the base path, which is the repository name on GitHub Pages.
@@ -26,6 +27,27 @@ export const mutationIconUrl = (mutation: Mutation): string =>
 
 export const mutagenIconUrl = (mutagen: Mutagen): string =>
   assetUrl(`images/mutagens/${mutagen.id}.png`);
+
+// The files drop the apostrophe of a name like Petri's Philter.
+const elixirSlug = (name: string): string => slug(name.replace(/'/g, ''));
+
+export const potionIconUrl = (potion: PotionData): string =>
+  assetUrl(`images/potions/${elixirSlug(potion.name)}.png`);
+
+export const decoctionIconUrl = (decoction: DecoctionData): string =>
+  assetUrl(`images/decoctions/${elixirSlug(decoction.name)}.png`);
+
+// Superior Swallow, or the potion's own name when it comes in one version only.
+export const potionTierName = (potion: PotionData, tier: number): string =>
+  potion.tiers.length === 1
+    ? potion.name
+    : `${['', 'Enhanced ', 'Superior '][tier - 1] ?? ''}${potion.name}`;
+
+export const formatDuration = (seconds: number | null): string => {
+  if (seconds === null) return 'instant';
+  if (seconds < 120) return `${seconds} s`;
+  return `${Math.round(seconds / 60)} min`;
+};
 
 export const treeColour = (tree: TreeName): string => `var(--tree-${tree.toLowerCase()})`;
 

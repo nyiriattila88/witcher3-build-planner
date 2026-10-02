@@ -10,6 +10,8 @@
   --tree-general: #b97c2a;
   --tab-mutagens: #7a63c9;
   --tab-mutations: #a8a66a;
+  --tab-toxicity: #6aa83a;
+  --toxic: #8ed04f;
   /* Mutation and mutagen colours, named after the trees they stand for. */
   --mut-combat: #e0262c;
   --mut-signs: #3d55e0;
@@ -624,6 +626,206 @@ img.disc {
   height: 132%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+/* --- Toxicity planner: the bar with its thresholds, what makes up the maximum, then the elixirs */
+
+.toxicity {
+  padding: 16px 18px 20px;
+}
+
+.toxicity-summary {
+  padding: 14px 16px;
+  border: 1px solid #2f3a2a;
+  background: rgba(20, 30, 16, 0.55);
+}
+
+.toxicity-bar {
+  position: relative;
+  height: 18px;
+  border: 1px solid #4a5a3e;
+  background: #0d120b;
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+.toxicity-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, #3f7f25, var(--toxic));
+  box-shadow: 0 0 10px rgba(142, 208, 79, 0.45);
+}
+
+.toxicity-fill.over {
+  background: linear-gradient(90deg, #7f2525, #d04f4f);
+  box-shadow: 0 0 10px rgba(208, 79, 79, 0.5);
+}
+
+.toxicity-mark {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--bright);
+}
+
+.toxicity-mark.skill {
+  background: var(--gold);
+}
+
+.toxicity-line {
+  margin: 10px 0 8px;
+  font-size: 16px;
+}
+
+.toxicity-line b {
+  color: var(--bright);
+  font-weight: 600;
+}
+
+.toxicity-warning {
+  margin-left: 8px;
+  color: #ff7a6b;
+  font-weight: 600;
+}
+
+.toxicity-sources {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.toxicity-sources div {
+  padding: 6px 8px;
+  border: 1px solid #2e3237;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.toxicity-sources dt {
+  color: var(--muted);
+  font-size: 12.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.toxicity-sources dd {
+  margin: 2px 0 0;
+  color: var(--bright);
+  font-size: 16px;
+}
+
+.toxicity-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.toxicity-controls input {
+  width: 72px;
+  padding: 4px 6px;
+  border: 1px solid #555;
+  background: #0b0c0e;
+  color: var(--bright);
+  font: inherit;
+}
+
+.manticore-pieces {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.manticore-pieces button {
+  margin-left: 2px;
+  padding: 3px 10px;
+  font-size: 14px;
+}
+
+.manticore-pieces button.active,
+.elixir-tiers button.active {
+  border-color: var(--toxic);
+  background: rgba(142, 208, 79, 0.2);
+  color: var(--bright);
+}
+
+.elixir-heading {
+  margin: 18px 0 8px;
+  color: var(--bright);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.elixir-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 8px;
+}
+
+.elixir {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid #2e3237;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+button.elixir {
+  cursor: pointer;
+}
+
+.elixir:hover {
+  border-color: #5a6068;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.elixir img {
+  grid-row: 1 / span 2;
+  width: 40px;
+  height: 40px;
+}
+
+.elixir-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.elixir-meta {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.elixir-tiers {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.elixir-tiers button {
+  flex: 1;
+  padding: 2px 0;
+  font-size: 13px;
+}
+
+.elixir.active {
+  border-color: var(--tab-toxicity);
+  background: rgba(106, 168, 58, 0.14);
+  box-shadow: 0 0 10px rgba(106, 168, 58, 0.25);
 }
 
 /* --- Info panel: fixed height, so the board below stays put while the pointer moves.

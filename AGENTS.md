@@ -33,7 +33,10 @@ Each layer only imports from the layers above it in this list. The model knows n
   the order of `src/data/`, and each field offers only what `Build` allows at that point. Reordering the
   data, changing a link or changing a rule silently changes what every shared code means. Such a change
   needs a new format behind a marker today's codes cannot contain, such as `3.`, and must keep decoding
-  the unmarked codes, the way `W3R1.` codes still decode through `src/build/legacy-build-code.ts`. The pinned codes in `src/build/build-code.test.ts` guard this, never
+  the unmarked codes, the way `W3R1.` codes still decode through `src/build/legacy-build-code.ts`.
+  The toxicity plan (the potions and decoctions of `src/data/alchemy.ts`, Manticore armor pieces and
+  known recipes) is walked last, which is why codes written before it existed still open; anything new
+  belongs after it for the same reason. The pinned codes in `src/build/build-code.test.ts` guard this, never
   change them to make a test pass.
 - **The address is the only state.** The build lives in the `build` parameter of the page address
   (`src/app/build-address.ts`), nothing is stored in the browser. A plain address opens an empty build,

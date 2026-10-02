@@ -1,4 +1,12 @@
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
+import {
+  ALCHEMY_RECIPES,
+  BASE_MAX_TOXICITY,
+  MANTICORE_ARMOR,
+  SAFE_TOXICITY_SHARE,
+  type DecoctionData,
+  type PotionData,
+} from '../data/alchemy';
 import type { ColourTree, MutagenId, MutationId } from '../data/mutations';
 import type { TreeName } from '../data/skills';
 import type { BuildSnapshot } from './build-snapshot';
@@ -9,6 +17,18 @@ export const SLOTS_PER_GROUP = 3;
 export const MUTAGEN_GROUPS = BASE_SLOTS / SLOTS_PER_GROUP;
 // While it sits in a slot, Synergy raises every mutagen bonus by 10% per rank.
 export const SYNERGY = { tree: 'General', name: 'Synergy', bonusPerRank: 0.1 } as const;
+// From a slot, Acquired Tolerance raises maximum Toxicity by 1 per learned recipe and rank, Metabolic
+// Control by 10 per rank.
+export const ACQUIRED_TOLERANCE = {
+  tree: 'Alchemy',
+  name: 'Acquired Tolerance',
+  perRecipe: 1,
+} as const;
+export const METABOLIC_CONTROL = {
+  tree: 'General',
+  name: 'Metabolic Control',
+  perRank: 10,
+} as const;
 
 export const slotGroup = (slotIndex: number): number => Math.floor(slotIndex / SLOTS_PER_GROUP);
 
@@ -19,7 +39,8 @@ export type MutagenBonus = {
   readonly value: number;
 };
 
-// One character build: skill ranks, slotted skills, mutagens and mutations.
+// One character build: skill ranks, slotted skills, mutagens, mutations and the potions and decoctions
+// planned to be active together.
 // Every command leaves the build valid, so callers never have to repair it.
 export class Build {
   readonly #catalog: Catalog;
@@ -28,6 +49,10 @@ export class Build {
   #mutagens: (MutagenId | null)[] = Array<MutagenId | null>(MUTAGEN_GROUPS).fill(null);
   #researched = new Set<MutationId>();
   #mutation: MutationId | null = null;
+  #potions = new Map<PotionData, number>();
+  #decoctions = new Set<DecoctionData>();
+  #manticorePieces = 0;
+  #knownRecipes: number = ALCHEMY_RECIPES;
 
   constructor(catalog: Catalog) {
     this.#catalog = catalog;
@@ -67,12 +92,24 @@ export class Build {
     copy.#mutagens = [...this.#mutagens];
     copy.#researched = new Set(this.#researched);
     copy.#mutation = this.#mutation;
+    copy.#potions = new Map(this.#potions);
+    copy.#decoctions = new Set(this.#decoctions);
+    copy.#manticorePieces = this.#manticorePieces;
+    copy.#knownRecipes = this.#knownRecipes;
     return copy;
   }
 
-  // Slots and the slotted mutation need points and research, so these three cover everything.
+  // Slots and the slotted mutation need points and research, so they need no check of their own.
   isEmpty(): boolean {
-    return this.#ranks.size === 0 && this.#researched.size === 0 && this.mutagenCount === 0;
+    return (
+      this.#ranks.size === 0 &&
+      this.#researched.size === 0 &&
+      this.mutagenCount === 0 &&
+      this.#potions.size === 0 &&
+      this.#decoctions.size === 0 &&
+      this.#manticorePieces === 0 &&
+      this.#knownRecipes === ALCHEMY_RECIPES
+    );
   }
 
   // --- Skill points
@@ -279,6 +316,87 @@ export class Build {
     this.#researched.clear();
     this.#mutation = null;
     this.#normalize();
+  }
+
+  // --- Potions, decoctions and Toxicity
+
+  // The active version of a potion: 0 for none, then the base, enhanced and superior one.
+  potionTier(potion: PotionData): number {
+    return this.#potions.get(potion) ?? 0;
+  }
+
+  setPotionTier(potion: PotionData, tier: number): void {
+    const value = Math.min(potion.tiers.length, Math.max(0, Math.trunc(tier)));
+    if (value > 0) this.#potions.set(potion, value);
+    else this.#potions.delete(potion);
+  }
+
+  isDecoctionActive(decoction: DecoctionData): boolean {
+    return this.#decoctions.has(decoction);
+  }
+
+  setDecoctionActive(decoction: DecoctionData, active: boolean): void {
+    if (active) this.#decoctions.add(decoction);
+    else this.#decoctions.delete(decoction);
+  }
+
+  get manticorePieces(): number {
+    return this.#manticorePieces;
+  }
+
+  setManticorePieces(pieces: number): void {
+    this.#manticorePieces = Math.min(MANTICORE_ARMOR.pieces, Math.max(0, Math.trunc(pieces)));
+  }
+
+  get knownRecipes(): number {
+    return this.#knownRecipes;
+  }
+
+  setKnownRecipes(count: number): void {
+    this.#knownRecipes = Math.min(ALCHEMY_RECIPES, Math.max(0, Math.trunc(count)));
+  }
+
+  resetElixirs(): void {
+    this.#potions.clear();
+    this.#decoctions.clear();
+  }
+
+  // Everything active at once: a decoction holds its Toxicity for as long as it lasts.
+  toxicity(): number {
+    let sum = 0;
+    for (const [potion, tier] of this.#potions) sum += potion.tiers[tier - 1]?.toxicity ?? 0;
+    for (const decoction of this.#decoctions) sum += decoction.toxicity;
+    return sum;
+  }
+
+  maxToxicity(): number {
+    return (
+      BASE_MAX_TOXICITY +
+      this.acquiredTolerance() +
+      this.metabolicControl() +
+      this.#manticorePieces * MANTICORE_ARMOR.toxicity
+    );
+  }
+
+  // Skills only work from a slot, so an unslotted one adds nothing.
+  acquiredTolerance(): number {
+    return (
+      this.#slottedRank(ACQUIRED_TOLERANCE) * ACQUIRED_TOLERANCE.perRecipe * this.#knownRecipes
+    );
+  }
+
+  metabolicControl(): number {
+    return this.#slottedRank(METABOLIC_CONTROL) * METABOLIC_CONTROL.perRank;
+  }
+
+  // Above this much Toxicity, Geralt takes overdose damage.
+  overdoseToxicity(): number {
+    return this.maxToxicity() * SAFE_TOXICITY_SHARE;
+  }
+
+  #slottedRank({ tree, name }: { readonly tree: string; readonly name: string }): number {
+    const skill = this.#catalog.skill(tree, name);
+    return skill !== undefined && this.slotOf(skill) >= 0 ? this.rank(skill) : 0;
   }
 
   #mutationById(id: MutationId): Mutation {

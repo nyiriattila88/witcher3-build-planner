@@ -1,3 +1,4 @@
+import type { DecoctionData, PotionData } from '../data/alchemy';
 import type {
   ColourTree,
   MutagenData,
@@ -39,6 +40,8 @@ export type Catalog = {
   readonly mutagens: readonly Mutagen[];
   readonly mutations: readonly Mutation[];
   readonly extraSlotUnlocks: readonly number[];
+  readonly potions: readonly PotionData[];
+  readonly decoctions: readonly DecoctionData[];
   readonly tree: (name: TreeName) => SkillTree;
   readonly skill: (tree: string, name: string) => Skill | undefined;
   readonly mutagen: (id: string | null) => Mutagen | undefined;
@@ -51,6 +54,8 @@ export type CatalogSources = {
   readonly mutagens: Readonly<Record<MutagenId, MutagenData>>;
   readonly mutations: Readonly<Record<MutationId, MutationData>>;
   readonly extraSlotUnlocks: readonly number[];
+  readonly potions: readonly PotionData[];
+  readonly decoctions: readonly DecoctionData[];
 };
 
 type MutableSkill = Omit<Skill, 'requires' | 'unlocks'> & { requires: Skill[]; unlocks: Skill[] };
@@ -112,6 +117,12 @@ export function createCatalog(sources: CatalogSources): Catalog {
     return { ...data, id, innate: innate === true, requires: requires.filter(isMutationId) };
   });
 
+  // A build keeps its potions and decoctions by name, so a name may only appear once.
+  const elixirNames = [...sources.potions, ...sources.decoctions].map((elixir) => elixir.name);
+  const repeated = elixirNames.filter((name, i) => elixirNames.indexOf(name) !== i);
+  if (repeated.length > 0)
+    throw new Error(`Potion or decoction listed twice: ${repeated.join(', ')}`);
+
   const treesByName = new Map(trees.map((tree) => [tree.name, tree]));
   const mutagensById = new Map<string, Mutagen>(mutagens.map((mutagen) => [mutagen.id, mutagen]));
   const mutationsById = new Map<string, Mutation>(
@@ -124,6 +135,8 @@ export function createCatalog(sources: CatalogSources): Catalog {
     mutagens,
     mutations,
     extraSlotUnlocks: sources.extraSlotUnlocks,
+    potions: sources.potions,
+    decoctions: sources.decoctions,
     tree: (name) => {
       const tree = treesByName.get(name);
       if (tree === undefined) throw new Error(`Unknown skill tree "${name}"`);

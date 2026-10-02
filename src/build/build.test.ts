@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Skill } from '../catalog/catalog';
 import { createGameCatalog } from '../catalog/game-catalog';
+import type { DecoctionData, PotionData } from '../data/alchemy';
+import { ALCHEMY_RECIPES } from '../data/alchemy';
 import type { TreeName } from '../data/skills';
 import { Build } from './build';
 import type { BuildSnapshot } from './build-snapshot';
@@ -16,6 +18,30 @@ const skill = (tree: TreeName, name: string): Skill => {
 const withPoints = (...skills: Skill[]): Build => {
   const build = new Build(catalog);
   for (const each of skills) build.addPoint(each);
+  return build;
+};
+
+const potion = (name: string): PotionData => {
+  const found = catalog.potions.find((each) => each.name === name);
+  if (found === undefined) throw new Error(`Test data names an unknown potion: ${name}`);
+  return found;
+};
+
+const decoction = (name: string): DecoctionData => {
+  const found = catalog.decoctions.find((each) => each.name === name);
+  if (found === undefined) throw new Error(`Test data names an unknown decoction: ${name}`);
+  return found;
+};
+
+// Learns whole trees, so any of their skills can be slotted.
+const withTrees = (...trees: TreeName[]): Build => {
+  const build = new Build(catalog);
+  for (let pass = 0; pass < 10; pass++) {
+    for (const tree of trees) {
+      for (const each of catalog.tree(tree).skills)
+        if (build.rank(each) === 0) build.addPoint(each);
+    }
+  }
   return build;
 };
 
@@ -183,6 +209,65 @@ describe('Build mutagens', () => {
   });
 });
 
+describe('Build Toxicity', () => {
+  it('adds up the Toxicity of everything active at once', () => {
+    const build = new Build(catalog);
+    build.setPotionTier(potion('Swallow'), 3);
+    build.setPotionTier(potion('Thunderbolt'), 1);
+    build.setDecoctionActive(decoction('Water hag decoction'), true);
+
+    const toxicity = build.toxicity();
+
+    expect(toxicity).toBe(20 + 25 + 50);
+  });
+
+  it('raises maximum Toxicity with Acquired Tolerance only while it sits in a slot', () => {
+    const build = withTrees('Alchemy');
+    const acquiredTolerance = skill('Alchemy', 'Acquired Tolerance');
+    const unslotted = build.maxToxicity();
+
+    build.placeSkill(acquiredTolerance, 0);
+
+    expect([unslotted, build.maxToxicity()]).toEqual([100, 100 + ALCHEMY_RECIPES]);
+  });
+
+  it('counts the known recipes, Metabolic Control and the Manticore armor pieces', () => {
+    const build = withTrees('Alchemy', 'General');
+    build.placeSkill(skill('Alchemy', 'Acquired Tolerance'), 0);
+    build.placeSkill(skill('General', 'Metabolic Control'), 1);
+    build.setKnownRecipes(40);
+    build.setManticorePieces(4);
+
+    const max = build.maxToxicity();
+
+    expect(max).toBe(100 + 40 + 10 + 4 * 5);
+  });
+
+  it('starts an overdose above half of the maximum', () => {
+    const build = new Build(catalog);
+    build.setManticorePieces(2);
+
+    const threshold = build.overdoseToxicity();
+
+    expect(threshold).toBe((100 + 10) / 2);
+  });
+
+  it('keeps every value in the range the game allows', () => {
+    const build = new Build(catalog);
+    build.setPotionTier(potion('Killer Whale'), 3);
+    build.setManticorePieces(9);
+    build.setKnownRecipes(-5);
+
+    const values = [
+      build.potionTier(potion('Killer Whale')),
+      build.manticorePieces,
+      build.knownRecipes,
+    ];
+
+    expect(values).toEqual([1, 4, 0]);
+  });
+});
+
 describe('Build emptiness', () => {
   it('counts a build with only a mutagen as not empty', () => {
     const build = new Build(catalog);
@@ -191,6 +276,13 @@ describe('Build emptiness', () => {
     const empty = [new Build(catalog).isEmpty(), build.isEmpty()];
 
     expect(empty).toEqual([true, false]);
+  });
+
+  it('counts a build with only a potion as not empty', () => {
+    const build = new Build(catalog);
+    build.setPotionTier(potion('Swallow'), 1);
+
+    expect(build.isEmpty()).toBe(false);
   });
 
   it('is empty again once its last point is removed', () => {

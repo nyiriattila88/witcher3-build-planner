@@ -11,6 +11,7 @@ import { plannerTabs, tabName, type PlannerTab } from '../planner/planner-tab';
 import { PlannerTabs } from '../planner/planner-tabs';
 import { SharePanel } from '../planner/share-panel';
 import { SlotBoard } from '../planner/slot-board';
+import { ToxicityPlanner } from '../planner/toxicity-planner';
 import { TreePane } from '../planner/tree-pane';
 import type { BuildAddress } from './build-address';
 import { RELEASE } from './release';
@@ -52,16 +53,25 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
         case 'mutations':
           draft.resetMutations();
           return;
+        case 'toxicity':
+          draft.resetElixirs();
+          return;
       }
     });
   };
 
-  const branchLabel =
-    tab.kind === 'tree'
-      ? `Points in branch: ${build.treePoints(tab.tree)}`
-      : tab.kind === 'mutations'
-        ? `Research cost total: ${build.researchCost()}`
-        : 'Drag to a mutagen slot';
+  const branchLabel = ((): string => {
+    switch (tab.kind) {
+      case 'tree':
+        return `Points in branch: ${build.treePoints(tab.tree)}`;
+      case 'mutations':
+        return `Research cost total: ${build.researchCost()}`;
+      case 'mutagens':
+        return 'Drag to a mutagen slot';
+      case 'toxicity':
+        return `Toxicity ${build.toxicity()} of ${build.maxToxicity()}`;
+    }
+  })();
 
   return (
     <div className="page">
@@ -139,6 +149,19 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
                 setInfo({ kind: 'mutation', mutation });
               }}
               onDragStart={drag.start}
+            />
+          )}
+          {tab.kind === 'toxicity' && (
+            <ToxicityPlanner
+              catalog={catalog}
+              build={build}
+              onChange={apply}
+              onHoverPotion={(potion, tier) => {
+                setInfo({ kind: 'potion', potion, tier });
+              }}
+              onHoverDecoction={(decoction) => {
+                setInfo({ kind: 'decoction', decoction });
+              }}
             />
           )}
         </div>

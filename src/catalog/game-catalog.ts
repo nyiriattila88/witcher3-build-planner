@@ -1,3 +1,4 @@
+import { DECOCTIONS, POTIONS } from '../data/alchemy';
 import { EXTRA_SLOT_UNLOCKS, MUTAGENS, MUTATIONS } from '../data/mutations';
 import { SKILL_TREES } from '../data/skills';
 import { TREE_LAYOUT } from '../data/tree-layout';
@@ -11,4 +12,6 @@ export const createGameCatalog = (): Catalog =>
     mutagens: MUTAGENS,
     mutations: MUTATIONS,
     extraSlotUnlocks: EXTRA_SLOT_UNLOCKS,
+    potions: POTIONS,
+    decoctions: DECOCTIONS,
   });

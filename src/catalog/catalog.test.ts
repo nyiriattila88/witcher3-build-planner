@@ -50,6 +50,8 @@ describe('createCatalog', () => {
         mutagens: MUTAGENS,
         mutations: MUTATIONS,
         extraSlotUnlocks: [2, 4, 8, 12],
+        potions: [],
+        decoctions: [],
       });
 
     expect(create).toThrow(/Nonexistent/);

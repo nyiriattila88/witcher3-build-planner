@@ -1,4 +1,5 @@
 import type { Catalog } from '../catalog/catalog';
+import { ALCHEMY_RECIPES, MANTICORE_ARMOR } from '../data/alchemy';
 import type { TreeName } from '../data/skills';
 import { Build, MAX_RANK, MUTAGEN_GROUPS } from './build';
 import { createLegacyDecoder, LEGACY_PREFIX } from './legacy-build-code';
@@ -16,6 +17,9 @@ const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 const MAX_BODY_LENGTH = 80;
 const FLAGS: readonly boolean[] = [false, true];
 const RANKS = Array.from({ length: MAX_RANK + 1 }, (_, rank) => rank);
+const upTo = (last: number): readonly number[] => Array.from({ length: last + 1 }, (_, n) => n);
+const MANTICORE_PIECES = upTo(MANTICORE_ARMOR.pieces);
+const MISSING_RECIPES = upTo(ALCHEMY_RECIPES);
 
 // Picks one of the options the rules leave open: the encoder writes which one the build holds, the
 // decoder reads it back.
@@ -105,6 +109,18 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
       const id = choose([null, ...mutagenIds], build.mutagenAt(group));
       if (id !== null) build.placeMutagen(id, group);
     }
+    // The toxicity plan comes last, so codes written before it existed keep meaning the same build.
+    for (const potion of catalog.potions) {
+      build.setPotionTier(potion, choose(upTo(potion.tiers.length), build.potionTier(potion)));
+    }
+    for (const decoction of catalog.decoctions) {
+      if (choose(FLAGS, build.isDecoctionActive(decoction)))
+        build.setDecoctionActive(decoction, true);
+    }
+    build.setManticorePieces(choose(MANTICORE_PIECES, build.manticorePieces));
+    build.setKnownRecipes(
+      ALCHEMY_RECIPES - choose(MISSING_RECIPES, ALCHEMY_RECIPES - build.knownRecipes),
+    );
   }
 
   function encode(build: Build): string {

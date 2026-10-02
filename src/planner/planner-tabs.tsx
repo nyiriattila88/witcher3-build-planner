@@ -22,6 +22,8 @@ const tabCount = (tab: PlannerTab, build: Build): readonly [count: string, meani
       return [`${build.mutagenCount}/${MUTAGEN_GROUPS}`, 'mutagens placed'];
     case 'mutations':
       return [`${build.researchedCount}`, 'mutations researched'];
+    case 'toxicity':
+      return [`${build.toxicity()}/${build.maxToxicity()}`, 'Toxicity of the maximum'];
   }
 };
 

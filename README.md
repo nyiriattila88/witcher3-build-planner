@@ -31,6 +31,10 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
 - **The in-game character screen.** Tooltips with the current and the next level, mutagen orbs in their
   diamonds, mutation emblems and the bonus of each slot group, as the game shows them. A double click
   takes a skill, mutagen or mutation off the board.
+- **Toxicity planner.** Pick the potions and decoctions that are active together and see them against the
+  maximum Toxicity: the base 100, Acquired Tolerance for the recipes you know, Metabolic Control and the
+  Manticore armor pieces you wear. The overdose threshold and the thresholds of slotted alchemy skills are
+  marked on the bar.
 - **Shareable builds.** A short build code restores everything: points, slots, mutagens and
   mutations. The page address carries it as `?build=`, so a copied link opens the same build, and a plain
   address starts empty.
@@ -88,6 +92,9 @@ Agent instructions for AI-assisted changes are in [AGENTS.md](AGENTS.md). Change
 - Mutations, mutagens and the extra slot rules: the rpg-gaming.com Witcher 3 build planner.
 - Mutation discs: cut from an in-game screenshot on the Improved Mutations page on Nexus Mods. Mutagen
   orbs: The Witcher Wiki on Fandom.
+- Potions and decoctions, their Toxicity, durations and effects, the alchemy formulae and the Manticore
+  armor: The Witcher Wiki on Fandom, with the values since patch 4.0. The overdose threshold at half of the
+  maximum: the list of changes of the next-gen update 4.0.
 - Game version: the Remastered patch notes on thewitcher.com. Patches 5.00b and 5.00c changed no
   skills.
 

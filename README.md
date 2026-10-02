@@ -35,8 +35,8 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
   takes a skill, mutagen or mutation off the board.
 - **Toxicity planner.** Pick the potions and decoctions that are active together and see them against the
   maximum Toxicity: the base 100, Acquired Tolerance for the recipes you know, Metabolic Control and the
-  Manticore armor pieces you wear. The overdose threshold and the thresholds of slotted alchemy skills are
-  marked on the bar.
+  Manticore armor pieces you wear. The share of the maximum stands beside the bar, the overdose threshold
+  and the thresholds of slotted alchemy skills are marked on it, and every skill there opens its tooltip.
 - **Shareable builds.** A short build code restores everything: points, slots, mutagens and
   mutations. The page address carries it as `?build=`, so a copied link opens the same build, and a plain
   address starts empty.

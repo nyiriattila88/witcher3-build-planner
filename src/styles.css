@@ -640,8 +640,15 @@ img.disc {
   background: rgba(20, 30, 16, 0.55);
 }
 
+.toxicity-meter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .toxicity-bar {
   position: relative;
+  flex: 1;
   height: 22px;
   border: 1px solid #4a5a3e;
   background: #0d120b;
@@ -673,23 +680,28 @@ img.disc {
 
 .toxicity-mark.skill {
   background: var(--gold);
+  cursor: help;
 }
 
-.toxicity-percent {
+/* The line is only 2 px wide, so a wider strip around it takes the pointer. */
+.toxicity-mark.skill::before {
+  content: '';
   position: absolute;
-  inset: 0;
-  color: var(--bright);
-  font-size: 14px;
+  inset: 0 -5px;
+}
+
+/* Beside the bar rather than on it, where the threshold marks would cross it. */
+.toxicity-percent {
+  min-width: 4ch;
+  color: var(--toxic);
+  font-size: 26px;
   font-weight: 600;
-  line-height: 22px;
-  text-align: center;
-  text-shadow:
-    0 1px 2px #000,
-    0 0 4px #000;
+  line-height: 1;
+  text-align: right;
 }
 
 .toxicity-percent.overdosed {
-  color: #ffb3a8;
+  color: #ff7a6b;
 }
 
 .toxicity-line {
@@ -719,6 +731,15 @@ img.disc {
   padding: 6px 8px;
   border: 1px solid #2e3237;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.toxicity-sources .skill {
+  cursor: help;
+}
+
+.toxicity-sources .skill:hover {
+  border-color: #5a6068;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .toxicity-sources dt {

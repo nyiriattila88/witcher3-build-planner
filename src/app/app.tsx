@@ -162,6 +162,9 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
               onHoverDecoction={(decoction) => {
                 setInfo({ kind: 'decoction', decoction });
               }}
+              onHoverSkill={(skill) => {
+                setInfo({ kind: 'skill', skill });
+              }}
             />
           )}
         </div>

@@ -1,6 +1,6 @@
 import { useRef, useState, type CSSProperties, type JSX, type MouseEvent } from 'react';
 import { ACQUIRED_TOLERANCE, METABOLIC_CONTROL, type Build } from '../build/build';
-import type { Catalog } from '../catalog/catalog';
+import type { Catalog, Skill } from '../catalog/catalog';
 import {
   ALCHEMY_RECIPES,
   BASE_MAX_TOXICITY,
@@ -10,6 +10,7 @@ import {
 } from '../data/alchemy';
 import { decoctionIconUrl, formatDuration, potionIconUrl, potionTierName } from './appearance';
 import { PANE_WIDTH } from './geometry';
+import { SkillTooltip } from './skill-tooltip';
 
 type ToxicityPlannerProps = {
   readonly catalog: Catalog;
@@ -17,16 +18,20 @@ type ToxicityPlannerProps = {
   readonly onChange: (change: (draft: Build) => void) => void;
   readonly onHoverPotion: (potion: PotionData, tier: number) => void;
   readonly onHoverDecoction: (decoction: DecoctionData) => void;
+  readonly onHoverSkill: (skill: Skill) => void;
 };
 
 type Elixir = PotionData['tiers'][number];
 
-type Tip = {
-  readonly title: string;
-  readonly elixir: Elixir;
-  readonly hint: string;
-  readonly placement: CSSProperties;
-};
+type Tip = { readonly placement: CSSProperties } & (
+  | {
+      readonly kind: 'elixir';
+      readonly title: string;
+      readonly elixir: Elixir;
+      readonly hint: string;
+    }
+  | { readonly kind: 'skill'; readonly skill: Skill; readonly hint: string | undefined }
+);
 
 const TIER_LABELS = ['I', 'II', 'III'];
 const MANTICORE_OPTIONS = Array.from({ length: MANTICORE_ARMOR.pieces + 1 }, (_, n) => n);
@@ -47,6 +52,7 @@ export function ToxicityPlanner({
   onChange,
   onHoverPotion,
   onHoverDecoction,
+  onHoverSkill,
 }: ToxicityPlannerProps): JSX.Element {
   const root = useRef<HTMLDivElement>(null);
   const [tip, setTip] = useState<Tip | null>(null);
@@ -56,73 +62,110 @@ export function ToxicityPlanner({
   const over = toxicity > overdose;
   const percent = Math.round((toxicity / max) * 100);
   const share = (value: number): string => `${Math.min(100, (value / max) * 100)}%`;
-  const slottedRank = (tree: string, name: string): number => {
-    const skill = catalog.skill(tree, name);
-    return skill !== undefined && build.slotOf(skill) >= 0 ? build.rank(skill) : 0;
-  };
+  const slottedRank = (skill: Skill | undefined): number =>
+    skill !== undefined && build.slotOf(skill) >= 0 ? build.rank(skill) : 0;
   const marks = SKILL_THRESHOLDS.flatMap(({ tree, name, shares }) => {
-    const rank = slottedRank(tree, name);
-    const at = shares[rank - 1];
-    return at === undefined ? [] : [{ name, value: max * at }];
+    const skill = catalog.skill(tree, name);
+    const at = shares[slottedRank(skill) - 1];
+    return skill === undefined || at === undefined ? [] : [{ skill, value: max * at }];
   });
-  const fromSkill = (value: number, rank: number): string =>
-    rank > 0 ? `+${value} (rank ${rank})` : 'not slotted';
 
-  // The in-game tooltip, beside the tile and towards the middle of the pane, as on the board.
-  const showTip = (event: MouseEvent, title: string, elixir: Elixir, hint: string): void => {
+  // The in-game tooltip, beside what is under the pointer and towards the middle of the pane, as on
+  // the board.
+  const placeBeside = (target: Element | null): CSSProperties | null => {
     const pane = root.current?.getBoundingClientRect();
-    const tile = event.currentTarget.closest('.elixir')?.getBoundingClientRect();
-    if (pane === undefined || tile === undefined) return;
-    const left = tile.left - pane.left;
-    const top = tile.top - pane.top;
+    const box = target?.getBoundingClientRect();
+    if (pane === undefined || box === undefined) return null;
+    const left = box.left - pane.left;
+    const top = box.top - pane.top;
     const horizontal =
-      left + tile.width / 2 > pane.width / 2
+      left + box.width / 2 > pane.width / 2
         ? { right: pane.width - left + TIP_GAP }
-        : { left: left + tile.width + TIP_GAP };
+        : { left: left + box.width + TIP_GAP };
     const vertical =
-      top + tile.height / 2 > pane.height / 2
-        ? { bottom: pane.height - (top + tile.height) }
+      top + box.height / 2 > pane.height / 2
+        ? { bottom: pane.height - (top + box.height) }
         : { top };
-    setTip({ title, elixir, hint, placement: { ...horizontal, ...vertical } });
+    return { ...horizontal, ...vertical };
+  };
+  const showTip = (event: MouseEvent, title: string, elixir: Elixir, hint: string): void => {
+    const placement = placeBeside(event.currentTarget.closest('.elixir'));
+    if (placement !== null) setTip({ kind: 'elixir', title, elixir, hint, placement });
+  };
+  const showSkillTip = (event: MouseEvent, skill: Skill, hint?: string): void => {
+    onHoverSkill(skill);
+    const placement = placeBeside(event.currentTarget);
+    if (placement !== null) setTip({ kind: 'skill', skill, hint, placement });
   };
   const hideTip = (): void => {
     setTip(null);
   };
 
+  // A skill that adds to maximum Toxicity, which only counts while it sits in a slot.
+  const skillSource = (
+    source: { readonly tree: string; readonly name: string },
+    value: number,
+  ): JSX.Element => {
+    const skill = catalog.skill(source.tree, source.name);
+    const rank = slottedRank(skill);
+    return (
+      <div
+        className="skill"
+        onMouseEnter={(event) => {
+          if (skill !== undefined)
+            showSkillTip(
+              event,
+              skill,
+              rank > 0 ? undefined : 'Counts only while it sits in a slot',
+            );
+        }}
+        onMouseLeave={hideTip}
+      >
+        <dt>{source.name}</dt>
+        <dd>{rank > 0 ? `+${value} (rank ${rank})` : 'not slotted'}</dd>
+      </div>
+    );
+  };
+
   return (
     <div ref={root} className="pane-content toxicity" style={{ width: PANE_WIDTH }}>
       <section className="toxicity-summary">
-        <div
-          className="toxicity-bar"
-          role="meter"
-          aria-label="Active Toxicity"
-          aria-valuemin={0}
-          aria-valuemax={max}
-          aria-valuenow={toxicity}
-        >
-          <span
-            className={over ? 'toxicity-fill overdosed' : 'toxicity-fill'}
-            style={{ width: share(toxicity) }}
-          />
-          <span
-            className="toxicity-mark overdose"
-            style={{ left: share(overdose) }}
-            title={`Overdose above ${formatAmount(overdose)}`}
-          />
-          {marks.map((mark) => (
+        <div className="toxicity-meter">
+          <div
+            className="toxicity-bar"
+            role="meter"
+            aria-label="Active Toxicity"
+            aria-valuemin={0}
+            aria-valuemax={max}
+            aria-valuenow={toxicity}
+          >
             <span
-              key={mark.name}
-              className="toxicity-mark skill"
-              style={{ left: share(mark.value) }}
-              title={`${mark.name} from ${formatAmount(mark.value)}`}
+              className={over ? 'toxicity-fill overdosed' : 'toxicity-fill'}
+              style={{ width: share(toxicity) }}
             />
-          ))}
+            <span
+              className="toxicity-mark overdose"
+              style={{ left: share(overdose) }}
+              title={`Overdose above ${formatAmount(overdose)}`}
+            />
+            {marks.map(({ skill, value }) => (
+              <span
+                key={skill.name}
+                className="toxicity-mark skill"
+                style={{ left: share(value) }}
+                onMouseEnter={(event) => {
+                  showSkillTip(event, skill, `Marked at ${formatAmount(value)} Toxicity`);
+                }}
+                onMouseLeave={hideTip}
+              />
+            ))}
+          </div>
           <span className={over ? 'toxicity-percent overdosed' : 'toxicity-percent'}>
             {percent}%
           </span>
         </div>
         <p className="toxicity-line">
-          Active <b>{toxicity}</b> of <b>{max}</b> Toxicity, overdose above{' '}
+          Active <b>{toxicity}</b> of <b>{max}</b> Toxicity ({percent}%), overdose above{' '}
           <b>{formatAmount(overdose)}</b> (50%)
           {over && <span className="toxicity-warning"> Overdose: Vitality drains</span>}
         </p>
@@ -131,24 +174,8 @@ export function ToxicityPlanner({
             <dt>Base</dt>
             <dd>{BASE_MAX_TOXICITY}</dd>
           </div>
-          <div>
-            <dt>{ACQUIRED_TOLERANCE.name}</dt>
-            <dd>
-              {fromSkill(
-                build.acquiredTolerance(),
-                slottedRank(ACQUIRED_TOLERANCE.tree, ACQUIRED_TOLERANCE.name),
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt>{METABOLIC_CONTROL.name}</dt>
-            <dd>
-              {fromSkill(
-                build.metabolicControl(),
-                slottedRank(METABOLIC_CONTROL.tree, METABOLIC_CONTROL.name),
-              )}
-            </dd>
-          </div>
+          {skillSource(ACQUIRED_TOLERANCE, build.acquiredTolerance())}
+          {skillSource(METABOLIC_CONTROL, build.metabolicControl())}
           <div>
             <dt>Manticore armor</dt>
             <dd>+{build.manticorePieces * MANTICORE_ARMOR.toxicity}</dd>
@@ -296,7 +323,15 @@ export function ToxicityPlanner({
         })}
       </div>
 
-      {tip !== null && (
+      {tip?.kind === 'skill' && (
+        <SkillTooltip
+          skill={tip.skill}
+          rank={build.rank(tip.skill)}
+          placement={tip.placement}
+          hint={tip.hint}
+        />
+      )}
+      {tip?.kind === 'elixir' && (
         <div className="game-tooltip" style={tip.placement} role="tooltip">
           <div className="game-tooltip-head">
             <b>{tip.title}</b>

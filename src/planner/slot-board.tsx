@@ -1,31 +1,25 @@
-import type { DragEvent, JSX } from 'react';
-import {
-  BASE_SLOTS,
-  MAX_RANK,
-  MUTAGEN_GROUPS,
-  SLOTS_PER_GROUP,
-  slotGroup,
-  type Build,
-} from '../build/build';
+import { useState, type DragEvent, type JSX } from 'react';
+import { BASE_SLOTS, MUTAGEN_GROUPS, SLOTS_PER_GROUP, slotGroup, type Build } from '../build/build';
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
-import {
-  iconUrl,
-  mutagenColour,
-  mutagenEffect,
-  mutagenLabel,
-  mutationColour,
-  plural,
-  treeColour,
-} from './appearance';
+import { helixUrl, iconUrl, mutagenColour, mutagenIconUrl, treeColour } from './appearance';
 import { dropTargetKey, type DragItem, type DropTarget } from './drag-and-drop';
 import {
+  BOARD_CENTRE,
   BOARD_SIZE,
-  MUTAGEN_SLOT_CENTRES,
   MUTAGEN_SLOT_SIZE,
-  MUTATION_SLOT_POSITION,
+  MUTATION_SLOT_RADIUS,
   SLOT_SIZE,
-  slotPosition,
+  bracketX,
+  groupHeaderBox,
+  isRightGroup,
+  mutagenSlotCentre,
+  slotCentre,
+  tooltipPlacement,
 } from './geometry';
+import { MutagenGem } from './mutagen-gem';
+import { MutationDisc } from './mutation-disc';
+import { RankPips } from './rank-pips';
+import { SkillTooltip } from './skill-tooltip';
 
 type BoardHandlers = {
   readonly overKey: string | null;
@@ -43,6 +37,8 @@ type SlotBoardProps = BoardHandlers & { readonly catalog: Catalog; readonly buil
 
 const groups = Array.from({ length: MUTAGEN_GROUPS }, (_, group) => group);
 
+const REMOVE_TIP = 'Drag to move, double-click to remove';
+
 // Drop-target props shared by every slot of the board.
 const dropTargetProps = (target: DropTarget, handlers: BoardHandlers) => ({
   onDragOver: (event: DragEvent) => {
@@ -56,9 +52,24 @@ const dropTargetProps = (target: DropTarget, handlers: BoardHandlers) => ({
   },
 });
 
+// Props of a board item: dragging moves it, a double click takes it off the board.
+const boardItemProps = (item: DragItem, handlers: BoardHandlers, onPickUp?: () => void) => ({
+  draggable: true,
+  onDragStart: (event: DragEvent) => {
+    onPickUp?.();
+    handlers.onDragStart(item, event);
+  },
+  onDoubleClick: () => {
+    handlers.onRemove(item);
+  },
+});
+
 export function SlotBoard({ catalog, build, ...handlers }: SlotBoardProps): JSX.Element {
+  const [tipSlot, setTipSlot] = useState<number | null>(null);
+  const tipSkill = tipSlot === null ? null : build.slotAt(tipSlot);
   return (
     <div className="board" style={BOARD_SIZE}>
+      <img className="board-helix" src={helixUrl} alt="" draggable={false} />
       <svg width={BOARD_SIZE.width} height={BOARD_SIZE.height}>
         {groups.map((group) => (
           <GroupBracket
@@ -68,18 +79,36 @@ export function SlotBoard({ catalog, build, ...handlers }: SlotBoardProps): JSX.
           />
         ))}
       </svg>
+      {groups.map((group) => (
+        <GroupHeader key={group} group={group} build={build} />
+      ))}
       {Array.from({ length: build.slotCount }, (_, index) => (
-        <SkillSlot key={index} index={index} catalog={catalog} build={build} handlers={handlers} />
+        <SkillSlot
+          key={index}
+          index={index}
+          catalog={catalog}
+          build={build}
+          handlers={handlers}
+          onTip={setTipSlot}
+        />
       ))}
       {groups.map((group) => (
         <MutagenSlot key={group} group={group} build={build} handlers={handlers} />
       ))}
       <MutationSlot catalog={catalog} build={build} handlers={handlers} />
+      {tipSlot !== null && tipSkill !== null && (
+        <SkillTooltip
+          skill={tipSkill}
+          rank={build.rank(tipSkill)}
+          placement={tooltipPlacement(slotCentre(tipSlot), SLOT_SIZE / 2, BOARD_SIZE)}
+          hint={REMOVE_TIP}
+        />
+      )}
     </div>
   );
 }
 
-// The bracket joins a group's three slots to its mutagen slot, in the mutagen's colour once one is placed.
+// The bracket joins a group's three slots to its mutagen, in the mutagen's colour once one is placed.
 function GroupBracket({
   group,
   mutagen,
@@ -87,22 +116,63 @@ function GroupBracket({
   group: number;
   mutagen: Mutagen | undefined;
 }): JSX.Element {
-  const right = group % 2 === 1;
-  const [first, middle, last] = [0, 1, 2].map((i) => slotPosition(group * SLOTS_PER_GROUP + i));
-  const centre = MUTAGEN_SLOT_CENTRES[group] ?? [0, 0];
-  const edge = (first?.[0] ?? 0) + (right ? SLOT_SIZE : 0);
-  const spine = edge + (right ? 18 : -18);
-  const half = SLOT_SIZE / 2;
-  const vertex = centre[0] + ((right ? -1 : 1) * MUTAGEN_SLOT_SIZE) / Math.SQRT2;
-  const top = (first?.[1] ?? 0) + half;
-  const mid = (middle?.[1] ?? 0) + half;
-  const bottom = (last?.[1] ?? 0) + half;
+  const side = isRightGroup(group) ? 1 : -1;
+  const rows = [0, 1, 2].map((i) => slotCentre(group * SLOTS_PER_GROUP + i)[1]);
+  const [top = 0, middle = 0, bottom = 0] = rows;
+  const [slotX] = slotCentre(group * SLOTS_PER_GROUP);
+  const edge = slotX + (side * SLOT_SIZE) / 2;
+  const spine = bracketX(group);
+  // The diamond's corner that faces the slots.
+  const corner = mutagenSlotCentre(group)[0] - (side * MUTAGEN_SLOT_SIZE) / Math.SQRT2;
   return (
     <path
-      className="bracket"
-      style={mutagen === undefined ? undefined : { stroke: mutagenColour(mutagen), strokeWidth: 3 }}
-      d={`M${edge} ${top} H${spine} V${bottom} H${edge} M${edge} ${mid} H${spine} M${spine} ${mid} H${vertex}`}
+      className={mutagen === undefined ? 'bracket' : 'bracket filled'}
+      style={mutagen === undefined ? undefined : { stroke: mutagenColour(mutagen) }}
+      d={`M${edge} ${top} H${spine} V${bottom} H${edge} M${edge} ${middle} H${corner}`}
     />
+  );
+}
+
+// The bar over a group, with its mutagen bonus as the game shows it.
+function GroupHeader({ group, build }: { group: number; build: Build }): JSX.Element {
+  const right = isRightGroup(group);
+  const box = groupHeaderBox(group);
+  const bonus = build.mutagenBonus(group);
+  const side = right ? ' right' : '';
+
+  if (bonus === null) {
+    return (
+      <div className={`group-header empty${side}`} style={box}>
+        No mutagen
+      </div>
+    );
+  }
+
+  const { mutagen, value } = bonus;
+  const icon = <img src={mutagenIconUrl(mutagen)} alt="" draggable={false} />;
+  const effect = (
+    <span className="group-effect">
+      {mutagen.effect}{' '}
+      <b>
+        +{value}
+        {mutagen.unit}
+      </b>
+    </span>
+  );
+  return (
+    <div className={`group-header${side}`} style={{ ...box, color: mutagenColour(mutagen) }}>
+      {right ? (
+        <>
+          {effect}
+          {icon}
+        </>
+      ) : (
+        <>
+          {icon}
+          {effect}
+        </>
+      )}
+    </div>
   );
 }
 
@@ -113,11 +183,16 @@ function SkillSlot({
   catalog,
   build,
   handlers,
-}: SlotProps & { index: number; catalog: Catalog }): JSX.Element {
-  const [x, y] = slotPosition(index);
+  onTip,
+}: SlotProps & {
+  index: number;
+  catalog: Catalog;
+  onTip: (index: number | null) => void;
+}): JSX.Element {
+  const [x, y] = slotCentre(index);
   const target: DropTarget = { kind: 'slot', index };
   const over = handlers.overKey === dropTargetKey(target) ? ' over' : '';
-  const position = { left: x, top: y };
+  const position = { left: x - SLOT_SIZE / 2, top: y - SLOT_SIZE / 2 };
 
   if (!build.isSlotUnlocked(index)) {
     const needed = catalog.extraSlotUnlocks[index - BASE_SLOTS] ?? 0;
@@ -126,9 +201,9 @@ function SkillSlot({
         className="slot locked"
         style={position}
         title={`Unlocks at ${needed} researched mutations`}
-        aria-label="Locked slot"
+        aria-label={`Locked slot, unlocks at ${needed} researched mutations`}
       >
-        🔒
+        <LockIcon />
       </div>
     );
   }
@@ -146,58 +221,48 @@ function SkillSlot({
         }
         {...dropTargetProps(target, handlers)}
       >
-        {index + 1}
         {accepts}
       </div>
     );
   }
 
   // A skill matching its group's mutagen glows, since it raises the bonus.
-  const frame =
-    mutagen === undefined
-      ? {}
-      : build.slotMatchesMutagen(index)
-        ? {
-            borderColor: '#fff',
-            boxShadow: `0 0 0 2px ${mutagenColour(mutagen)}, 0 0 14px ${mutagenColour(mutagen)}`,
-          }
-        : { boxShadow: `0 0 0 2px ${mutagenColour(mutagen)}` };
-  const item: DragItem = { kind: 'skill', skill, from: index };
+  const glow =
+    mutagen !== undefined && build.slotMatchesMutagen(index)
+      ? { boxShadow: `0 0 0 2px ${mutagenColour(mutagen)}, 0 0 16px ${mutagenColour(mutagen)}` }
+      : {};
   return (
     <div
       className={`slot filled${over}`}
-      style={{ ...position, background: treeColour(skill.tree), ...frame }}
-      draggable
-      onDragStart={(event) => {
-        handlers.onDragStart(item, event);
-      }}
+      style={{ ...position, color: treeColour(skill.tree) }}
+      aria-label={`${skill.name} in slot ${index + 1}`}
       onMouseEnter={() => {
+        onTip(index);
         handlers.onHoverSkill(skill);
       }}
+      onMouseLeave={() => {
+        onTip(null);
+      }}
+      {...boardItemProps({ kind: 'skill', skill, from: index }, handlers, () => {
+        onTip(null);
+      })}
       {...dropTargetProps(target, handlers)}
     >
-      <img src={iconUrl(skill)} alt="" draggable={false} />
-      <span className="slot-name">{skill.name}</span>
-      <RemoveButton
-        label={`Unslot ${skill.name}`}
-        onClick={() => {
-          handlers.onRemove(item);
-        }}
-      />
-      <span className="rank-badge">
-        {build.rank(skill)}/{MAX_RANK}
+      <span className="tile" style={glow}>
+        <img src={iconUrl(skill)} alt="" draggable={false} />
+        {accepts}
       </span>
-      {accepts}
+      <RankPips rank={build.rank(skill)} />
     </div>
   );
 }
 
-// Coloured segments show which trees the extra slots take under the slotted mutation.
+// Coloured segments along the bottom of slots 13-16 show which trees they take.
 function AcceptedTrees({ build }: { build: Build }): JSX.Element | null {
   const trees = build.extraSlotTrees();
   if (trees.length === 0) return null;
   return (
-    <span className="slot-accepts" title={`Accepts: ${trees.join(', ')}`}>
+    <span className="slot-accepts" title={`Takes ${trees.join(', ')} skills`}>
       {trees.map((tree) => (
         <i key={tree} style={{ background: treeColour(tree) }} />
       ))}
@@ -206,7 +271,7 @@ function AcceptedTrees({ build }: { build: Build }): JSX.Element | null {
 }
 
 function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }): JSX.Element {
-  const [cx, cy] = MUTAGEN_SLOT_CENTRES[group] ?? [0, 0];
+  const [cx, cy] = mutagenSlotCentre(group);
   const target: DropTarget = { kind: 'mutagen-slot', group };
   const over = handlers.overKey === dropTargetKey(target) ? ' over' : '';
   const half = MUTAGEN_SLOT_SIZE / 2;
@@ -218,106 +283,111 @@ function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }):
       <div
         className={`mutagen-slot${over}`}
         style={position}
+        aria-label="Empty mutagen slot"
         {...dropTargetProps(target, handlers)}
       />
     );
   }
 
-  const { mutagen, matching, synergy, value } = bonus;
-  const item: DragItem = { kind: 'mutagen', mutagen: mutagen.id, from: group };
-  const details = [
-    plural(matching, `matching ${mutagen.tree} skill`),
-    synergy > 0 ? `Synergy ${synergy}` : '',
-  ]
-    .filter((part) => part !== '')
-    .join(', ');
+  const { mutagen, matching, synergy } = bonus;
   return (
     <>
       <div
         className={`mutagen-slot filled${over}`}
-        style={{ ...position, background: mutagenColour(mutagen) }}
-        draggable
-        onDragStart={(event) => {
-          handlers.onDragStart(item, event);
-        }}
+        style={position}
+        title={REMOVE_TIP}
+        aria-label={mutagen.name}
         onMouseEnter={() => {
           handlers.onHoverMutagen(mutagen);
         }}
+        {...boardItemProps({ kind: 'mutagen', mutagen: mutagen.id, from: group }, handlers)}
         {...dropTargetProps(target, handlers)}
       >
-        <span className="mutagen-name">{mutagenLabel(mutagen)}</span>
-        <RemoveButton
-          label={`Remove ${mutagen.name}`}
-          onClick={() => {
-            handlers.onRemove(item);
-          }}
-        />
+        <MutagenGem mutagen={mutagen} />
       </div>
-      <div
-        className="mutagen-bonus"
-        style={{
-          // Narrower than the gap to the bracket, so the text never crosses its line.
-          left: cx - 54,
-          top: cy + MUTAGEN_SLOT_SIZE / Math.SQRT2 + 4,
-          color: mutagenColour(mutagen),
-        }}
-      >
-        {mutagenEffect(mutagen, value)}
+      <p className="mutagen-caption" style={{ left: cx - 55, top: cy + half * Math.SQRT2 + 6 }}>
+        {matching} matching
         <br />
-        <span>{details}</span>
-      </div>
+        {mutagen.tree} {matching === 1 ? 'skill' : 'skills'}
+        {synergy > 0 && (
+          <>
+            <br />
+            Synergy rank {synergy}
+          </>
+        )}
+      </p>
     </>
   );
 }
 
+// The mutation sits in the middle, its name to the left and what it does to the right.
 function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catalog }): JSX.Element {
-  const [x, y] = MUTATION_SLOT_POSITION;
+  const [cx, cy] = BOARD_CENTRE;
+  const radius = MUTATION_SLOT_RADIUS;
   const target: DropTarget = { kind: 'mutation-slot' };
   const over = handlers.overKey === dropTargetKey(target) ? ' over' : '';
   const mutation = catalog.mutation(build.slottedMutation);
+  const innate = catalog.mutations.find((candidate) => candidate.innate);
+  const circle = { left: cx - radius, top: cy - radius, width: 2 * radius, height: 2 * radius };
+  const nameBox = { right: BOARD_SIZE.width - (cx - radius - 20), top: cy - 34 };
+  const textBox = { left: cx + radius + 20, top: cy - 70 };
 
   if (mutation === undefined) {
     return (
-      <div
-        className={`mutation-slot${over}`}
-        style={{ left: x, top: y }}
-        {...dropTargetProps(target, handlers)}
-      >
-        Mutation
-        <br />({build.researchedCount} researched)
-      </div>
+      <>
+        <div
+          className={`mutation-slot${over}`}
+          style={circle}
+          aria-label="Empty mutation slot"
+          {...dropTargetProps(target, handlers)}
+        >
+          {innate !== undefined && <MutationDisc mutation={innate} />}
+        </div>
+        <div className="mutation-title empty" style={nameBox}>
+          <b>No mutation</b>
+          <span>{build.researchedCount} researched</span>
+        </div>
+        <p className="mutation-text empty" style={textBox}>
+          Drag a researched mutation onto the circle. Its colours decide which trees slots 13-16
+          take.
+        </p>
+      </>
     );
   }
 
-  const item: DragItem = { kind: 'mutation', mutation: mutation.id, fromBoard: true };
   return (
-    <div
-      className={`mutation-slot filled${over}`}
-      style={{ left: x, top: y, background: mutationColour(mutation) }}
-      draggable
-      onDragStart={(event) => {
-        handlers.onDragStart(item, event);
-      }}
-      onMouseEnter={() => {
-        handlers.onHoverMutation(mutation);
-      }}
-      {...dropTargetProps(target, handlers)}
-    >
-      {mutation.name}
-      <RemoveButton
-        label={`Remove ${mutation.name}`}
-        onClick={() => {
-          handlers.onRemove(item);
+    <>
+      <div
+        className={`mutation-slot filled${over}`}
+        style={circle}
+        title={REMOVE_TIP}
+        aria-label={mutation.name}
+        onMouseEnter={() => {
+          handlers.onHoverMutation(mutation);
         }}
-      />
-    </div>
+        {...boardItemProps({ kind: 'mutation', mutation: mutation.id, fromBoard: true }, handlers)}
+        {...dropTargetProps(target, handlers)}
+      >
+        <MutationDisc mutation={mutation} />
+      </div>
+      <div className="mutation-title" style={nameBox}>
+        <b>{mutation.name}</b>
+        <span>{mutation.trees.join(' / ')} mutation</span>
+      </div>
+      <p className="mutation-text" style={textBox}>
+        {mutation.description}
+      </p>
+    </>
   );
 }
 
-function RemoveButton({ label, onClick }: { label: string; onClick: () => void }): JSX.Element {
+function LockIcon(): JSX.Element {
   return (
-    <button type="button" className="remove" title={label} aria-label={label} onClick={onClick}>
-      ✕
-    </button>
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z"
+      />
+    </svg>
   );
 }

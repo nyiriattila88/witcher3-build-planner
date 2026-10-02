@@ -1,9 +1,18 @@
-import type { DragEvent, JSX, KeyboardEvent } from 'react';
+import { useState, type DragEvent, type JSX, type KeyboardEvent } from 'react';
 import { MAX_RANK, type Build } from '../build/build';
 import type { Skill, SkillTree } from '../catalog/catalog';
 import { backgroundUrl, iconUrl, treeColour } from './appearance';
 import type { DragItem } from './drag-and-drop';
-import { ICON_SIZE, NODE_WIDTH, nodeCentre, treeBackdrop, treePaneSize } from './geometry';
+import {
+  ICON_SIZE,
+  NODE_WIDTH,
+  nodeCentre,
+  tooltipPlacement,
+  treeBackdrop,
+  treePaneSize,
+} from './geometry';
+import { RankPips } from './rank-pips';
+import { SkillTooltip } from './skill-tooltip';
 
 type TreePaneProps = {
   readonly tree: SkillTree;
@@ -14,13 +23,21 @@ type TreePaneProps = {
   readonly onDragStart: (item: DragItem, event: DragEvent) => void;
 };
 
-export function TreePane({ tree, build, ...handlers }: TreePaneProps): JSX.Element {
+export function TreePane({
+  tree,
+  build,
+  onHover,
+  onDragStart,
+  ...handlers
+}: TreePaneProps): JSX.Element {
+  const [hovered, setHovered] = useState<Skill | null>(null);
   const size = treePaneSize(tree.skills.map((skill) => skill.position));
   return (
     <div
       className="pane-content"
       style={{
         ...size,
+        color: treeColour(tree.name),
         backgroundImage: `url("${backgroundUrl(tree.name.toLowerCase())}")`,
         backgroundSize: treeBackdrop.size,
         backgroundPosition: treeBackdrop.position,
@@ -43,13 +60,39 @@ export function TreePane({ tree, build, ...handlers }: TreePaneProps): JSX.Eleme
         })}
       </svg>
       {tree.skills.map((skill) => (
-        <SkillNode key={skill.index} skill={skill} build={build} {...handlers} />
+        <SkillNode
+          key={skill.index}
+          skill={skill}
+          build={build}
+          {...handlers}
+          onHover={(target) => {
+            setHovered(target);
+            onHover(target);
+          }}
+          onLeave={() => {
+            setHovered(null);
+          }}
+          onDragStart={(item, event) => {
+            setHovered(null);
+            onDragStart(item, event);
+          }}
+        />
       ))}
+      {hovered?.tree === tree.name && (
+        <SkillTooltip
+          skill={hovered}
+          rank={build.rank(hovered)}
+          placement={tooltipPlacement(nodeCentre(hovered.position), ICON_SIZE / 2, size)}
+        />
+      )}
     </div>
   );
 }
 
-type SkillNodeProps = Omit<TreePaneProps, 'tree'> & { readonly skill: Skill };
+type SkillNodeProps = Omit<TreePaneProps, 'tree'> & {
+  readonly skill: Skill;
+  readonly onLeave: () => void;
+};
 
 function SkillNode({
   skill,
@@ -57,6 +100,7 @@ function SkillNode({
   onLearn,
   onUnlearn,
   onHover,
+  onLeave,
   onDragStart,
 }: SkillNodeProps): JSX.Element {
   const rank = build.rank(skill);
@@ -90,20 +134,20 @@ function SkillNode({
       onMouseEnter={() => {
         onHover(skill);
       }}
+      onMouseLeave={onLeave}
       onFocus={() => {
         onHover(skill);
       }}
+      onBlur={onLeave}
       onDragStart={(event) => {
         onDragStart({ kind: 'skill', skill, from: null }, event);
       }}
     >
-      <div className="node-icon" style={{ background: treeColour(skill.tree) }}>
+      <span className="node-icon tile" style={{ color: treeColour(skill.tree) }}>
         <img src={iconUrl(skill)} alt="" draggable={false} />
-        <span className="rank-badge">
-          {rank}/{MAX_RANK}
-        </span>
-      </div>
-      {skill.name}
+      </span>
+      <RankPips rank={rank} />
+      <span className="node-name">{skill.name}</span>
     </div>
   );
 }

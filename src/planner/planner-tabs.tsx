@@ -13,14 +13,15 @@ type PlannerTabsProps = {
 const tabColour = (tab: PlannerTab): string =>
   tab.kind === 'tree' ? treeColour(tab.tree) : `var(--tab-${tab.kind})`;
 
-const tabCount = (tab: PlannerTab, build: Build): string => {
+// The number under a tab, and what it counts.
+const tabCount = (tab: PlannerTab, build: Build): readonly [count: string, meaning: string] => {
   switch (tab.kind) {
     case 'tree':
-      return `${build.treePoints(tab.tree)} pts`;
+      return [`${build.treePoints(tab.tree)}`, 'points spent'];
     case 'mutagens':
-      return `${build.mutagenCount}/${MUTAGEN_GROUPS}`;
+      return [`${build.mutagenCount}/${MUTAGEN_GROUPS}`, 'mutagens placed'];
     case 'mutations':
-      return `${build.researchedCount} researched`;
+      return [`${build.researchedCount}`, 'mutations researched'];
   }
 };
 
@@ -29,19 +30,21 @@ export function PlannerTabs({ tabs, current, build, onSelect }: PlannerTabsProps
     <nav className="tabs" aria-label="Skill trees, mutagens and mutations">
       {tabs.map((tab) => {
         const active = tabKey(tab) === tabKey(current);
+        const [count, meaning] = tabCount(tab, build);
         return (
           <button
             key={tabKey(tab)}
             type="button"
             className={active ? 'tab active' : 'tab'}
-            style={{ background: tabColour(tab) }}
+            style={{ color: tabColour(tab) }}
+            title={`${count} ${meaning}`}
             aria-pressed={active}
             onClick={() => {
               onSelect(tab);
             }}
           >
-            {tabName(tab)}
-            <span className="tab-count">{tabCount(tab, build)}</span>
+            <span className="tab-name">{tabName(tab)}</span>
+            <span className="tab-count">{count}</span>
           </button>
         );
       })}

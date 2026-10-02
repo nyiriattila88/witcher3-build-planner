@@ -15,6 +15,15 @@ export const iconUrl = (skill: Skill): string =>
 
 export const backgroundUrl = (name: string): string => assetUrl(`images/backgrounds/${name}.jpg`);
 
+// The faint double helix behind the slot board, as on the in-game character screen.
+export const helixUrl = assetUrl('images/backgrounds/helix.svg');
+
+export const mutationIconUrl = (mutation: Mutation): string =>
+  assetUrl(`images/mutations/${mutation.id}.png`);
+
+export const mutagenIconUrl = (mutagen: Mutagen): string =>
+  assetUrl(`images/mutagens/${mutagen.id}.png`);
+
 export const treeColour = (tree: TreeName): string => `var(--tree-${tree.toLowerCase()})`;
 
 export const mutationColour = (mutation: Mutation): string =>
@@ -28,6 +37,3 @@ export const mutagenLabel = (mutagen: Mutagen): string => mutagen.name.replace(/
 
 export const mutagenEffect = (mutagen: Mutagen, value: number): string =>
   `${mutagen.effect} +${value}${mutagen.unit}`;
-
-export const plural = (count: number, noun: string): string =>
-  `${count} ${noun}${count === 1 ? '' : 's'}`;

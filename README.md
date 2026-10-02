@@ -1,4 +1,4 @@
-# Witcher 3 Build Planner
+# Witcher 3 Remastered Build Planner
 
 [![Deploy to GitHub Pages](https://github.com/nyiriattila88/witcher3-build-planner/actions/workflows/deploy.yml/badge.svg)](https://github.com/nyiriattila88/witcher3-build-planner/actions/workflows/deploy.yml)
 [![Version](https://img.shields.io/github/package-json/v/nyiriattila88/witcher3-build-planner?label=version)](CHANGELOG.md)
@@ -11,12 +11,12 @@
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
 ![Vitest](https://img.shields.io/badge/tested%20with-Vitest-6e9f18?logo=vitest&logoColor=white)
 
-A skill planner for **The Witcher 3: Wild Hunt Remastered**: the four reworked skill trees, skill slots,
-mutagens and mutations, and a build code that carries a whole build.
+A build planner for **The Witcher 3: Wild Hunt Remastered**, game version 5.00c: the four reworked
+skill trees, skill slots, mutagens and mutations, and a short build code that carries a whole build.
 
 **[Open the planner](https://nyiriattila88.github.io/witcher3-build-planner/)**
 
-![A Combat build with Bloodbath: the tree, the slotted skills glowing under red mutagens and the extra slots 13 and 14](docs/screenshot.png)
+![A Combat build with Bloodbath: the tree, the slotted skills under red mutagens around the mutation, and the extra slots 13 and 14](docs/screenshot.png)
 
 ## Features
 
@@ -28,10 +28,14 @@ mutagens and mutations, and a build code that carries a whole build.
   every matching skill in its group and with Synergy, and the board shows which slots count.
 - **Mutations.** Research them in order, slot one in the centre, and fill slots 13-16, which open with
   research and take only the mutation's colours.
+- **The in-game character screen.** Tooltips with the current and the next level, mutagen orbs in their
+  diamonds, mutation emblems and the bonus of each slot group, as the game shows them. A double click
+  takes a skill, mutagen or mutation off the board.
 - **Shareable builds.** A short build code restores everything: points, slots, mutagens and
   mutations. The page address carries it as `?build=`, so a copied link opens the same build, and a plain
   address starts empty.
-- **Always know what is live.** The footer shows the version, the commit and the build date.
+- **Always know what is live.** The header shows the planner version and the game version the data
+  matches, the footer the commit and the build date.
 
 ## Built with
 
@@ -81,12 +85,16 @@ Agent instructions for AI-assisted changes are in [AGENTS.md](AGENTS.md). Change
   guide.
 - Tree layout, links, icons and backdrops: in-game screenshots published by Mobalytics.
 - Mutations, mutagens and the extra slot rules: the rpg-gaming.com Witcher 3 build planner.
+- Mutation emblems, mutagen orbs and the mutation disc: The Witcher Wiki on Fandom, from the game.
+- Game version: the Remastered patch notes on thewitcher.com. Patches 5.00b and 5.00c changed no
+  skills.
 
 ## License
 
 The code is released under the [MIT License](LICENSE). The Witcher 3: Wild Hunt, its names, icons and
 artwork belong to CD PROJEKT RED and are not covered by it. This is a fan project, not affiliated with or
-endorsed by CD PROJEKT RED.
+endorsed by CD PROJEKT RED. The Barlow Semi Condensed font is bundled through Fontsource under the SIL Open
+Font License 1.1.
 
 ## Author
 

@@ -1,21 +1,22 @@
 :root {
   --text: #e8e2d6;
-  --muted: #8d877c;
-  --gold: #f2d27a;
-  --frame: #3a3a3a;
-  --tree-combat: #d8343a;
-  --tree-signs: #3b49c9;
-  --tree-alchemy: #3f8f38;
-  --tree-general: #a0682c;
-  --tab-mutagens: #6a55b8;
-  --tab-mutations: #9c9a5a;
+  --bright: #f4efe5;
+  --muted: #8f897d;
+  --gold: #d9b768;
+  --frame: #2e3136;
+  --tree-combat: #c62f2f;
+  --tree-signs: #2a5bc8;
+  --tree-alchemy: #3a8a31;
+  --tree-general: #b97c2a;
+  --tab-mutagens: #7a63c9;
+  --tab-mutations: #a8a66a;
   /* Mutation and mutagen colours, named after the trees they stand for. */
   --mut-combat: #e0262c;
-  --mut-signs: #3d45d6;
+  --mut-signs: #3d55e0;
   --mut-alchemy: #2c9a2c;
-  --mut-combat-signs: #5d1270;
+  --mut-combat-signs: #8a2bb0;
   --mut-combat-alchemy: #c9c400;
-  --mut-combat-signs-alchemy: #b9b9b9;
+  --mut-combat-signs-alchemy: #c4c4c4;
 }
 
 * {
@@ -25,42 +26,99 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(ellipse at top, #262321, #0b0b0b 70%);
+  background:
+    radial-gradient(ellipse at 70% 0%, rgba(70, 82, 96, 0.22), transparent 60%),
+    radial-gradient(ellipse at top, #16181b, #060708 75%);
   color: var(--text);
   font:
-    14px/1.35 'Segoe UI',
+    15px/1.35 'Barlow Semi Condensed',
+    'Segoe UI',
     Roboto,
     Arial,
     sans-serif;
 }
 
 button {
-  background: linear-gradient(#6a6a6a, #4a4a4a);
-  color: #fff;
-  border: 1px solid #222;
   padding: 8px 18px;
+  border: 1px solid #5a6068;
+  background: linear-gradient(#2c3035, #1a1d21);
+  color: var(--text);
+  font: inherit;
   font-size: 15px;
+  letter-spacing: 0.4px;
   cursor: pointer;
 }
 
 button:hover {
-  background: linear-gradient(#7a7a7a, #575757);
+  border-color: #9aa1a9;
+  background: linear-gradient(#363b41, #22262b);
+  color: var(--bright);
 }
 
-/* --- Page layout: the planner on the left, the info panel and the slot board on the right */
+/* --- Page layout: the masthead on top, the planner on the left, info and the slot board on the right */
 
 .page {
   max-width: 1600px;
   margin: 20px auto;
   padding: 16px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 24px;
-  background: rgba(14, 14, 14, 0.94);
-  border: 1px solid #7a1c1c;
+  /* min-content: the tree pane sets the planner's width, longer texts in that column wrap. */
+  grid-template-columns: min-content minmax(0, 1fr);
+  gap: 20px 24px;
+  background: rgba(9, 10, 12, 0.92);
+  border: 1px solid var(--frame);
   box-shadow:
     0 0 0 1px #000,
-    0 0 22px rgba(200, 30, 30, 0.18);
+    0 0 40px rgba(0, 0, 0, 0.85);
+}
+
+.masthead {
+  grid-column: 1 / -1;
+  padding: 6px 0 14px;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, rgba(217, 183, 104, 0.55), transparent) 1;
+  text-align: center;
+}
+
+.masthead h1 {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-weight: 400;
+}
+
+.masthead-game {
+  color: var(--bright);
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px #000;
+}
+
+.masthead-app {
+  color: var(--gold);
+  font-size: 15px;
+  letter-spacing: 9px;
+  text-transform: uppercase;
+}
+
+.masthead-versions {
+  margin: 8px 0 0;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.masthead-versions span {
+  padding: 2px 10px;
+  border: 1px solid #3a3e44;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .side {
@@ -70,71 +128,103 @@ button:hover {
   min-width: 0;
 }
 
-h1 {
-  margin: 0 0 10px;
-  min-height: 34px;
-  text-align: center;
-  font-size: 26px;
-  font-weight: 400;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
+/* --- Tabs, totals and the branch header, styled after the in-game tree tabs */
 
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
 .tab {
-  font: inherit;
-  padding: 7px 12px;
-  border: 2px solid transparent;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
+  position: relative;
+  min-width: 96px;
+  padding: 6px 12px 12px;
+  border: 1px solid #2a2d31;
+  background: rgba(255, 255, 255, 0.025);
   text-align: center;
-  text-shadow: 0 1px 2px #000;
-  opacity: 0.6;
-  cursor: pointer;
+  opacity: 0.72;
 }
 
-.tab.active {
-  opacity: 1;
-  border-color: #fff;
+.tab::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  bottom: 5px;
+  left: 10px;
+  height: 4px;
+  background: currentColor;
+}
+
+.tab-name {
+  display: block;
+  color: #cfc8ba;
+  font-size: 14px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
 }
 
 .tab-count {
   display: block;
-  font-size: 11px;
-  font-weight: 400;
-  opacity: 0.85;
+  color: var(--bright);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.tab:hover {
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab.active {
+  opacity: 1;
+  border-color: #9a9a9a;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.08);
+}
+
+.tab.active .tab-name {
+  color: var(--bright);
 }
 
 .totals {
   display: flex;
   justify-content: space-between;
   margin: 4px 2px 10px;
+  color: #cfc8ba;
   font-size: 16px;
-  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
 }
 
 .branch {
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
-  padding: 11px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  font-weight: 700;
+  padding: 9px 16px;
+  border: 1px solid color-mix(in srgb, currentColor 65%, #000);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, currentColor 55%, transparent),
+    color-mix(in srgb, currentColor 12%, transparent)
+  );
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
   text-transform: uppercase;
+}
+
+.branch span {
+  color: var(--bright);
   text-shadow: 0 1px 2px #000;
 }
 
 .pane {
   min-width: 760px;
   min-height: 400px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--frame);
 }
 
@@ -158,49 +248,180 @@ h1 {
   margin-top: 14px;
 }
 
+/* --- Skill tiles and rank pips, shared by the trees, the board and the info panel.
+   The icons are white on black, so screen blending lays them over the tree colour. */
+
+.tile {
+  position: relative;
+  display: block;
+  border: 2px solid color-mix(in srgb, currentColor 50%, #fff);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, currentColor 80%, #fff) 0%,
+    currentColor 45%,
+    color-mix(in srgb, currentColor 50%, #000) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
+    inset 0 0 12px rgba(0, 0, 0, 0.45);
+}
+
+.tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.pips {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  height: 6px;
+  margin-top: 4px;
+}
+
+.pips i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1d2126;
+  box-shadow: inset 0 0 0 1px #50565e;
+}
+
+.pips i.lit {
+  background: #f6f2ea;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.85);
+}
+
+/* The in-game selection: white corner brackets around the tile. */
+.node:hover .tile::before,
+.node:focus-visible .tile::before,
+.slot.filled:hover .tile::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  background:
+    linear-gradient(#fff 0 0) top left / 12px 2px,
+    linear-gradient(#fff 0 0) top left / 2px 12px,
+    linear-gradient(#fff 0 0) top right / 12px 2px,
+    linear-gradient(#fff 0 0) top right / 2px 12px,
+    linear-gradient(#fff 0 0) bottom left / 12px 2px,
+    linear-gradient(#fff 0 0) bottom left / 2px 12px,
+    linear-gradient(#fff 0 0) bottom right / 12px 2px,
+    linear-gradient(#fff 0 0) bottom right / 2px 12px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* The in-game skill tooltip: name and rank, then the current and the next level. */
+.skill-tooltip {
+  position: absolute;
+  z-index: 10;
+  width: 300px;
+  padding-bottom: 10px;
+  border: 1px solid #575b61;
+  background: rgba(30, 32, 35, 0.97);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
+  color: #ebe6dc;
+  font-size: 15px;
+  line-height: 1.3;
+  text-align: left;
+  pointer-events: none;
+}
+
+.skill-tooltip-head {
+  margin-bottom: 2px;
+  padding: 7px 12px;
+  border-bottom: 1px solid #45494f;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.skill-tooltip-head b {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.skill-tooltip-head span {
+  color: #b9b3a7;
+}
+
+.skill-tooltip p {
+  margin: 0;
+  padding: 0 12px;
+  white-space: pre-line;
+}
+
+.skill-tooltip .skill-tooltip-label {
+  padding-top: 7px;
+}
+
+.skill-tooltip .next {
+  color: #9b968c;
+}
+
+.skill-tooltip .skill-tooltip-hint {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #3c4046;
+  color: var(--gold);
+  font-size: 14px;
+}
+
 /* --- Skill tree */
 
 .node {
   position: absolute;
   width: 108px;
-  height: 94px;
+  height: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  color: var(--text);
   text-align: center;
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1.1;
-  text-shadow: 0 1px 2px #000;
   cursor: pointer;
   user-select: none;
 }
 
-.node-icon {
-  position: relative;
-  width: 62px;
-  height: 62px;
-  margin-bottom: 3px;
-  overflow: hidden;
-  border: 2px solid #000;
-  outline: 1px solid #555;
+.node:focus-visible {
+  outline: none;
 }
 
-/* The icons are white on black, so screen blending tints them with the tree colour behind. */
-.node-icon img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  mix-blend-mode: screen;
+.node-icon {
+  width: 62px;
+  height: 62px;
+  flex: none;
+}
+
+.node-name {
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 4px #000;
 }
 
 .node.locked {
-  filter: grayscale(1) brightness(0.45);
   cursor: not-allowed;
 }
 
+.node.locked .node-icon {
+  filter: grayscale(1) brightness(0.35);
+}
+
+.node.locked .node-name {
+  color: #78736a;
+}
+
+/* As in the game, a skill without points is a dark tile, brighter when it can take a point. */
 .node.available .node-icon {
-  filter: saturate(0.35) brightness(0.8);
+  filter: grayscale(1) brightness(0.62);
 }
 
 .node.learned {
@@ -208,8 +429,10 @@ h1 {
 }
 
 .node.learned .node-icon {
-  outline: 2px solid var(--gold);
-  box-shadow: 0 0 12px rgba(242, 210, 122, 0.5);
+  border-color: #fff4dc;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 0 12px color-mix(in srgb, currentColor 75%, transparent);
 }
 
 .node.slotted .node-icon::after {
@@ -220,37 +443,74 @@ h1 {
   width: 8px;
   height: 8px;
   background: var(--gold);
+  box-shadow: 0 0 3px #000;
   transform: rotate(45deg);
 }
 
-.node .rank-badge {
-  position: absolute;
-  right: 2px;
-  bottom: 0;
-  padding: 0 3px;
-  background: rgba(0, 0, 0, 0.7);
-  font-size: 11px;
-}
-
 .link {
-  stroke: #666;
-  stroke-width: 1.5;
-  opacity: 0.55;
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0.4;
 }
 
 .link.active {
-  stroke: var(--gold);
+  stroke: color-mix(in srgb, currentColor 60%, #fff);
   stroke-width: 2.5;
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
-/* --- Mutagen picker */
+/* --- Mutagens: the in-game orb in a silver diamond, the name across it */
+
+.mutagen,
+.mutagen-slot {
+  border: 2px solid #8f969d;
+  background: radial-gradient(circle, #1c2025, #0a0c0f 75%);
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 4px rgba(255, 255, 255, 0.07);
+  transform: rotate(45deg);
+}
+
+.gem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-45deg);
+}
+
+.gem img {
+  width: 76%;
+  height: 76%;
+  filter: drop-shadow(0 0 8px currentColor);
+  pointer-events: none;
+}
+
+.gem-name {
+  position: absolute;
+  top: 50%;
+  right: -22%;
+  left: -22%;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-align: center;
+  text-shadow:
+    0 0 3px #000,
+    0 1px 2px #000,
+    0 0 7px #000;
+  transform: translateY(-50%);
+}
 
 .mutagen-grid {
   display: grid;
-  grid-template-columns: repeat(3, 150px);
+  grid-template-columns: repeat(3, 160px);
   justify-content: center;
-  gap: 40px 30px;
+  gap: 44px 34px;
   padding: 50px 0;
 }
 
@@ -258,77 +518,89 @@ h1 {
   width: 96px;
   height: 96px;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #000;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
-  transform: rotate(45deg);
   cursor: grab;
 }
 
-.mutagen span {
-  width: 90px;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.15;
-  text-align: center;
-  text-shadow: 0 1px 2px #000;
-  transform: rotate(-45deg);
+.mutagen .gem-name {
+  font-size: 15px;
 }
 
 .mutagen-effect {
-  margin-top: 22px;
-  color: var(--muted);
-  font-size: 12px;
+  margin-top: 24px;
+  font-size: 14px;
+  font-weight: 600;
   text-align: center;
 }
 
-/* --- Mutation tree */
+/* --- Mutation tree: the in-game emblem on a disc of the mutation's colours, the name below */
 
 .mutation {
   position: absolute;
-  width: 76px;
-  height: 76px;
+  width: 128px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border: 4px solid #000;
-  border-radius: 50%;
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1.1;
   text-align: center;
-  text-shadow: 0 1px 2px #000;
   cursor: pointer;
   user-select: none;
 }
 
+.mutation-ring {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  padding: 3px;
+  border: 2px solid #4b5056;
+  border-radius: 50%;
+  background: #0b0d10;
+  box-shadow: 0 0 0 1px #000;
+}
+
+.mutation-name {
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 4px #000;
+}
+
 .mutation.locked {
-  filter: grayscale(0.8) brightness(0.35);
   cursor: not-allowed;
 }
 
-.mutation.available {
-  border-color: #888;
-  filter: brightness(0.6);
+.mutation.locked .mutation-ring {
+  filter: grayscale(1) brightness(0.42);
+}
+
+.mutation.locked .mutation-name {
+  color: #78736a;
+}
+
+.mutation.available .mutation-ring {
+  border-color: #8a8f96;
+  filter: saturate(0.6) brightness(0.72);
 }
 
 .mutation.researched {
-  border-color: #fff;
-  box-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
   cursor: grab;
 }
 
-.mutation.slotted::after {
+.mutation.researched .mutation-ring {
+  border-color: #f2eee6;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.45);
+}
+
+.mutation.slotted .mutation-ring::after {
   content: '';
   position: absolute;
-  top: -2px;
-  right: 6px;
+  top: -1px;
+  right: 4px;
   width: 9px;
   height: 9px;
   background: var(--gold);
+  box-shadow: 0 0 3px #000;
   transform: rotate(45deg);
 }
 
@@ -341,57 +613,147 @@ h1 {
   stroke-width: 5;
 }
 
-/* --- Info panel: fixed height, so the board below stays put while the pointer moves over skills.
-   310px fits the longest skill text at the usual width, a narrower window scrolls inside the panel. */
-
-.info {
-  height: 310px;
-  overflow-y: auto;
-  padding: 12px 14px;
-  border: 1px solid #8a1d1d;
-  background: linear-gradient(#2a2a2a, #1b1b1b);
+.disc {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 38%,
+    color-mix(in srgb, currentColor 65%, #fff) 0%,
+    currentColor 42%,
+    color-mix(in srgb, currentColor 40%, #000) 100%
+  );
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.65);
 }
 
-.info p {
+.disc img {
+  display: block;
+  width: 62%;
+  height: 62%;
+  margin: 19%;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+  pointer-events: none;
+}
+
+.disc.innate {
+  background: none;
+  box-shadow: none;
+}
+
+.disc.innate img {
+  width: 100%;
+  height: 100%;
   margin: 0;
+  filter: none;
+}
+
+/* --- Info panel: fixed height, so the board below stays put while the pointer moves.
+   360px fits the longest text at full width (353px, measured), a narrower window scrolls inside. */
+
+.info {
+  height: 360px;
+  overflow-y: auto;
+  padding: 14px 18px;
+  border: 1px solid #3b3f45;
+  background: linear-gradient(#17191c, #0f1114);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.info-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.info-icon {
+  display: flex;
+  flex: none;
+  width: 56px;
+  height: 56px;
+}
+
+.info-icon > * {
+  width: 100%;
+  height: 100%;
 }
 
 .info h2 {
-  margin: 0 0 4px;
-  font-size: 18px;
+  margin: 0 0 3px;
+  color: var(--bright);
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.1;
 }
 
 .info-meta {
-  margin-bottom: 6px;
+  margin: 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
+}
+
+.info-text {
+  margin: 0;
+  color: #ddd6ca;
+  font-size: 17px;
+  line-height: 1.4;
 }
 
 /* A rank text keeps its line break: the tree bonus sits on its own line, as in the game. */
 .info-rank {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 10px;
+  margin: 0 0 6px;
+  padding: 5px 10px;
+  border-left: 3px solid #3a3d42;
+  background: rgba(255, 255, 255, 0.03);
+  color: #a9a397;
+  font-size: 15.5px;
+  line-height: 1.3;
   white-space: pre-line;
-  margin: 3px 0;
-  padding: 5px 8px;
-  border-left: 3px solid #444;
-  background: #222;
+}
+
+.info-rank b {
+  padding-top: 2px;
+  color: #8e887c;
   font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .info-rank.reached {
   border-left-color: var(--gold);
-  background: #2b271d;
+  background: rgba(217, 183, 104, 0.08);
+  color: #ece6da;
+}
+
+.info-rank.reached b {
+  color: var(--gold);
 }
 
 /* --- Slot board, laid out like the in-game character screen */
 
 .board {
   position: relative;
-  width: 640px;
-  height: 610px;
   margin: 0 auto;
 }
 
-.board svg {
+.board-helix {
+  position: absolute;
+  right: -30px;
+  bottom: 40px;
+  width: 620px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.board > svg {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -399,75 +761,105 @@ h1 {
 
 .bracket {
   fill: none;
-  stroke: #555;
+  stroke: #4a4f56;
   stroke-width: 2;
+}
+
+.bracket.filled {
+  stroke-width: 2.5;
+}
+
+.group-header {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, currentColor 65%, #fff);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, currentColor 75%, #000),
+    color-mix(in srgb, currentColor 35%, #000)
+  );
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 12px color-mix(in srgb, currentColor 35%, transparent);
+}
+
+.group-header.right {
+  justify-content: flex-end;
+  background: linear-gradient(
+    270deg,
+    color-mix(in srgb, currentColor 75%, #000),
+    color-mix(in srgb, currentColor 35%, #000)
+  );
+}
+
+.group-header img {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.group-effect {
+  color: var(--bright);
+  font-size: 16px;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px #000;
+}
+
+.group-effect b {
+  margin-left: 3px;
+  font-weight: 600;
+}
+
+.group-header.empty {
+  justify-content: center;
+  border-color: #2e3237;
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: none;
+  color: #5d5a54;
+  font-size: 14px;
+  letter-spacing: 0.5px;
 }
 
 .slot {
   position: absolute;
-  width: 78px;
-  height: 78px;
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #555;
-  background: rgba(0, 0, 0, 0.4);
-  color: #555;
-  font-size: 28px;
-  text-align: center;
+  border: 2px solid #3a3f46;
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 0 0 1px #000;
 }
 
 .slot.locked {
-  color: #444;
-  font-size: 22px;
+  border-color: #2b2f34;
+  color: #6a6e74;
 }
 
 .slot.filled {
   flex-direction: column;
   justify-content: flex-start;
-  gap: 1px;
-  padding: 3px;
-  overflow: hidden;
-  border-color: #000;
-  color: #fff;
-  font-size: 10.5px;
-  font-weight: 600;
-  line-height: 1.05;
-  text-shadow:
-    0 1px 2px #000,
-    0 0 4px #000;
+  border: 0;
+  background: none;
+  box-shadow: none;
   cursor: grab;
 }
 
-.slot.filled img {
+.slot.filled .tile {
+  width: 60px;
+  height: 60px;
   flex: none;
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(0, 0, 0, 0.6);
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
-
-.slot .rank-badge {
-  position: absolute;
-  top: 2px;
-  left: 4px;
-  font-size: 10px;
-}
-
-/* Always two lines tall, so one-line names sit level with two-line ones. */
-.slot-name {
-  height: 2.2em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .slot-accepts {
   position: absolute;
-  right: 6px;
-  bottom: 2px;
-  left: 6px;
+  right: 5px;
+  bottom: 3px;
+  left: 5px;
   height: 4px;
   display: flex;
   gap: 2px;
@@ -475,118 +867,124 @@ h1 {
 
 .slot-accepts i {
   flex: 1;
-}
-
-.remove {
-  padding: 0;
-  border: 0;
-  background: none;
-  font-family: inherit;
-  line-height: 1;
-  position: absolute;
-  top: 1px;
-  right: 4px;
-  color: #fff;
-  font-size: 12px;
-  opacity: 0.6;
-  cursor: pointer;
-}
-
-.remove:hover {
-  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
 }
 
 .mutagen-slot {
   position: absolute;
-  width: 76px;
-  height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #555;
-  transform: rotate(45deg);
+  width: 72px;
+  height: 72px;
 }
 
 .mutagen-slot.filled {
-  border-color: #000;
   cursor: grab;
 }
 
-.mutagen-name {
-  width: 76px;
-  font-size: 10.5px;
-  font-weight: 600;
-  line-height: 1.05;
-  text-align: center;
-  text-shadow: 0 1px 2px #000;
-  transform: rotate(-45deg);
-}
-
-/* The slot's top-left corner is the diamond's top vertex once rotated. */
-.mutagen-slot .remove {
-  top: 0;
-  right: auto;
-  left: 3px;
-  transform: rotate(-45deg);
-}
-
-.mutagen-bonus {
+.mutagen-caption {
   position: absolute;
-  width: 108px;
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.mutagen-bonus span {
+  width: 110px;
+  margin: 0;
   color: var(--muted);
-  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.15;
+  text-align: center;
 }
 
 .mutation-slot {
   position: absolute;
-  width: 104px;
-  height: 104px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  border: 2px solid #555;
+  padding: 4px;
+  border: 2px solid #4e535a;
   border-radius: 50%;
-  color: var(--muted);
-  font-size: 11px;
-  text-align: center;
+  background: #0b0d10;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 30px rgba(0, 0, 0, 0.85);
+}
+
+.mutation-slot:not(.filled) .disc {
+  filter: saturate(0.6) brightness(0.8);
 }
 
 .mutation-slot.filled {
-  border: 4px solid #000;
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.35);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  text-shadow: 0 1px 2px #000;
+  border-color: #ece7dd;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 24px rgba(255, 255, 255, 0.35);
   cursor: grab;
+}
+
+.mutation-title {
+  position: absolute;
+  width: 250px;
+  padding: 9px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  text-align: right;
+}
+
+.mutation-title b {
+  display: block;
+  color: var(--bright);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.mutation-title span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.mutation-title.empty b {
+  color: var(--muted);
+}
+
+.mutation-text {
+  position: absolute;
+  width: 258px;
+  height: 140px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  color: #d9d3c7;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.mutation-text.empty {
+  color: var(--muted);
 }
 
 .over {
   border-color: var(--gold) !important;
-  background: rgba(242, 210, 122, 0.15) !important;
+  background: rgba(217, 183, 104, 0.15) !important;
 }
 
 /* --- Help text, build summary and the share box */
 
 .help {
   margin: 0;
+  padding: 10px 14px 10px 32px;
+  border: 1px solid #2b2e33;
+  background: rgba(255, 255, 255, 0.02);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.help b {
+  color: var(--bright);
+  font-weight: 600;
 }
 
 .summary {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .summary-title {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .summary b {
@@ -597,7 +995,7 @@ h1 {
 .footer {
   align-self: flex-end;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
   text-align: right;
 }
 
@@ -607,9 +1005,9 @@ h1 {
 
 .footer .release {
   font-family: Consolas, monospace;
+  font-size: 12px;
 }
 
-.node:focus-visible,
 .mutation:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--gold);
@@ -619,8 +1017,8 @@ button:focus-visible {
 .share {
   margin-top: 14px;
   padding: 10px 12px;
-  border: 1px solid #444;
-  background: #141414;
+  border: 1px solid #3a3e44;
+  background: #111316;
 }
 
 .share label {
@@ -640,7 +1038,7 @@ button:focus-visible {
   min-width: 0;
   padding: 7px 8px;
   border: 1px solid #555;
-  background: #0c0c0c;
+  background: #0b0c0e;
   color: var(--gold);
   font:
     13px Consolas,
@@ -654,8 +1052,9 @@ button:focus-visible {
 
 .share-message {
   min-height: 16px;
+  margin: 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 @media (max-width: 1450px) {

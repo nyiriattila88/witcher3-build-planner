@@ -1,8 +1,8 @@
 import { useMemo, useState, type JSX } from 'react';
 import type { BuildCodec } from '../build/build-code';
 import type { Catalog } from '../catalog/catalog';
+import { GAME_VERSION } from '../data/game-version';
 import { treeColour } from '../planner/appearance';
-import { buildTitle } from '../planner/build-title';
 import { BuildSummary } from '../planner/build-summary';
 import { InfoPanel, type InfoTarget } from '../planner/info-panel';
 import { MutagenPicker } from '../planner/mutagen-picker';
@@ -65,14 +65,25 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
 
   return (
     <div className="page">
+      <header className="masthead">
+        <h1>
+          <span className="masthead-game">The Witcher 3: Wild Hunt Remastered</span>
+          <span className="masthead-app">Build Planner</span>
+        </h1>
+        <p className="masthead-versions">
+          <span>Planner v{RELEASE.version}</span>
+          <span title="Skill data from the Remastered release 5.00. Patches 5.00b and 5.00c changed no skills.">
+            Game version {GAME_VERSION}
+          </span>
+        </p>
+      </header>
       <main className="planner">
-        <h1>{buildTitle(build, catalog) || tabName(tab)}</h1>
         <PlannerTabs tabs={tabs} current={tab} build={build} onSelect={selectTab} />
         <div className="totals">
           <span>Total Points Allocated: {build.totalPoints()}</span>
           <span>Total Unslotted: {build.unslottedPoints()}</span>
         </div>
-        <div className="branch" style={{ background: tabColour(tab) }}>
+        <div className="branch" style={{ color: tabColour(tab) }}>
           <span>{tabName(tab)}</span>
           <span>{branchLabel}</span>
         </div>
@@ -169,15 +180,22 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
             setInfo({ kind: 'mutation', mutation });
           }}
         />
-        <p className="help">
-          Skills: left click +1 rank, right click −1 rank, drag a skill with points onto a slot.
-          Mutagens: drag a diamond onto a mutagen slot. Mutations: left click researches, right
-          click un-researches, drag a researched mutation into the centre circle. Drag anything off
-          the board (or click ×) to remove it.
-        </p>
+        <ul className="help">
+          <li>
+            <b>Click</b> a skill to add a rank or a mutation to research it, <b>right-click</b> to
+            take it back.
+          </li>
+          <li>
+            <b>Drag</b> a skill with points, a mutagen or a researched mutation onto the board.
+          </li>
+          <li>
+            <b>Double-click</b> a skill, mutagen or mutation on the board to remove it, or drag it
+            off the board.
+          </li>
+        </ul>
         <BuildSummary build={build} catalog={catalog} />
         <footer className="footer">
-          Skill planner for The Witcher 3: Wild Hunt Remastered · by Attila Nyiri ·{' '}
+          Build planner for The Witcher 3: Wild Hunt Remastered {GAME_VERSION} · by Attila Nyiri ·{' '}
           <a href={REPOSITORY_URL}>source on GitHub</a>
           <br />
           <span className="release">

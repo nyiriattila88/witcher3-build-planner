@@ -29,6 +29,7 @@
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && knip"
   },
   "dependencies": {
+    "@fontsource/barlow-semi-condensed": "5.3.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

@@ -1,8 +1,9 @@
 import type { DragEvent, JSX } from 'react';
 import type { Mutagen } from '../catalog/catalog';
-import { backgroundUrl, mutagenColour, mutagenEffect, mutagenLabel } from './appearance';
+import { backgroundUrl, mutagenColour, mutagenEffect } from './appearance';
 import type { DragItem } from './drag-and-drop';
 import { PANE_WIDTH } from './geometry';
+import { MutagenGem } from './mutagen-gem';
 
 type MutagenPickerProps = {
   readonly mutagens: readonly Mutagen[];
@@ -25,7 +26,6 @@ export function MutagenPicker({ mutagens, onHover, onDragStart }: MutagenPickerP
           <div key={mutagen.id}>
             <div
               className="mutagen"
-              style={{ background: mutagenColour(mutagen) }}
               draggable
               aria-label={mutagen.name}
               onMouseEnter={() => {
@@ -35,9 +35,11 @@ export function MutagenPicker({ mutagens, onHover, onDragStart }: MutagenPickerP
                 onDragStart({ kind: 'mutagen', mutagen: mutagen.id, from: null }, event);
               }}
             >
-              <span>{mutagenLabel(mutagen)}</span>
+              <MutagenGem mutagen={mutagen} />
             </div>
-            <div className="mutagen-effect">{mutagenEffect(mutagen, mutagen.bonus)}</div>
+            <div className="mutagen-effect" style={{ color: mutagenColour(mutagen) }}>
+              {mutagenEffect(mutagen, mutagen.bonus)}
+            </div>
           </div>
         ))}
       </div>

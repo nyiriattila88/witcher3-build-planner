@@ -33,41 +33,97 @@ export const treeBackdrop = {
   }px`,
 };
 
-export const MUTATION_GRID = { left: 110, top: 70, column: 135, row: 125, radius: 38, height: 520 };
+// The name hangs below the disc and may be as wide as a column.
+export const MUTATION_GRID = {
+  left: 110,
+  top: 60,
+  column: 135,
+  row: 125,
+  radius: 38,
+  label: 128,
+  height: 540,
+};
 
 export const mutationCentre = ([column, row]: Point): Point => [
   MUTATION_GRID.left + column * MUTATION_GRID.column,
   MUTATION_GRID.top + row * MUTATION_GRID.row,
 ];
 
-// Slot board geometry, laid out like the in-game character screen.
-export const BOARD_SIZE = { width: 640, height: 610 };
-export const SLOT_SIZE = 78;
-const SLOT_POSITIONS: readonly Point[] = [
-  [150, 20],
-  [150, 105],
-  [150, 190],
-  [412, 20],
-  [412, 105],
-  [412, 190],
-  [150, 340],
-  [150, 425],
-  [150, 510],
-  [412, 340],
-  [412, 425],
-  [412, 510],
-  [281, 105],
-  [281, 20],
-  [281, 425],
-  [281, 510],
-];
-export const MUTAGEN_SLOT_SIZE = 76;
-export const MUTAGEN_SLOT_CENTRES: readonly Point[] = [
-  [75, 145],
-  [565, 145],
-  [75, 465],
-  [565, 465],
-];
-export const MUTATION_SLOT_POSITION: Point = [268, 252];
+// Slot board geometry, laid out like the in-game character screen: a group of three slots in each
+// corner with its mutagen beside it, the extra slots 13-16 above and below the mutation in the middle.
+export const BOARD_SIZE = { width: 700, height: 650 };
+export const SLOT_SIZE = 60;
+export const BOARD_CENTRE: Point = [350, 325];
+// From the middle column to a group's column, from one slot row to the next.
+const COLUMN = 92;
+const ROW = 80;
+// The bracket runs between a group's slots and its mutagen, this far from the slots.
+const BRACKET_GAP = 14;
+export const MUTAGEN_SLOT_SIZE = 72;
+const MUTAGEN_OFFSET = 205;
+export const MUTATION_SLOT_RADIUS = 56;
 
-export const slotPosition = (index: number): Point => SLOT_POSITIONS[index] ?? [0, 0];
+const [centreX, centreY] = BOARD_CENTRE;
+// Slot rows of the upper and the lower groups, from the top.
+const upperRows = [centreY - 3.5 * ROW, centreY - 2.5 * ROW, centreY - 1.5 * ROW];
+const lowerRows = [centreY + 1.5 * ROW, centreY + 2.5 * ROW, centreY + 3.5 * ROW];
+const groupRows = [upperRows, upperRows, lowerRows, lowerRows];
+
+export const isRightGroup = (group: number): boolean => group % 2 === 1;
+
+const groupColumn = (group: number): number => centreX + (isRightGroup(group) ? COLUMN : -COLUMN);
+
+// Slot centres by index: the four groups of three, then slots 13 and 14 above the mutation and 15 and
+// 16 below it, each pair counted outwards from the middle.
+const SLOT_CENTRES: readonly Point[] = [
+  ...[0, 1, 2, 3].flatMap((group) =>
+    (groupRows[group] ?? []).map((y): Point => [groupColumn(group), y]),
+  ),
+  [centreX, centreY - 1.5 * ROW],
+  [centreX, centreY - 2.5 * ROW],
+  [centreX, centreY + 1.5 * ROW],
+  [centreX, centreY + 2.5 * ROW],
+];
+
+export const slotCentre = (index: number): Point => SLOT_CENTRES[index] ?? BOARD_CENTRE;
+
+// A group's mutagen sits level with its middle slot, its header level with the first.
+export const mutagenSlotCentre = (group: number): Point => [
+  centreX + (isRightGroup(group) ? MUTAGEN_OFFSET : -MUTAGEN_OFFSET),
+  groupRows[group]?.[1] ?? centreY,
+];
+
+// The x of a group's bracket spine, between its slots and its mutagen.
+export const bracketX = (group: number): number =>
+  groupColumn(group) + (isRightGroup(group) ? 1 : -1) * (SLOT_SIZE / 2 + BRACKET_GAP);
+
+const HEADER_HEIGHT = 36;
+const BOARD_MARGIN = 16;
+
+// The bar with the group's mutagen bonus, from the bracket out to the board's edge.
+export const groupHeaderBox = (
+  group: number,
+): { left: number; top: number; width: number; height: number } => {
+  const top = (groupRows[group]?.[0] ?? centreY) - HEADER_HEIGHT / 2;
+  if (isRightGroup(group)) {
+    const left = bracketX(group) + BRACKET_GAP;
+    return { left, top, width: BOARD_SIZE.width - BOARD_MARGIN - left, height: HEADER_HEIGHT };
+  }
+  const right = bracketX(group) - BRACKET_GAP;
+  return { left: BOARD_MARGIN, top, width: right - BOARD_MARGIN, height: HEADER_HEIGHT };
+};
+
+const TOOLTIP_GAP = 10;
+
+// Puts a tooltip beside an icon, on the side facing the middle of its container, so it never hangs
+// over the container's edge.
+export const tooltipPlacement = (
+  [x, y]: Point,
+  half: number,
+  container: { readonly width: number; readonly height: number },
+): { left?: number; right?: number; top?: number; bottom?: number } => ({
+  ...(x > container.width / 2
+    ? { right: container.width - (x - half - TOOLTIP_GAP) }
+    : { left: x + half + TOOLTIP_GAP }),
+  ...(y > container.height / 2 ? { bottom: container.height - (y + half) } : { top: y - half }),
+});

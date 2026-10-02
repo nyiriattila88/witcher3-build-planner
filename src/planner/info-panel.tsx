@@ -1,7 +1,8 @@
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 import { MAX_RANK, SYNERGY, type Build } from '../build/build';
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
-import { mutagenEffect, mutationColour } from './appearance';
+import { iconUrl, mutagenEffect, mutagenIconUrl, treeColour } from './appearance';
+import { MutationDisc } from './mutation-disc';
 import { tabName, tabTip, type PlannerTab } from './planner-tab';
 
 // What the info panel explains: the open tab, or the skill, mutation or mutagen under the pointer.
@@ -29,10 +30,9 @@ function InfoContent({ target, build, catalog }: InfoPanelProps): JSX.Element {
   switch (target.kind) {
     case 'tab':
       return (
-        <>
-          <h2>{tabName(target.tab)}</h2>
-          <p className="info-meta">{tabTip(target.tab)}</p>
-        </>
+        <InfoLayout title={tabName(target.tab)}>
+          <p className="info-text">{tabTip(target.tab)}</p>
+        </InfoLayout>
       );
     case 'skill':
       return <SkillInfo skill={target.skill} build={build} />;
@@ -43,29 +43,58 @@ function InfoContent({ target, build, catalog }: InfoPanelProps): JSX.Element {
   }
 }
 
+type InfoLayoutProps = {
+  readonly icon?: ReactNode;
+  readonly title: string;
+  readonly meta?: ReactNode;
+  readonly children: ReactNode;
+};
+
+// An icon beside the title and its details, then the text, the way the game's tooltips read.
+function InfoLayout({ icon, title, meta, children }: InfoLayoutProps): JSX.Element {
+  return (
+    <>
+      <header className="info-head">
+        {icon !== undefined && <span className="info-icon">{icon}</span>}
+        <div>
+          <h2>{title}</h2>
+          {meta !== undefined && <p className="info-meta">{meta}</p>}
+        </div>
+      </header>
+      {children}
+    </>
+  );
+}
+
 const names = (skills: readonly Skill[]): string | null =>
   skills.length > 0 ? skills.map((skill) => skill.name).join(', ') : null;
 
 function SkillInfo({ skill, build }: { skill: Skill; build: Build }): JSX.Element {
   const rank = build.rank(skill);
   const slot = build.slotOf(skill);
-  return (
+  const icon = (
+    <span className="tile" style={{ color: treeColour(skill.tree) }}>
+      <img src={iconUrl(skill)} alt="" draggable={false} />
+    </span>
+  );
+  const meta = (
     <>
-      <h2>{skill.name}</h2>
-      <p className="info-meta">
-        {skill.tree} · Rank {rank}/{MAX_RANK}
-        {slot >= 0 ? ` · Slot ${slot + 1}` : ''}
-        <br />
-        Unlocked by: {names(skill.requires) ?? 'Starting skill'}
-        <br />
-        Unlocks: {names(skill.unlocks) ?? 'none'}
-      </p>
+      {skill.tree} skill · Rank {rank}/{MAX_RANK}
+      {slot >= 0 ? ` · Slot ${slot + 1}` : ''}
+      <br />
+      Unlocked by: {names(skill.requires) ?? 'starting skill'} · Unlocks:{' '}
+      {names(skill.unlocks) ?? 'none'}
+    </>
+  );
+  return (
+    <InfoLayout icon={icon} title={skill.name} meta={meta}>
       {skill.ranks.map((text, i) => (
         <p key={i} className={i < rank ? 'info-rank reached' : 'info-rank'}>
-          <b>Rank {i + 1}:</b> {text}
+          <b>Rank {i + 1}</b>
+          <span>{text}</span>
         </p>
       ))}
-    </>
+    </InfoLayout>
   );
 }
 
@@ -82,33 +111,35 @@ function MutationInfo({
   const unlockedSlots = catalog.extraSlotUnlocks.filter(
     (needed) => build.researchedCount >= needed,
   ).length;
-  return (
+  const meta = (
     <>
-      <h2 style={{ color: mutationColour(mutation) }}>{mutation.name}</h2>
-      <p className="info-meta">
-        {mutation.trees.join(' / ')} mutation · Research cost: {mutation.cost}
-        {requires === '' ? '' : ` · Requires: ${requires}`}
-        {mutation.innate && (
-          <>
-            <br />
-            Mutations researched: {build.researchedCount} · Extra slots unlocked: {unlockedSlots}
-          </>
-        )}
-      </p>
-      <p className="info-rank reached">{mutation.description}</p>
+      {mutation.trees.join(' / ')} mutation · Research cost: {mutation.cost}
+      {requires === '' ? '' : ` · Requires: ${requires}`}
+      {mutation.innate && (
+        <>
+          <br />
+          Mutations researched: {build.researchedCount} · Extra slots unlocked: {unlockedSlots}
+        </>
+      )}
     </>
+  );
+  return (
+    <InfoLayout icon={<MutationDisc mutation={mutation} />} title={mutation.name} meta={meta}>
+      <p className="info-text">{mutation.description}</p>
+    </InfoLayout>
   );
 }
 
 function MutagenInfo({ mutagen }: { mutagen: Mutagen }): JSX.Element {
+  const icon = <img src={mutagenIconUrl(mutagen)} alt="" draggable={false} />;
+  const meta = `${mutagen.tree} mutagen · ${mutagenEffect(mutagen, mutagen.bonus)}`;
   return (
-    <>
-      <h2>{mutagen.name}</h2>
-      <p className="info-meta">
-        {mutagenEffect(mutagen, mutagen.bonus)} per mutagen, multiplied by 1 + the number of{' '}
-        {mutagen.tree} skills slotted in the same group. Synergy (slotted) adds{' '}
-        {SYNERGY.bonusPerRank * 100}% per rank.
+    <InfoLayout icon={icon} title={mutagen.name} meta={meta}>
+      <p className="info-text">
+        In a mutagen slot it gives {mutagenEffect(mutagen, mutagen.bonus)}. Every {mutagen.tree}{' '}
+        skill slotted in the same group adds that bonus once more, and Synergy in a slot raises it
+        by {SYNERGY.bonusPerRank * 100}% per rank.
       </p>
-    </>
+    </InfoLayout>
   );
 }

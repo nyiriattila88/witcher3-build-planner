@@ -4,6 +4,7 @@ import type { Catalog, Mutation } from '../catalog/catalog';
 import { backgroundUrl, mutationColour } from './appearance';
 import type { DragItem } from './drag-and-drop';
 import { MUTATION_GRID, PANE_WIDTH, mutationCentre } from './geometry';
+import { MutationDisc } from './mutation-disc';
 
 type MutationTreeProps = {
   readonly catalog: Catalog;
@@ -75,11 +76,7 @@ function MutationNode({
   return (
     <div
       className={`mutation ${state}${slotted}`}
-      style={{
-        left: x - MUTATION_GRID.radius,
-        top: y - MUTATION_GRID.radius,
-        background: mutationColour(mutation),
-      }}
+      style={{ left: x - MUTATION_GRID.label / 2, top: y - MUTATION_GRID.radius }}
       role="button"
       tabIndex={0}
       aria-label={`${mutation.name}, ${state}`}
@@ -105,7 +102,10 @@ function MutationNode({
         onDragStart({ kind: 'mutation', mutation: mutation.id, fromBoard: false }, event);
       }}
     >
-      {mutation.name}
+      <span className="mutation-ring">
+        <MutationDisc mutation={mutation} />
+      </span>
+      <span className="mutation-name">{mutation.name}</span>
     </div>
   );
 }

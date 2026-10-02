@@ -51,7 +51,10 @@ Each layer only imports from the layers above it in this list. The model knows n
   panel keeps.
 - **Assets are served under the base path.** `public/images/` is referenced at runtime through
   `import.meta.env.BASE_URL` in `src/planner/appearance.ts`, because GitHub Pages serves the site under
-  `/witcher3-build-planner/`. The base itself is set once, in `vite.config.ts`.
+  `/witcher3-build-planner/`. The base itself is set once, in `vite.config.ts`. Mutation and mutagen
+  icons are named after their ids in `src/data/mutations.ts`, so renaming an id loses its icon.
+- **The game version is a claim about the data.** `GAME_VERSION` in `src/data/game-version.ts` names the
+  patch the skill data matches, and the header shows it. Raise it only after checking the patch notes.
 - **The tree backdrops are aligned to the nodes.** They are the in-game screenshots with the skill
   boxes removed, positioned by `TREE_SCALE` and `SCREENSHOT_ORIGIN` in `src/planner/geometry.ts`.
   Changing the scale moves the nodes and the backdrop together, changing one of them alone does not.

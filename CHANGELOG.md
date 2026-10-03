@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.2 - 2026-10-03
+
+- The armor tiles on the Gear tab show the weight class under the armor number, such as Heavy armor.
+
 ## 2.7.1 - 2026-10-03
 
 - An item's tooltip on the Gear tab names what it is first: the armor's weight class, such as Heavy

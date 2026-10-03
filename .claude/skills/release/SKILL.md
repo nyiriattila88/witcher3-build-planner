@@ -21,5 +21,8 @@ description: Cut a release of the planner. Raises the version in package.json, r
 4. **Verify** with `pnpm check`, `pnpm test` and `pnpm build`. A failure stops the release.
 5. **Commit** with a one-line message of at most 70 characters, `Release <version>`, without any AI
    attribution.
-6. **Do not push** without asking. Pushing to `main` deploys to GitHub Pages, and the footer of the
-   live page then shows the new version and commit.
+6. **Do not push** without asking. Pushing `main` only runs CI. The version goes live with its tag:
+   `git tag -a v<version> -m "Release <version>"` on the release commit, then
+   `git push origin v<version>`. The Release workflow checks the tag against `package.json` and the
+   CHANGELOG, deploys to GitHub Pages and publishes the GitHub release, and the footer of the live page
+   then shows the new version and commit.

@@ -80,8 +80,9 @@ pnpm build
 ```
 
 A release raises the version in `package.json` and adds a `CHANGELOG.md` entry, the `/release` skill
-walks through it. The page footer shows the version and the deployed commit, so what is live is never a
-guess.
+walks through it. Pushing `main` only runs CI, the version goes live when its `v<version>` tag is pushed:
+the Release workflow deploys it and publishes the GitHub release. The page footer shows the version and
+the deployed commit, so what is live is never a guess.
 
 ## Language and style
 

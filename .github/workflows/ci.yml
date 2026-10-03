@@ -1,24 +1,23 @@
-# Checks every push to main and publishes the planner on GitHub Pages.
-# After the GitHub Pages workflow of the Vite guide, with pnpm and the project's checks in front of the build.
-name: Deploy to GitHub Pages
+# Checks, tests and builds every push to main and every pull request. The release workflow runs it too,
+# and only then does the build go up as the site to deploy.
+name: CI
 
 on:
   push:
     branches: ['main']
-  workflow_dispatch:
+  pull_request:
+  workflow_call:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# One deployment at a time, the newest push wins.
+# A newer push to the same branch makes the run in progress pointless.
 concurrency:
-  group: 'pages'
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -38,20 +37,8 @@ jobs:
         run: pnpm test
       - name: Build
         run: pnpm build
-      - name: Set up Pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       - name: Upload the site
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-24.04
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

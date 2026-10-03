@@ -1,0 +1,80 @@
+# Puts a version live. Pushing its tag, such as v2.10.0, runs CI on it, deploys it to GitHub Pages and
+# then publishes a GitHub release with its CHANGELOG section, so a release exists only for what went out.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+# One deployment at a time. A deployment in progress is never cut short, the newest waiting one follows.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Check that the tag names the version and the CHANGELOG has it
+        run: |
+          version=$(jq -r .version package.json)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::$GITHUB_REF_NAME is not the version in package.json, v$version."
+            exit 1
+          fi
+          if ! awk -v head="## $version " 'index($0, head) == 1 { found = 1 } END { exit !found }' CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no entry for $version."
+            exit 1
+          fi
+
+  verify:
+    needs: version
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
+
+  release:
+    needs: deploy
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Publish the release with its CHANGELOG section
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "$GITHUB_REF_NAME is released already."
+            exit 0
+          fi
+          # GitHub shows every line break of a release note, so a wrapped list item is joined.
+          awk -v head="## ${GITHUB_REF_NAME#v} " '
+            index($0, head) == 1 { found = 1; next }
+            !found { next }
+            /^## / { exit }
+            /^  / && held != "" { held = held " " substr($0, 3); next }
+            { if (started) print held; held = $0; started = 1 }
+            END { if (started) print held }
+          ' CHANGELOG.md > notes.md
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file notes.md

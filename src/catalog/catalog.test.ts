@@ -66,6 +66,10 @@ describe('createCatalog', () => {
         extraSlotUnlocks: [2, 4, 8, 12],
         potions: [],
         decoctions: [],
+        gear: [],
+        setBonuses: [],
+        upgrades: [],
+        enchantments: [],
       });
 
     expect(create).toThrow(/Nonexistent/);

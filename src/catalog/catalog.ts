@@ -1,4 +1,5 @@
 import type { DecoctionData, PotionData } from '../data/alchemy';
+import type { GearItemData, GearSchool, SetBonusData } from '../data/gear';
 import type {
   ColourTree,
   MutagenData,
@@ -8,6 +9,7 @@ import type {
 } from '../data/mutations';
 import type { SkillTreeData, TreeBonus, TreeName } from '../data/skills';
 import type { TreeLayout } from '../data/tree-layout';
+import type { EnchantmentData, UpgradeData } from '../data/upgrades';
 
 export type Skill = {
   readonly index: number;
@@ -43,7 +45,13 @@ export type Catalog = {
   readonly extraSlotUnlocks: readonly number[];
   readonly potions: readonly PotionData[];
   readonly decoctions: readonly DecoctionData[];
+  readonly gear: readonly GearItemData[];
+  // One entry per school, in the order of the gear.
+  readonly setBonuses: readonly SetBonusData[];
+  readonly upgrades: readonly UpgradeData[];
+  readonly enchantments: readonly EnchantmentData[];
   readonly tree: (name: TreeName) => SkillTree;
+  readonly setBonus: (school: GearSchool) => SetBonusData;
   readonly skill: (tree: string, name: string) => Skill | undefined;
   readonly mutagen: (id: string | null) => Mutagen | undefined;
   readonly mutation: (id: string | null) => Mutation | undefined;
@@ -57,11 +65,21 @@ export type CatalogSources = {
   readonly extraSlotUnlocks: readonly number[];
   readonly potions: readonly PotionData[];
   readonly decoctions: readonly DecoctionData[];
+  readonly gear: readonly GearItemData[];
+  readonly setBonuses: readonly SetBonusData[];
+  readonly upgrades: readonly UpgradeData[];
+  readonly enchantments: readonly EnchantmentData[];
 };
 
 type MutableSkill = Omit<Skill, 'requires' | 'unlocks'> & { requires: Skill[]; unlocks: Skill[] };
 
 const skillKey = (tree: string, name: string): string => `${tree}/${name}`;
+
+const assertUnique = (what: string, items: readonly { readonly name: string }[]): void => {
+  const names = items.map((item) => item.name);
+  const repeated = names.filter((name, i) => names.indexOf(name) !== i);
+  if (repeated.length > 0) throw new Error(`${what} listed twice: ${repeated.join(', ')}`);
+};
 
 // Joins the data files into lookups. A broken reference in the data is a programmer error and stops the start.
 export function createCatalog(sources: CatalogSources): Catalog {
@@ -118,11 +136,17 @@ export function createCatalog(sources: CatalogSources): Catalog {
     return { ...data, id, innate: innate === true, requires: requires.filter(isMutationId) };
   });
 
-  // A build keeps its potions and decoctions by name, so a name may only appear once.
-  const elixirNames = [...sources.potions, ...sources.decoctions].map((elixir) => elixir.name);
-  const repeated = elixirNames.filter((name, i) => elixirNames.indexOf(name) !== i);
-  if (repeated.length > 0)
-    throw new Error(`Potion or decoction listed twice: ${repeated.join(', ')}`);
+  // The planner finds elixirs, gear and upgrades by name, so a name may only appear once in its list.
+  assertUnique('Potion or decoction', [...sources.potions, ...sources.decoctions]);
+  assertUnique('Gear', sources.gear);
+  assertUnique('Rune or glyph', sources.upgrades);
+  assertUnique('Enchantment', sources.enchantments);
+
+  const setBonusesBySchool = new Map(sources.setBonuses.map((set) => [set.school, set]));
+  const schoolless = sources.gear.filter((item) => !setBonusesBySchool.has(item.school));
+  if (schoolless.length > 0) {
+    throw new Error(`Gear of a school without set bonuses: ${schoolless[0]?.name ?? ''}`);
+  }
 
   const treesByName = new Map(trees.map((tree) => [tree.name, tree]));
   const mutagensById = new Map<string, Mutagen>(mutagens.map((mutagen) => [mutagen.id, mutagen]));
@@ -138,10 +162,19 @@ export function createCatalog(sources: CatalogSources): Catalog {
     extraSlotUnlocks: sources.extraSlotUnlocks,
     potions: sources.potions,
     decoctions: sources.decoctions,
+    gear: sources.gear,
+    setBonuses: sources.setBonuses,
+    upgrades: sources.upgrades,
+    enchantments: sources.enchantments,
     tree: (name) => {
       const tree = treesByName.get(name);
       if (tree === undefined) throw new Error(`Unknown skill tree "${name}"`);
       return tree;
+    },
+    setBonus: (school) => {
+      const set = setBonusesBySchool.get(school);
+      if (set === undefined) throw new Error(`No set bonuses for the ${school} school`);
+      return set;
     },
     skill: (tree, name) => skillsByKey.get(skillKey(tree, name)),
     mutagen: (id) => (id === null ? undefined : mutagensById.get(id)),

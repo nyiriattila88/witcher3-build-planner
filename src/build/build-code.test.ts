@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createGameCatalog } from '../catalog/game-catalog';
+import { GEAR_SLOTS } from '../data/gear';
 import { Build, MUTAGEN_GROUPS } from './build';
 import { createBuildCodec } from './build-code';
 
@@ -29,6 +30,11 @@ const fingerprint = (build: Build): string =>
     decoctions: catalog.decoctions.map((decoction) => build.isDecoctionActive(decoction)),
     manticore: build.manticorePieces,
     recipes: build.knownRecipes,
+    gear: GEAR_SLOTS.map((slot) => [
+      build.gearAt(slot)?.name ?? null,
+      build.enchantmentAt(slot)?.name ?? null,
+      [0, 1, 2].map((socket) => build.upgradeAt(slot, socket)?.name ?? null),
+    ]),
   });
 
 // A small seeded generator, so the random builds are the same on every run.
@@ -75,6 +81,17 @@ const aRandomBuild = (random: () => number): Build => {
   }
   if (random() < 0.5) build.setManticorePieces(Math.floor(random() * 5));
   if (random() < 0.5) build.setKnownRecipes(Math.floor(random() * 150));
+  for (const slot of GEAR_SLOTS) {
+    const item = pick(catalog.gear.filter((each) => each.slot === slot));
+    if (item === undefined || random() < 0.4) continue;
+    build.equip(slot, item);
+    const word = pick(catalog.enchantments.filter((each) => build.canEnchant(slot, each)));
+    if (word !== undefined && random() < 0.3) build.enchant(slot, word);
+    for (let socket = 0; socket < item.sockets; socket++) {
+      const upgrade = pick(catalog.upgrades.filter((each) => build.canUpgrade(slot, socket, each)));
+      if (upgrade !== undefined && random() < 0.6) build.setUpgrade(slot, socket, upgrade);
+    }
+  }
   return build;
 };
 

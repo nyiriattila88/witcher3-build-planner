@@ -1,7 +1,8 @@
 import type { Catalog } from '../catalog/catalog';
 import { ALCHEMY_RECIPES, MANTICORE_ARMOR } from '../data/alchemy';
+import { GEAR_SLOTS } from '../data/gear';
 import type { TreeName } from '../data/skills';
-import { Build, MAX_RANK, MUTAGEN_GROUPS } from './build';
+import { Build, MAX_RANK, MUTAGEN_GROUPS, upgradeKind } from './build';
 import { createLegacyDecoder, LEGACY_PREFIX } from './legacy-build-code';
 
 export type BuildCodec = {
@@ -14,7 +15,7 @@ export type BuildCodec = {
 const MARKER = '2.';
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 // Longer than any build code, so pasted text never turns into a huge number.
-const MAX_BODY_LENGTH = 80;
+const MAX_BODY_LENGTH = 120;
 const FLAGS: readonly boolean[] = [false, true];
 const RANKS = Array.from({ length: MAX_RANK + 1 }, (_, rank) => rank);
 const upTo = (last: number): readonly number[] => Array.from({ length: last + 1 }, (_, n) => n);
@@ -121,6 +122,26 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
     build.setKnownRecipes(
       ALCHEMY_RECIPES - choose(MISSING_RECIPES, ALCHEMY_RECIPES - build.knownRecipes),
     );
+    // The gear comes after the toxicity plan for the same reason.
+    for (const slot of GEAR_SLOTS) {
+      const item = choose(
+        [null, ...catalog.gear.filter((each) => each.slot === slot)],
+        build.gearAt(slot),
+      );
+      if (item === null) continue;
+      build.equip(slot, item);
+      const words = catalog.enchantments.filter((word) => build.canEnchant(slot, word));
+      const word = choose([null, ...words], build.enchantmentAt(slot));
+      if (word !== null) {
+        build.enchant(slot, word);
+        continue;
+      }
+      const fitting = catalog.upgrades.filter((upgrade) => upgrade.kind === upgradeKind(slot));
+      for (let socket = 0; socket < item.sockets; socket++) {
+        const upgrade = choose([null, ...fitting], build.upgradeAt(slot, socket));
+        if (upgrade !== null) build.setUpgrade(slot, socket, upgrade);
+      }
+    }
   }
 
   function encode(build: Build): string {

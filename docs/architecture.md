@@ -7,7 +7,8 @@ to share one. This page explains how the code is organised and why. The rules fo
 
 ## Layers
 
-The game rules know nothing about React. Each layer only imports from the layers above it:
+The game rules know nothing about React. Each layer only imports from the layers above it, and ESLint
+checks both (`import-x/no-restricted-paths` and `no-restricted-imports` in `eslint.config.js`):
 
 | Layer          | What it holds                                                                             |
 | -------------- | ----------------------------------------------------------------------------------------- |

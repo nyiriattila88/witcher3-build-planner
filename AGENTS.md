@@ -17,6 +17,7 @@ pnpm build            # the static site in dist/, what GitHub Pages serves
 ## How the code is split
 
 Each layer only imports from the layers above it in this list. The model knows nothing about React.
+ESLint checks both, so a wrong import fails `pnpm check`.
 
 | Folder         | Role                                                                                         |
 | -------------- | -------------------------------------------------------------------------------------------- |

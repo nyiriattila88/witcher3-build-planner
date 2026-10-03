@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.5.0 - 2026-10-03
+
+- A potion or decoction that would take the active Toxicity above the maximum can no longer be made
+  active, as in the game. It is greyed out, and its tooltip says why. Up to the maximum itself is fine.
+- When the maximum drops below the active Toxicity later, for example with Acquired Tolerance out of
+  its slot, the plan stays as it is and the Toxicity line warns that it is above the maximum.
+
 ## 2.4.0 - 2026-10-03
 
 - On a touch screen a double tap takes a skill rank back or unresearches a mutation, the way a

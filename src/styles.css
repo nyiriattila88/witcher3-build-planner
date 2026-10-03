@@ -11,6 +11,7 @@
   --tab-mutagens: #7a63c9;
   --tab-mutations: #a8a66a;
   --tab-toxicity: #6aa83a;
+  --tab-gear: #8fa3b8;
   --toxic: #8ed04f;
   /* Mutation and mutagen colours, named after the trees they stand for. */
   --mut-combat: #e0262c;
@@ -778,19 +779,6 @@ img.disc {
   font: inherit;
 }
 
-.manticore-pieces {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.manticore-pieces button {
-  margin-left: 2px;
-  padding: 3px 10px;
-  font-size: 14px;
-}
-
-.manticore-pieces button.active,
 .elixir-tiers button.active {
   border-color: var(--toxic);
   background: rgba(142, 208, 79, 0.2);
@@ -878,6 +866,140 @@ button.elixir {
 .elixir.blocked,
 .elixir .blocked {
   cursor: not-allowed;
+}
+
+/* --- Gear: what is worn and the set bonuses on top, then the schools side by side for every slot */
+
+.gear {
+  padding: 16px 18px 20px;
+}
+
+.gear-summary {
+  padding: 14px 16px;
+  border: 1px solid #343a42;
+  background: rgba(22, 27, 33, 0.6);
+}
+
+.gear-totals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.gear-totals div {
+  padding: 6px 8px;
+  border: 1px solid #2e3237;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.gear-totals dt {
+  color: var(--muted);
+  font-size: 12.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.gear-totals dd {
+  margin: 2px 0 0;
+  color: var(--bright);
+  font-size: 16px;
+}
+
+.gear-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.gear-set {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.gear-set b {
+  color: var(--bright);
+  font-weight: 600;
+}
+
+.gear-set p {
+  margin: 3px 0 0;
+}
+
+/* A set bonus only lights up once enough pieces are worn. */
+.gear-set p.active {
+  color: #ddd6ca;
+}
+
+.gear-set p span {
+  color: var(--gold);
+}
+
+.gear-schools {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.gear-school {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-color: #353a41;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.gear-school.active {
+  border-color: var(--tab-gear);
+  background: rgba(143, 163, 184, 0.16);
+  box-shadow: 0 0 10px rgba(143, 163, 184, 0.25);
+}
+
+.gear-school-name {
+  color: var(--bright);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gear-school-stat {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.gear-sockets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+
+.gear-socket {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.gear-socket select {
+  max-width: 330px;
+  padding: 4px 6px;
+  border: 1px solid #555;
+  background: #0b0c0e;
+  color: var(--bright);
+  font: inherit;
+  font-size: 14px;
+}
+
+.gear-enchantment {
+  flex-basis: 100%;
+  margin: 0;
+  color: #ddd6ca;
+  font-size: 15px;
 }
 
 /* --- Info panel: fixed height, so the board below stays put while the pointer moves.

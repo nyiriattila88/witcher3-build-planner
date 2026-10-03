@@ -1,15 +1,20 @@
 import type { JSX, ReactNode } from 'react';
-import { MAX_RANK, SYNERGY, type Build } from '../build/build';
+import { MAX_RANK, SET_PIECES, SYNERGY, type Build } from '../build/build';
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
+import type { GearItemData } from '../data/gear';
+import { ENCHANTMENT_SOCKETS, type EnchantmentData, type UpgradeData } from '../data/upgrades';
 import {
   decoctionIconUrl,
   formatDuration,
+  GEAR_SLOT_NAMES,
+  gearStatText,
   iconUrl,
   mutagenEffect,
   mutagenIconUrl,
   potionIconUrl,
   potionTierName,
+  statBonusText,
   treeColour,
 } from './appearance';
 import { MutationDisc } from './mutation-disc';
@@ -22,7 +27,10 @@ export type InfoTarget =
   | { readonly kind: 'mutation'; readonly mutation: Mutation }
   | { readonly kind: 'mutagen'; readonly mutagen: Mutagen }
   | { readonly kind: 'potion'; readonly potion: PotionData; readonly tier: number }
-  | { readonly kind: 'decoction'; readonly decoction: DecoctionData };
+  | { readonly kind: 'decoction'; readonly decoction: DecoctionData }
+  | { readonly kind: 'gear'; readonly item: GearItemData }
+  | { readonly kind: 'upgrade'; readonly upgrade: UpgradeData }
+  | { readonly kind: 'enchantment'; readonly enchantment: EnchantmentData };
 
 type InfoPanelProps = {
   readonly target: InfoTarget;
@@ -56,6 +64,12 @@ function InfoContent({ target, build, catalog }: InfoPanelProps): JSX.Element {
       return <PotionInfo potion={target.potion} tier={target.tier} build={build} />;
     case 'decoction':
       return <DecoctionInfo decoction={target.decoction} />;
+    case 'gear':
+      return <GearInfo item={target.item} build={build} catalog={catalog} />;
+    case 'upgrade':
+      return <UpgradeInfo upgrade={target.upgrade} />;
+    case 'enchantment':
+      return <EnchantmentInfo enchantment={target.enchantment} />;
   }
 }
 
@@ -197,6 +211,71 @@ function DecoctionInfo({ decoction }: { decoction: DecoctionData }): JSX.Element
   return (
     <InfoLayout icon={icon} title={decoction.name} meta={meta}>
       <p className="info-text">{decoction.effect}</p>
+    </InfoLayout>
+  );
+}
+
+function GearInfo({
+  item,
+  build,
+  catalog,
+}: {
+  item: GearItemData;
+  build: Build;
+  catalog: Catalog;
+}): JSX.Element {
+  const set = catalog.setBonus(item.school);
+  const pieces = build.setPieces(item.school);
+  const kind = item.damage === null ? `${set.weight} armor` : GEAR_SLOT_NAMES[item.slot];
+  const meta = (
+    <>
+      {item.school} school · {kind} · Level {item.level}
+      <br />
+      {gearStatText(item)} · {item.sockets} {item.sockets === 1 ? 'socket' : 'sockets'} · Set pieces
+      worn: {pieces}
+    </>
+  );
+  return (
+    <InfoLayout title={item.name} meta={meta}>
+      {item.bonuses.map((bonus) => (
+        <p key={bonus[0]} className="info-text">
+          {statBonusText(bonus)}
+        </p>
+      ))}
+      {set.three === null || set.six === null ? (
+        <p className="info-text">{item.school} gear has no set bonuses.</p>
+      ) : (
+        <>
+          <p className={pieces >= SET_PIECES.first ? 'info-rank reached' : 'info-rank'}>
+            <b>{SET_PIECES.first} pieces</b>
+            <span>{set.three}</span>
+          </p>
+          <p className={pieces >= SET_PIECES.full ? 'info-rank reached' : 'info-rank'}>
+            <b>{SET_PIECES.full} pieces</b>
+            <span>{set.six}</span>
+          </p>
+        </>
+      )}
+    </InfoLayout>
+  );
+}
+
+function UpgradeInfo({ upgrade }: { upgrade: UpgradeData }): JSX.Element {
+  const meta = upgrade.kind === 'rune' ? 'Rune · goes into a sword' : 'Glyph · goes into armor';
+  return (
+    <InfoLayout title={upgrade.name} meta={meta}>
+      <p className="info-text">{statBonusText(upgrade.bonus)}</p>
+    </InfoLayout>
+  );
+}
+
+function EnchantmentInfo({ enchantment }: { enchantment: EnchantmentData }): JSX.Element {
+  const target = enchantment.kind === 'runeword' ? 'a sword' : 'a chest armor';
+  const meta = `${enchantment.kind === 'runeword' ? 'Runeword' : 'Glyphword'} · Runewright level ${enchantment.level} · fills ${target} with ${ENCHANTMENT_SOCKETS} sockets`;
+  return (
+    <InfoLayout title={enchantment.name} meta={meta}>
+      <p className="info-text">{enchantment.effect}</p>
+      <p className="info-meta">Made from {enchantment.ingredients.join(', ')}</p>
     </InfoLayout>
   );
 }

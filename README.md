@@ -40,9 +40,14 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
   and the thresholds of slotted alchemy skills are marked on it, and every skill there opens its tooltip.
   As in the game, a potion or decoction that would take the total above the maximum cannot be made
   active.
-- **Shareable builds.** A short build code restores everything: points, slots, mutagens and
-  mutations. The page address carries it as `?build=`, so a copied link opens the same build, and a plain
-  address starts empty.
+- **Witcher gear.** Wear the final school gear of Bear, Cat, Griffin, Wolf, Forgotten Wolf, Manticore and
+  Viper, one item per slot and mixed freely. Put runes into the swords and glyphs into the armor socket
+  by socket, or a runeword or glyphword from the Runewright. Wearing 3 or 6 pieces of a school shows its
+  set bonuses, the Manticore pieces raise maximum Toxicity, and every item, rune and glyph counts towards
+  the total bonuses.
+- **Shareable builds.** A short build code restores everything: points, slots, mutagens, mutations, the
+  toxicity plan and the gear. The page address carries it as `?build=`, so a copied link opens the same
+  build, and a plain address starts empty.
 - **Always know what is live.** The header shows the planner version and the game version the data
   matches, the footer the commit and the build date.
 
@@ -57,13 +62,13 @@ the site to GitHub Pages.
 
 The game rules know nothing about React. Each layer only imports from the ones above it:
 
-| Layer          | What it holds                                                                     |
-| -------------- | --------------------------------------------------------------------------------- |
-| `src/data/`    | The game data as typed values: skills, tree layout and links, mutagens, mutations |
-| `src/catalog/` | The data joined into lookups, with prerequisites and unlocks resolved at startup  |
-| `src/build/`   | The `Build` model and every rule, and the build code                              |
-| `src/planner/` | React components and the pure UI logic beside them                                |
-| `src/app/`     | State, the address bar, drag and drop and the page layout                         |
+| Layer          | What it holds                                                                       |
+| -------------- | ----------------------------------------------------------------------------------- |
+| `src/data/`    | The game data as typed values: skills and trees, mutagens, mutations, elixirs, gear |
+| `src/catalog/` | The data joined into lookups, with prerequisites and unlocks resolved at startup    |
+| `src/build/`   | The `Build` model and every rule, and the build code                                |
+| `src/planner/` | React components and the pure UI logic beside them                                  |
+| `src/app/`     | State, the address bar, drag and drop and the page layout                           |
 
 A `Build` keeps itself valid after every command, so the components never decide what is allowed. The
 build code is one mixed-radix number in base64url. It walks the build field by field, and each field
@@ -99,9 +104,13 @@ Agent instructions for AI-assisted changes are in [AGENTS.md](AGENTS.md). Change
   orbs: The Witcher Wiki on Fandom.
 - Potions and decoctions, their Toxicity, durations and effects and the Manticore armor: The Witcher Wiki
   on Fandom, with the values since patch 4.0, and the Fextralife Witcher 3 wiki pages edited after 4.0
-  where the two disagree. The effect values are written into the in-game descriptions. The overdose threshold at half of the maximum: the list of
-  changes of the next-gen update 4.0. The 167 alchemy recipes: what players measured with Acquired
-  Tolerance since 4.0 (148 in the base game, 150 with Hearts of Stone).
+  where the two disagree. The effect values are written into the in-game descriptions. The overdose
+  threshold at half of the maximum: the list of changes of the next-gen update 4.0. The 167 alchemy
+  recipes: what players measured with Acquired Tolerance since 4.0 (148 in the base game, 150 with Hearts
+  of Stone).
+- Witcher gear, set bonuses, runestones, glyphs and the Runewright's runewords and glyphwords: The
+  Witcher Wiki on Fandom, with the regular game's values since patch 4.0. The set bonuses come with the
+  final, grandmaster version of a school's gear.
 - Game version: the Remastered patch notes on thewitcher.com. Patches 5.00b and 5.00c changed no
   skills.
 

@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
 import { MUTAGEN_GROUPS, type Build } from '../build/build';
+import { GEAR_SLOTS } from '../data/gear';
 import { treeColour } from './appearance';
 import { tabKey, tabName, type PlannerTab } from './planner-tab';
 
@@ -24,6 +25,8 @@ const tabCount = (tab: PlannerTab, build: Build): readonly [count: string, meani
       return [`${build.researchedCount}`, 'mutations researched'];
     case 'toxicity':
       return [`${build.toxicity()}/${build.maxToxicity()}`, 'Toxicity of the maximum'];
+    case 'gear':
+      return [`${build.gearCount}/${GEAR_SLOTS.length}`, 'items worn'];
   }
 };
 

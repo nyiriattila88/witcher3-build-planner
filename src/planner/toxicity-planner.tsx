@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type JSX, type MouseEvent } from 'react';
+import { useRef, type JSX, type MouseEvent } from 'react';
 import { ACQUIRED_TOLERANCE, METABOLIC_CONTROL, type Build } from '../build/build';
 import type { Catalog, Skill } from '../catalog/catalog';
 import {
@@ -11,6 +11,7 @@ import {
 import { decoctionIconUrl, formatDuration, potionIconUrl, potionTierName } from './appearance';
 import { PANE_WIDTH } from './geometry';
 import { SkillTooltip } from './skill-tooltip';
+import { usePaneTooltip } from './use-pane-tooltip';
 
 type ToxicityPlannerProps = {
   readonly catalog: Catalog;
@@ -23,20 +24,17 @@ type ToxicityPlannerProps = {
 
 type Elixir = PotionData['tiers'][number];
 
-type Tip = { readonly placement: CSSProperties } & (
+type Tip =
   | {
       readonly kind: 'elixir';
       readonly title: string;
       readonly elixir: Elixir;
       readonly hint: string;
     }
-  | { readonly kind: 'skill'; readonly skill: Skill; readonly hint: string | undefined }
-);
+  | { readonly kind: 'skill'; readonly skill: Skill; readonly hint: string | undefined };
 
 const TIER_LABELS = ['I', 'II', 'III'];
 const TOO_TOXIC = 'Too toxic: it would take Toxicity above the maximum';
-const MANTICORE_OPTIONS = Array.from({ length: MANTICORE_ARMOR.pieces + 1 }, (_, n) => n);
-const TIP_GAP = 10;
 
 // Skills whose effect starts at a share of the maximum, marked on the bar while they sit in a slot.
 const SKILL_THRESHOLDS = [
@@ -55,8 +53,9 @@ export function ToxicityPlanner({
   onHoverDecoction,
   onHoverSkill,
 }: ToxicityPlannerProps): JSX.Element {
-  const root = useRef<HTMLDivElement>(null);
-  const [tip, setTip] = useState<Tip | null>(null);
+  const pane = useRef<HTMLDivElement>(null);
+  const tooltip = usePaneTooltip<Tip>(pane);
+  const tip = tooltip.tip;
   const max = build.maxToxicity();
   const toxicity = build.toxicity();
   const overdose = build.overdoseToxicity();
@@ -77,36 +76,14 @@ export function ToxicityPlanner({
     return skill === undefined || at === undefined ? [] : [{ skill, value: max * at }];
   });
 
-  // The in-game tooltip, beside what is under the pointer and towards the middle of the pane, as on
-  // the board.
-  const placeBeside = (target: Element | null): CSSProperties | null => {
-    const pane = root.current?.getBoundingClientRect();
-    const box = target?.getBoundingClientRect();
-    if (pane === undefined || box === undefined) return null;
-    const left = box.left - pane.left;
-    const top = box.top - pane.top;
-    const horizontal =
-      left + box.width / 2 > pane.width / 2
-        ? { right: pane.width - left + TIP_GAP }
-        : { left: left + box.width + TIP_GAP };
-    const vertical =
-      top + box.height / 2 > pane.height / 2
-        ? { bottom: pane.height - (top + box.height) }
-        : { top };
-    return { ...horizontal, ...vertical };
-  };
   const showTip = (event: MouseEvent, title: string, elixir: Elixir, hint: string): void => {
-    const placement = placeBeside(event.currentTarget.closest('.elixir'));
-    if (placement !== null) setTip({ kind: 'elixir', title, elixir, hint, placement });
+    tooltip.show(event.currentTarget.closest('.elixir'), { kind: 'elixir', title, elixir, hint });
   };
   const showSkillTip = (event: MouseEvent, skill: Skill, hint?: string): void => {
     onHoverSkill(skill);
-    const placement = placeBeside(event.currentTarget);
-    if (placement !== null) setTip({ kind: 'skill', skill, hint, placement });
+    tooltip.show(event.currentTarget, { kind: 'skill', skill, hint });
   };
-  const hideTip = (): void => {
-    setTip(null);
-  };
+  const hideTip = tooltip.hide;
 
   // A skill that adds to maximum Toxicity, which only counts while it sits in a slot.
   const skillSource = (
@@ -135,7 +112,7 @@ export function ToxicityPlanner({
   };
 
   return (
-    <div ref={root} className="pane-content toxicity" style={{ width: PANE_WIDTH }}>
+    <div ref={pane} className="pane-content toxicity" style={{ width: PANE_WIDTH }}>
       <section className="toxicity-summary">
         <div className="toxicity-meter">
           <div
@@ -185,7 +162,10 @@ export function ToxicityPlanner({
           {skillSource(METABOLIC_CONTROL, build.metabolicControl())}
           <div>
             <dt>Manticore armor</dt>
-            <dd>+{build.manticorePieces * MANTICORE_ARMOR.toxicity}</dd>
+            <dd>
+              +{build.manticorePieces * MANTICORE_ARMOR.toxicity} ({build.manticorePieces} of{' '}
+              {MANTICORE_ARMOR.pieces} pieces)
+            </dd>
           </div>
         </dl>
         <div className="toxicity-controls">
@@ -205,24 +185,7 @@ export function ToxicityPlanner({
             />{' '}
             of {ALCHEMY_RECIPES}
           </label>
-          <span className="manticore-pieces">
-            Manticore armor pieces
-            {MANTICORE_OPTIONS.map((pieces) => (
-              <button
-                key={pieces}
-                type="button"
-                className={pieces === build.manticorePieces ? 'active' : undefined}
-                aria-pressed={pieces === build.manticorePieces}
-                onClick={() => {
-                  onChange((draft) => {
-                    draft.setManticorePieces(pieces);
-                  });
-                }}
-              >
-                {pieces}
-              </button>
-            ))}
-          </span>
+          <span>Manticore armor pieces come from the Gear tab.</span>
         </div>
       </section>
 
@@ -347,24 +310,24 @@ export function ToxicityPlanner({
         })}
       </div>
 
-      {tip?.kind === 'skill' && (
+      {tip?.content.kind === 'skill' && (
         <SkillTooltip
-          skill={tip.skill}
-          rank={build.rank(tip.skill)}
+          skill={tip.content.skill}
+          rank={build.rank(tip.content.skill)}
           placement={tip.placement}
-          hint={tip.hint}
+          hint={tip.content.hint}
         />
       )}
-      {tip?.kind === 'elixir' && (
+      {tip?.content.kind === 'elixir' && (
         <div className="game-tooltip" style={tip.placement} role="tooltip">
           <div className="game-tooltip-head">
-            <b>{tip.title}</b>
+            <b>{tip.content.title}</b>
             <span>
-              Toxicity {tip.elixir.toxicity} · {formatDuration(tip.elixir.duration)}
+              Toxicity {tip.content.elixir.toxicity} · {formatDuration(tip.content.elixir.duration)}
             </span>
           </div>
-          <p className="game-tooltip-label">{tip.elixir.effect}</p>
-          <p className="game-tooltip-hint">{tip.hint}</p>
+          <p className="game-tooltip-label">{tip.content.elixir.effect}</p>
+          <p className="game-tooltip-hint">{tip.content.hint}</p>
         </div>
       )}
     </div>

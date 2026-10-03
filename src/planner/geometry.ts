@@ -127,3 +127,21 @@ export const tooltipPlacement = (
     : { left: x + half + TOOLTIP_GAP }),
   ...(y > container.height / 2 ? { bottom: container.height - (y + half) } : { top: y - half }),
 });
+
+// The same for a box of any size, given relative to its container.
+export const placementBeside = (
+  box: {
+    readonly left: number;
+    readonly top: number;
+    readonly width: number;
+    readonly height: number;
+  },
+  container: { readonly width: number; readonly height: number },
+): { left?: number; right?: number; top?: number; bottom?: number } => ({
+  ...(box.left + box.width / 2 > container.width / 2
+    ? { right: container.width - box.left + TOOLTIP_GAP }
+    : { left: box.left + box.width + TOOLTIP_GAP }),
+  ...(box.top + box.height / 2 > container.height / 2
+    ? { bottom: container.height - (box.top + box.height) }
+    : { top: box.top }),
+});

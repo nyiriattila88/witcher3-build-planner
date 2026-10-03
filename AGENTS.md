@@ -20,7 +20,7 @@ Each layer only imports from the layers above it in this list. The model knows n
 
 | Folder         | Role                                                                                         |
 | -------------- | -------------------------------------------------------------------------------------------- |
-| `src/data/`    | The game data: skills, tree layout and links, mutagens and mutations. Plain typed values.    |
+| `src/data/`    | The game data: skills and trees, mutagens, mutations, elixirs and gear. Plain typed values.  |
 | `src/catalog/` | Joins the data into lookups (prerequisites, unlocks, ids). Fails fast on a broken reference. |
 | `src/build/`   | The `Build` model with every game rule, its snapshot form and the build code.                |
 | `src/planner/` | React components and the pure UI logic beside them (colours, geometry, drag and drop).       |
@@ -35,9 +35,11 @@ Each layer only imports from the layers above it in this list. The model knows n
   needs a new format behind a marker today's codes cannot contain, such as `3.`, and must keep decoding
   the unmarked codes, the way `W3R1.` codes still decode through `src/build/legacy-build-code.ts`.
   The toxicity plan (the potions and decoctions of `src/data/alchemy.ts`, Manticore armor pieces and
-  known recipes) is walked last, which is why codes written before it existed still open; anything new
-  belongs after it for the same reason. The pinned codes in `src/build/build-code.test.ts` guard this, never
-  change them to make a test pass.
+  known recipes) and then the gear (`src/data/gear.ts` with the runes, glyphs and enchantments of
+  `src/data/upgrades.ts`) are walked last, which is why codes written before them still open; anything
+  new belongs after the gear for the same reason. A code from before the gear keeps its own count of
+  Manticore pieces until armor is picked. The pinned codes in `src/build/build-code.test.ts` guard this,
+  never change them to make a test pass.
 - **The address is the only state.** The build lives in the `build` parameter of the page address
   (`src/app/build-address.ts`), nothing is stored in the browser. A plain address opens an empty build,
   and a 1.x link with the code in its hash is moved into the parameter.

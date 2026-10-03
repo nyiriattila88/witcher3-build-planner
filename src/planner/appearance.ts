@@ -1,5 +1,6 @@
 import type { Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
+import type { GearItemData, GearSlot, StatBonus } from '../data/gear';
 import type { TreeName } from '../data/skills';
 
 // Files under public/ are served below the base path, which is the repository name on GitHub Pages.
@@ -62,3 +63,22 @@ export const mutagenLabel = (mutagen: Mutagen): string => mutagen.name.replace(/
 
 export const mutagenEffect = (mutagen: Mutagen, value: number): string =>
   `${mutagen.effect} +${value}${mutagen.unit}`;
+
+export const GEAR_SLOT_NAMES: Readonly<Record<GearSlot, string>> = {
+  steel: 'Steel sword',
+  silver: 'Silver sword',
+  armor: 'Armor',
+  gloves: 'Gauntlets',
+  trousers: 'Trousers',
+  boots: 'Boots',
+};
+
+// As the game lists an item's bonus: +22% Attack Power.
+export const statBonusText = ([stat, value, unit]: StatBonus): string => `+${value}${unit} ${stat}`;
+
+// The damage of a sword or the armor of a piece of armor, as the number alone.
+export const gearValue = (item: GearItemData): string =>
+  item.damage === null ? `${item.armor ?? 0}` : `${item.damage[0]}-${item.damage[1]}`;
+
+export const gearStatText = (item: GearItemData): string =>
+  `${gearValue(item)} ${item.damage === null ? 'armor' : 'damage'}`;

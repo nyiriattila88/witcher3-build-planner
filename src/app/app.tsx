@@ -4,6 +4,7 @@ import type { Catalog } from '../catalog/catalog';
 import { GAME_VERSION } from '../data/game-version';
 import { treeColour } from '../planner/appearance';
 import { BuildSummary } from '../planner/build-summary';
+import { GearPlanner } from '../planner/gear-planner';
 import { InfoPanel, type InfoTarget } from '../planner/info-panel';
 import { MutagenPicker } from '../planner/mutagen-picker';
 import { MutationTree } from '../planner/mutation-tree';
@@ -56,6 +57,9 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
         case 'toxicity':
           draft.resetElixirs();
           return;
+        case 'gear':
+          draft.resetGear();
+          return;
       }
     });
   };
@@ -70,6 +74,8 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
         return 'Drag to a mutagen slot';
       case 'toxicity':
         return `Toxicity ${build.toxicity()} of ${build.maxToxicity()}`;
+      case 'gear':
+        return `Armor ${build.armorValue()}`;
     }
   })();
 
@@ -166,6 +172,9 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
                 setInfo({ kind: 'skill', skill });
               }}
             />
+          )}
+          {tab.kind === 'gear' && (
+            <GearPlanner catalog={catalog} build={build} onChange={apply} onHover={setInfo} />
           )}
         </div>
         <div className="buttons">

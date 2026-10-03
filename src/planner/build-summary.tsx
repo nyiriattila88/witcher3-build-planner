@@ -1,46 +1,76 @@
 import type { JSX, ReactNode } from 'react';
-import { MAX_RANK, MUTAGEN_GROUPS, type Build, type MutagenBonus } from '../build/build';
+import {
+  MAX_RANK,
+  MUTAGEN_GROUPS,
+  SET_PIECES,
+  type Build,
+  type MutagenBonus,
+} from '../build/build';
 import type { Catalog } from '../catalog/catalog';
+import { GEAR_SLOTS } from '../data/gear';
 import { mutagenColour, mutagenEffect, potionTierName, treeColour } from './appearance';
 
 type BuildSummaryProps = { readonly build: Build; readonly catalog: Catalog };
+
+type StatTotal = { stat: string; value: number; unit: string; colour: string | null };
 
 const marker = (slotted: boolean): string => (slotted ? '◆ ' : '');
 
 // The board does not number its slots, so a mutagen is named after the corner of its group.
 const GROUP_NAMES = ['Top left', 'Top right', 'Bottom left', 'Bottom right'];
 
-// One line per stat, in tree order: the tree bonuses of the slotted skills, then the mutagens. A
-// mutagen's colour decides the stat it raises, so the bonuses of one colour add up.
+// One line per stat: the tree bonuses of the slotted skills, the mutagens in tree order, then the gear
+// with its runes and glyphs. Bonuses to the same stat add up, coloured after where the first came from.
 function totalBonuses(
   build: Build,
   catalog: Catalog,
   mutagens: readonly MutagenBonus[],
 ): ReactNode[] {
-  const lines: ReactNode[] = [];
+  const totals = new Map<string, StatTotal>();
+  const add = (stat: string, value: number, unit: string, colour: string | null): void => {
+    const key = `${stat.toLowerCase()}|${unit}`;
+    const total = totals.get(key);
+    if (total === undefined) totals.set(key, { stat, value, unit, colour });
+    else total.value += value;
+  };
   for (const tree of catalog.trees) {
     const value = build.treeBonus(tree.name);
-    if (value === 0) continue;
-    lines.push(
-      <>
-        <span style={{ color: treeColour(tree.name) }}>{tree.bonus.stat}</span> +{value}
-        {tree.bonus.unit}
-      </>,
-    );
+    if (value > 0) add(tree.bonus.stat, value, tree.bonus.unit, treeColour(tree.name));
   }
   for (const tree of catalog.trees) {
-    const ofColour = mutagens.filter(({ mutagen }) => mutagen.tree === tree.name);
-    const mutagen = ofColour[0]?.mutagen;
-    if (mutagen === undefined) continue;
-    const value = ofColour.reduce((sum, bonus) => sum + bonus.value, 0);
-    lines.push(
-      <>
-        <span style={{ color: mutagenColour(mutagen) }}>{mutagen.effect}</span> +{value}
-        {mutagen.unit}
-      </>,
-    );
+    for (const { mutagen, value } of mutagens) {
+      if (mutagen.tree === tree.name)
+        add(mutagen.effect, value, mutagen.unit, mutagenColour(mutagen));
+    }
   }
-  return lines;
+  for (const [stat, value, unit] of build.gearBonuses()) add(stat, value, unit, null);
+  return [...totals.values()].map(({ stat, value, unit, colour }) => (
+    <>
+      <span style={colour === null ? undefined : { color: colour }}>{stat}</span> +{value}
+      {unit}
+    </>
+  ));
+}
+
+// What is worn, with the runes, glyphs or enchantment in it, then the set bonuses that apply.
+function gearLines(build: Build, catalog: Catalog): string[] {
+  const items = GEAR_SLOTS.flatMap((slot) => {
+    const item = build.gearAt(slot);
+    if (item === null) return [];
+    const word = build.enchantmentAt(slot);
+    const inset = Array.from({ length: item.sockets }, (_, socket) =>
+      build.upgradeAt(slot, socket),
+    );
+    const extras = word === null ? inset.flatMap((each) => each?.name ?? []) : [word.name];
+    return [extras.length > 0 ? `${item.name} (${extras.join(', ')})` : item.name];
+  });
+  const sets = catalog.setBonuses.flatMap(({ school, three }) => {
+    const pieces = build.setPieces(school);
+    if (pieces < SET_PIECES.first || three === null) return [];
+    const bonuses = pieces >= SET_PIECES.full ? '3 and 6 piece bonuses' : '3 piece bonus';
+    return [`${school} set, ${pieces} pieces: ${bonuses}`];
+  });
+  return [...items, ...sets];
 }
 
 export function BuildSummary({ build, catalog }: BuildSummaryProps): JSX.Element | null {
@@ -112,6 +142,14 @@ export function BuildSummary({ build, catalog }: BuildSummaryProps): JSX.Element
           return `${potionTierName(potion, tier)} (${potion.tiers[tier - 1]?.toxicity ?? 0})`;
         }),
       ],
+    });
+  }
+
+  if (build.gearCount > 0) {
+    sections.push({
+      title: `Gear, armor ${build.armorValue()}`,
+      colour: 'var(--tab-gear)',
+      lines: gearLines(build, catalog),
     });
   }
 

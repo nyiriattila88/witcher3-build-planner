@@ -226,13 +226,15 @@ function GearInfo({
 }): JSX.Element {
   const set = catalog.setBonus(item.school);
   const pieces = build.setPieces(item.school);
+  const final = catalog.versions(item).at(-1) === item;
   const kind = item.damage === null ? `${set.weight} armor` : GEAR_SLOT_NAMES[item.slot];
   const meta = (
     <>
-      {item.school} school · {kind} · Level {item.level}
+      {item.school} school{item.tier === null ? '' : ` · ${item.tier}`} · {kind} · Level{' '}
+      {item.level}
       <br />
-      {gearStatText(item)} · {item.sockets} {item.sockets === 1 ? 'socket' : 'sockets'} · Set pieces
-      worn: {pieces}
+      {gearStatText(item)} · {item.sockets} {item.sockets === 1 ? 'socket' : 'sockets'} ·{' '}
+      {final ? `Set pieces worn: ${pieces}` : 'Only the final version counts for the set'}
     </>
   );
   return (

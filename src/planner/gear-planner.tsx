@@ -1,4 +1,4 @@
-import { useRef, type JSX } from 'react';
+import { useRef, type JSX, type MouseEvent } from 'react';
 import { SET_PIECES, upgradeKind, type Build } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import { GEAR_SLOTS, type GearItemData, type GearSlot, type SetBonusData } from '../data/gear';
@@ -18,7 +18,7 @@ type ItemTip = { readonly item: GearItemData; readonly hint: string };
 
 const wornValue = (item: GearItemData | null): string => (item === null ? 'none' : gearValue(item));
 
-// One school per button for every slot, so the schools mix freely, then the sockets of what is worn.
+// The schools side by side for every slot, so they mix freely, then the sockets of what is worn.
 export function GearPlanner(props: GearPlannerProps): JSX.Element {
   const { catalog, build } = props;
   const pane = useRef<HTMLDivElement>(null);
@@ -112,62 +112,28 @@ function SetStatus({ set, pieces }: { set: SetBonusData; pieces: number }): JSX.
 
 type SlotPickerProps = GearPlannerProps & {
   readonly slot: GearSlot;
-  readonly onTip: (target: Element, item: GearItemData, hint: string) => void;
+  readonly onTip: (target: Element | null, item: GearItemData, hint: string) => void;
   readonly onLeave: () => void;
 };
 
-function SlotPicker({
-  catalog,
-  build,
-  onChange,
-  onHover,
-  slot,
-  onTip,
-  onLeave,
-}: SlotPickerProps): JSX.Element {
+function SlotPicker(props: SlotPickerProps): JSX.Element {
+  const { catalog, build, onChange, onHover, slot } = props;
   const worn = build.gearAt(slot);
   return (
     <section className="gear-slot">
       <h3 className="elixir-heading">{GEAR_SLOT_NAMES[slot]}</h3>
       <div className="gear-schools">
-        {catalog.gear
+        {catalog.finalGear
           .filter((item) => item.slot === slot)
-          .map((item) => {
-            const active = worn === item;
-            return (
-              <button
-                key={item.name}
-                type="button"
-                className={active ? 'gear-school active' : 'gear-school'}
-                aria-pressed={active}
-                onClick={(event) => {
-                  onChange((draft) => {
-                    draft.equip(slot, active ? null : item);
-                  });
-                  onTip(
-                    event.currentTarget,
-                    item,
-                    active ? 'Click to wear it' : 'Click to take it off',
-                  );
-                }}
-                onMouseEnter={(event) => {
-                  onHover({ kind: 'gear', item });
-                  onTip(
-                    event.currentTarget,
-                    item,
-                    active ? 'Click to take it off' : 'Click to wear it',
-                  );
-                }}
-                onMouseLeave={onLeave}
-                onFocus={() => {
-                  onHover({ kind: 'gear', item });
-                }}
-              >
-                <span className="gear-school-name">{item.school}</span>
-                <span className="gear-school-stat">{gearStatText(item)}</span>
-              </button>
-            );
-          })}
+          .map((final) => (
+            <SchoolTile
+              key={final.school}
+              {...props}
+              final={final}
+              versions={catalog.versions(final)}
+              worn={worn}
+            />
+          ))}
       </div>
       {worn !== null && (
         <Sockets
@@ -180,6 +146,81 @@ function SlotPicker({
         />
       )}
     </section>
+  );
+}
+
+const VERSION_LABELS = ['I', 'II', 'III', 'IV', 'V'];
+
+type SchoolTileProps = SlotPickerProps & {
+  readonly final: GearItemData;
+  readonly versions: readonly GearItemData[];
+  readonly worn: GearItemData | null;
+};
+
+// One school's item for the slot with a button per version, the way a potion has one per tier.
+function SchoolTile({
+  onChange,
+  onHover,
+  onTip,
+  onLeave,
+  slot,
+  final,
+  versions,
+  worn,
+}: SchoolTileProps): JSX.Element {
+  const wornHere = versions.find((version) => version === worn) ?? null;
+  const shown = wornHere ?? final;
+  const tileOf = (event: MouseEvent): Element | null => event.currentTarget.closest('.gear-school');
+  return (
+    <div
+      className={wornHere === null ? 'gear-school' : 'gear-school active'}
+      onMouseEnter={(event) => {
+        onHover({ kind: 'gear', item: shown });
+        onTip(
+          event.currentTarget,
+          shown,
+          wornHere === null
+            ? 'Pick a version to wear it'
+            : 'Click its version again to take it off',
+        );
+      }}
+      onMouseLeave={onLeave}
+    >
+      <span className="gear-school-name">{final.school}</span>
+      <span className="gear-school-stat">{gearStatText(shown)}</span>
+      <span className="tier-buttons">
+        {versions.map((version, i) => {
+          const chosen = version === worn;
+          return (
+            <button
+              key={version.name}
+              type="button"
+              className={chosen ? 'active' : undefined}
+              aria-pressed={chosen}
+              aria-label={version.name}
+              onClick={() => {
+                onChange((draft) => {
+                  draft.equip(slot, chosen ? null : version);
+                });
+              }}
+              onMouseEnter={(event) => {
+                onHover({ kind: 'gear', item: version });
+                onTip(
+                  tileOf(event),
+                  version,
+                  chosen ? 'Click to take it off' : 'Click to wear this version',
+                );
+              }}
+              onFocus={() => {
+                onHover({ kind: 'gear', item: version });
+              }}
+            >
+              {versions.length === 1 ? 'On' : VERSION_LABELS[i]}
+            </button>
+          );
+        })}
+      </span>
+    </div>
   );
 }
 

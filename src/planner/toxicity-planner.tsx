@@ -265,7 +265,7 @@ export function ToxicityPlanner({
               <span className="elixir-meta">
                 {shown.toxicity} · {formatDuration(shown.duration)}
               </span>
-              <span className="elixir-tiers">
+              <span className="tier-buttons">
                 {potion.tiers.map((each, i) => {
                   const chosen = tier === i + 1;
                   const allowed = build.canSetPotionTier(potion, i + 1);

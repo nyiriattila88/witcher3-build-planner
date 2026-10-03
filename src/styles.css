@@ -779,7 +779,7 @@ img.disc {
   font: inherit;
 }
 
-.elixir-tiers button.active {
+.tier-buttons button.active {
   border-color: var(--toxic);
   background: rgba(142, 208, 79, 0.2);
   color: var(--bright);
@@ -839,14 +839,14 @@ button.elixir {
   font-size: 12.5px;
 }
 
-.elixir-tiers {
+.tier-buttons {
   grid-column: 1 / -1;
   display: flex;
   gap: 4px;
   margin-top: 5px;
 }
 
-.elixir-tiers button {
+.tier-buttons button {
   flex: 1;
   padding: 2px 0;
   font-size: 13px;
@@ -936,11 +936,11 @@ button.elixir {
   color: var(--gold);
 }
 
-/* Seven equal columns, so a long school name wraps instead of pushing the row out of the pane. */
+/* Four equal columns leave room for the five version buttons under every school. */
 .gear-schools {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .gear-school {
@@ -948,12 +948,22 @@ button.elixir {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding: 6px 4px;
-  border-color: #353a41;
+  padding: 6px 8px;
+  border: 1px solid #2e3237;
   background: rgba(0, 0, 0, 0.35);
 }
 
-.gear-school.active {
+.gear-school:hover {
+  border-color: #5a6068;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.gear-school .tier-buttons {
+  align-self: stretch;
+}
+
+.gear-school.active,
+.gear-school .tier-buttons button.active {
   border-color: var(--tab-gear);
   background: rgba(143, 163, 184, 0.16);
   box-shadow: 0 0 10px rgba(143, 163, 184, 0.25);

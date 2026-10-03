@@ -8,16 +8,19 @@ import {
 } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import { GEAR_SLOTS } from '../data/gear';
-import { mutagenColour, mutagenEffect, potionTierName, treeColour } from './appearance';
+import {
+  GROUP_NAMES,
+  mutagenColour,
+  mutagenEffect,
+  potionTierName,
+  treeColour,
+} from './appearance';
 
 type BuildSummaryProps = { readonly build: Build; readonly catalog: Catalog };
 
 type StatTotal = { stat: string; value: number; unit: string; colour: string | null };
 
 const marker = (slotted: boolean): string => (slotted ? '◆ ' : '');
-
-// The board does not number its slots, so a mutagen is named after the corner of its group.
-const GROUP_NAMES = ['Top left', 'Top right', 'Bottom left', 'Bottom right'];
 
 // One line per stat: the tree bonuses of the slotted skills, the mutagens in tree order, then the gear
 // with its runes and glyphs. Bonuses to the same stat add up, coloured after where the first came from.

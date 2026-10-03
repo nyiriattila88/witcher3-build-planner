@@ -43,7 +43,7 @@ export function GearPlanner(props: GearPlannerProps): JSX.Element {
   });
 
   return (
-    <div ref={pane} className="pane-content gear" style={{ width: PANE_WIDTH }}>
+    <div ref={pane} className="pane-content gear" style={{ maxWidth: PANE_WIDTH }}>
       <section className="gear-summary">
         <dl className="gear-totals">
           <div>

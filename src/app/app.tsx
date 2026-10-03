@@ -4,6 +4,7 @@ import type { Catalog } from '../catalog/catalog';
 import { GAME_VERSION } from '../data/game-version';
 import { treeColour } from '../planner/appearance';
 import { BuildSummary } from '../planner/build-summary';
+import { applyDrop } from '../planner/drag-and-drop';
 import { GearPlanner } from '../planner/gear-planner';
 import { InfoPanel, type InfoTarget } from '../planner/info-panel';
 import { MutagenPicker } from '../planner/mutagen-picker';
@@ -203,6 +204,11 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
               else if (item.kind === 'mutation') draft.unslotMutation();
             });
           }}
+          onPlace={(item, target) => {
+            apply((draft) => {
+              applyDrop(draft, item, target);
+            });
+          }}
           onHoverSkill={(skill) => {
             setInfo({ kind: 'skill', skill });
           }}
@@ -219,11 +225,12 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
             take it back. On a touch screen, <b>tap</b> and <b>double-tap</b>.
           </li>
           <li>
-            <b>Drag</b> a skill with points, a mutagen or a researched mutation onto the board.
+            <b>Drag</b> a skill with points, a mutagen or a researched mutation onto the board, or{' '}
+            <b>click</b> a slot of the board to pick what goes in.
           </li>
           <li>
             <b>Double-click</b> a skill, mutagen or mutation on the board to remove it, or drag it
-            off the board.
+            off the board. On a touch screen, <b>double-tap</b> it.
           </li>
         </ul>
         <BuildSummary build={build} catalog={catalog} />

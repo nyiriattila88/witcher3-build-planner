@@ -25,15 +25,16 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
 - **The unlock rules.** A skill opens once a linked parent has a point. Taking the last point from a
   skill also takes every skill that only it kept unlocked, so a branch unwinds in one go. A right-click
   takes a rank back, and on a touch screen a double tap does.
-- **Skill slots and mutagens.** Drag skills into twelve slots in four groups. A mutagen's bonus grows with
-  every matching skill in its group and with Synergy, and the board shows which slots count.
+- **Skill slots and mutagens.** Drag skills into twelve slots in four groups, or click a slot and pick
+  from the list of what fits there. A mutagen's bonus grows with every matching skill in its group and
+  with Synergy, and the board shows which slots count.
 - **Total bonuses.** The build summary adds up what the slotted skills give through their tree, such as
   Adrenaline Point gain for Combat, and what the mutagens give, one line per stat.
 - **Mutations.** Research them in order, slot one in the centre, and fill the four extra slots around it, which open with
   research and take only the mutation's colours. Unresearching a mutation also takes the ones that need it.
 - **The in-game character screen.** Tooltips with the current and the next level, mutagen orbs in their
   diamonds, mutation emblems and the bonus of each slot group, as the game shows them. A double click
-  takes a skill, mutagen or mutation off the board.
+  or a double tap takes a skill, mutagen or mutation off the board.
 - **Toxicity planner.** Pick the potions and decoctions that are active together and see them against the
   maximum Toxicity: the base 100, Acquired Tolerance for the recipes you know, Metabolic Control and the
   Manticore armor pieces you wear. The share of the maximum stands beside the bar, the overdose threshold
@@ -46,6 +47,9 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
   stay with the slot when the item changes, and what the new item has no socket for waits, greyed out,
   until it fits again. Wearing 3 or 6 final pieces of a school shows its set bonuses, the Manticore
   pieces raise maximum Toxicity, and every item, rune and glyph counts towards the total bonuses.
+- **On a phone too.** The trees and the board scale down to the width of the screen with larger labels,
+  the info panel comes right after the pane, and the board's slots are filled by tapping, so nothing
+  needs dragging.
 - **Shareable builds.** A short build code restores everything: points, slots, mutagens, mutations, the
   toxicity plan and the gear. The page address carries it as `?build=`, so a copied link opens the same
   build, and a plain address starts empty.

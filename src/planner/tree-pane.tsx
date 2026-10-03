@@ -3,6 +3,7 @@ import { MAX_RANK, type Build } from '../build/build';
 import type { Skill, SkillTree } from '../catalog/catalog';
 import { backgroundUrl, iconUrl, treeColour } from './appearance';
 import type { DragItem } from './drag-and-drop';
+import { FitToWidth } from './fit-to-width';
 import {
   ICON_SIZE,
   NODE_WIDTH,
@@ -34,59 +35,61 @@ export function TreePane({
   const [hovered, setHovered] = useState<Skill | null>(null);
   const size = treePaneSize(tree.skills.map((skill) => skill.position));
   return (
-    <div
-      className="pane-content"
-      style={{
-        ...size,
-        color: treeColour(tree.name),
-        backgroundImage: `url("${backgroundUrl(tree.name.toLowerCase())}")`,
-        backgroundSize: treeBackdrop.size,
-        backgroundPosition: treeBackdrop.position,
-      }}
-    >
-      <svg width={size.width} height={size.height}>
-        {tree.links.map(([parent, child]) => {
-          const [x1, y1] = nodeCentre(parent.position);
-          const [x2, y2] = nodeCentre(child.position);
-          return (
-            <line
-              key={`${parent.index}-${child.index}`}
-              className={build.rank(parent) > 0 ? 'link active' : 'link'}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-            />
-          );
-        })}
-      </svg>
-      {tree.skills.map((skill) => (
-        <SkillNode
-          key={skill.index}
-          skill={skill}
-          build={build}
-          {...handlers}
-          onHover={(target) => {
-            setHovered(target);
-            onHover(target);
-          }}
-          onLeave={() => {
-            setHovered(null);
-          }}
-          onDragStart={(item, event) => {
-            setHovered(null);
-            onDragStart(item, event);
-          }}
-        />
-      ))}
-      {hovered?.tree === tree.name && (
-        <SkillTooltip
-          skill={hovered}
-          rank={build.rank(hovered)}
-          placement={tooltipPlacement(nodeCentre(hovered.position), ICON_SIZE / 2, size)}
-        />
-      )}
-    </div>
+    <FitToWidth width={size.width} height={size.height}>
+      <div
+        className="pane-content"
+        style={{
+          ...size,
+          color: treeColour(tree.name),
+          backgroundImage: `url("${backgroundUrl(tree.name.toLowerCase())}")`,
+          backgroundSize: treeBackdrop.size,
+          backgroundPosition: treeBackdrop.position,
+        }}
+      >
+        <svg width={size.width} height={size.height}>
+          {tree.links.map(([parent, child]) => {
+            const [x1, y1] = nodeCentre(parent.position);
+            const [x2, y2] = nodeCentre(child.position);
+            return (
+              <line
+                key={`${parent.index}-${child.index}`}
+                className={build.rank(parent) > 0 ? 'link active' : 'link'}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+              />
+            );
+          })}
+        </svg>
+        {tree.skills.map((skill) => (
+          <SkillNode
+            key={skill.index}
+            skill={skill}
+            build={build}
+            {...handlers}
+            onHover={(target) => {
+              setHovered(target);
+              onHover(target);
+            }}
+            onLeave={() => {
+              setHovered(null);
+            }}
+            onDragStart={(item, event) => {
+              setHovered(null);
+              onDragStart(item, event);
+            }}
+          />
+        ))}
+        {hovered?.tree === tree.name && (
+          <SkillTooltip
+            skill={hovered}
+            rank={build.rank(hovered)}
+            placement={tooltipPlacement(nodeCentre(hovered.position), ICON_SIZE / 2, size)}
+          />
+        )}
+      </div>
+    </FitToWidth>
   );
 }
 

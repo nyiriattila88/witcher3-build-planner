@@ -112,7 +112,7 @@ export function ToxicityPlanner({
   };
 
   return (
-    <div ref={pane} className="pane-content toxicity" style={{ width: PANE_WIDTH }}>
+    <div ref={pane} className="pane-content toxicity" style={{ maxWidth: PANE_WIDTH }}>
       <section className="toxicity-summary">
         <div className="toxicity-meter">
           <div

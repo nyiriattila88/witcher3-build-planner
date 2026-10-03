@@ -1,8 +1,24 @@
 import { useState, type DragEvent, type JSX, type RefObject } from 'react';
-import { BASE_SLOTS, MUTAGEN_GROUPS, SLOTS_PER_GROUP, slotGroup, type Build } from '../build/build';
+import {
+  BASE_SLOTS,
+  MAX_RANK,
+  MUTAGEN_GROUPS,
+  SLOTS_PER_GROUP,
+  slotGroup,
+  type Build,
+} from '../build/build';
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
-import { helixUrl, iconUrl, mutagenColour, mutagenIconUrl, treeColour } from './appearance';
-import { dropTargetKey, type DragItem, type DropTarget } from './drag-and-drop';
+import {
+  GROUP_NAMES,
+  helixUrl,
+  iconUrl,
+  mutagenColour,
+  mutagenIconUrl,
+  mutationColour,
+  treeColour,
+} from './appearance';
+import { acceptsDrop, dropTargetKey, type DragItem, type DropTarget } from './drag-and-drop';
+import { FitToWidth } from './fit-to-width';
 import {
   BOARD_CENTRE,
   BOARD_SIZE,
@@ -20,11 +36,14 @@ import { MutagenGem } from './mutagen-gem';
 import { MutationDisc } from './mutation-disc';
 import { RankPips } from './rank-pips';
 import { SkillTooltip } from './skill-tooltip';
+import { useBoardTaps } from './use-board-taps';
 
 type BoardHandlers = {
   readonly overKey: string | null;
   readonly onDragStart: (item: DragItem, event: DragEvent) => void;
   readonly onRemove: (item: DragItem) => void;
+  // Puts what was picked from the list of a slot into it.
+  readonly onPlace: (item: DragItem, target: DropTarget) => void;
   readonly onHoverSkill: (skill: Skill) => void;
   readonly onHoverMutagen: (mutagen: Mutagen) => void;
   readonly onHoverMutation: (mutation: Mutation) => void;
@@ -39,59 +58,80 @@ type SlotBoardProps = BoardHandlers & {
 
 const groups = Array.from({ length: MUTAGEN_GROUPS }, (_, group) => group);
 
-const REMOVE_TIP = 'Drag to move, double-click to remove';
+const REMOVE_TIP = 'Drag to move, double-click to remove, click to change';
 
-// Props of a board item: dragging moves it, a double click takes it off the board.
+// Props of a board item: dragging moves it.
 const boardItemProps = (item: DragItem, handlers: BoardHandlers, onPickUp?: () => void) => ({
   draggable: true,
   onDragStart: (event: DragEvent) => {
     onPickUp?.();
     handlers.onDragStart(item, event);
   },
-  onDoubleClick: () => {
-    handlers.onRemove(item);
-  },
 });
 
 export function SlotBoard({ catalog, build, boardRef, ...handlers }: SlotBoardProps): JSX.Element {
   const [tipSlot, setTipSlot] = useState<number | null>(null);
+  const [picking, setPicking] = useState<DropTarget | null>(null);
   const tipSkill = tipSlot === null ? null : build.slotAt(tipSlot);
   return (
-    <div ref={boardRef} className="board" style={BOARD_SIZE}>
-      <img className="board-helix" src={helixUrl} alt="" draggable={false} />
-      <svg width={BOARD_SIZE.width} height={BOARD_SIZE.height}>
-        {groups.map((group) => (
-          <GroupBracket
-            key={group}
-            group={group}
-            build={build}
-            mutagen={catalog.mutagen(build.mutagenAt(group))}
-          />
-        ))}
-      </svg>
-      {groups.map((group) => (
-        <GroupHeader key={group} group={group} build={build} />
-      ))}
-      {Array.from({ length: build.slotCount }, (_, index) => (
-        <SkillSlot
-          key={index}
-          index={index}
+    <div className="board-area">
+      <FitToWidth width={BOARD_SIZE.width} height={BOARD_SIZE.height}>
+        <div ref={boardRef} className="board" style={BOARD_SIZE}>
+          <img className="board-helix" src={helixUrl} alt="" draggable={false} />
+          <svg width={BOARD_SIZE.width} height={BOARD_SIZE.height}>
+            {groups.map((group) => (
+              <GroupBracket
+                key={group}
+                group={group}
+                build={build}
+                mutagen={catalog.mutagen(build.mutagenAt(group))}
+              />
+            ))}
+          </svg>
+          {groups.map((group) => (
+            <GroupHeader key={group} group={group} build={build} />
+          ))}
+          {Array.from({ length: build.slotCount }, (_, index) => (
+            <SkillSlot
+              key={index}
+              index={index}
+              catalog={catalog}
+              build={build}
+              handlers={handlers}
+              onPick={setPicking}
+              onTip={setTipSlot}
+            />
+          ))}
+          {groups.map((group) => (
+            <MutagenSlot
+              key={group}
+              group={group}
+              build={build}
+              handlers={handlers}
+              onPick={setPicking}
+            />
+          ))}
+          <MutationSlot catalog={catalog} build={build} handlers={handlers} onPick={setPicking} />
+          {tipSlot !== null && tipSkill !== null && (
+            <SkillTooltip
+              skill={tipSkill}
+              rank={build.rank(tipSkill)}
+              placement={tooltipPlacement(slotCentre(tipSlot), SLOT_SIZE / 2, BOARD_SIZE)}
+              hint={REMOVE_TIP}
+            />
+          )}
+        </div>
+      </FitToWidth>
+      {picking !== null && (
+        <SlotChoices
+          key={dropTargetKey(picking)}
           catalog={catalog}
           build={build}
+          target={picking}
           handlers={handlers}
-          onTip={setTipSlot}
-        />
-      ))}
-      {groups.map((group) => (
-        <MutagenSlot key={group} group={group} build={build} handlers={handlers} />
-      ))}
-      <MutationSlot catalog={catalog} build={build} handlers={handlers} />
-      {tipSlot !== null && tipSkill !== null && (
-        <SkillTooltip
-          skill={tipSkill}
-          rank={build.rank(tipSkill)}
-          placement={tooltipPlacement(slotCentre(tipSlot), SLOT_SIZE / 2, BOARD_SIZE)}
-          hint={REMOVE_TIP}
+          onClose={() => {
+            setPicking(null);
+          }}
         />
       )}
     </div>
@@ -183,13 +223,19 @@ function GroupHeader({ group, build }: { group: number; build: Build }): JSX.Ele
   );
 }
 
-type SlotProps = { readonly build: Build; readonly handlers: BoardHandlers };
+type SlotProps = {
+  readonly build: Build;
+  readonly handlers: BoardHandlers;
+  // Opens the list of what the slot can take.
+  readonly onPick: (target: DropTarget) => void;
+};
 
 function SkillSlot({
   index,
   catalog,
   build,
   handlers,
+  onPick,
   onTip,
 }: SlotProps & {
   index: number;
@@ -198,6 +244,15 @@ function SkillSlot({
 }): JSX.Element {
   const [x, y] = slotCentre(index);
   const target: DropTarget = { kind: 'slot', index };
+  const skill = build.slotAt(index);
+  const taps = useBoardTaps(
+    () => {
+      onPick(target);
+    },
+    () => {
+      if (skill !== null) handlers.onRemove({ kind: 'skill', skill, from: index });
+    },
+  );
   const over = handlers.overKey === dropTargetKey(target) ? ' over' : '';
   const position = { left: x - SLOT_SIZE / 2, top: y - SLOT_SIZE / 2 };
 
@@ -218,10 +273,17 @@ function SkillSlot({
   const accepts = index >= BASE_SLOTS ? <AcceptedTrees build={build} /> : null;
   const mutagen =
     index < BASE_SLOTS ? catalog.mutagen(build.mutagenAt(slotGroup(index))) : undefined;
-  const skill = build.slotAt(index);
   if (skill === null) {
     return (
-      <div className={`slot${over}`} style={position}>
+      <div
+        className={`slot${over}`}
+        style={position}
+        role="button"
+        aria-label="Empty skill slot, click to pick a skill"
+        onClick={() => {
+          onPick(target);
+        }}
+      >
         {accepts}
       </div>
     );
@@ -244,6 +306,7 @@ function SkillSlot({
       onMouseLeave={() => {
         onTip(null);
       }}
+      {...taps}
       {...boardItemProps({ kind: 'skill', skill, from: index }, handlers, () => {
         onTip(null);
       })}
@@ -270,9 +333,23 @@ function AcceptedTrees({ build }: { build: Build }): JSX.Element | null {
   );
 }
 
-function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }): JSX.Element {
+function MutagenSlot({
+  group,
+  build,
+  handlers,
+  onPick,
+}: SlotProps & { group: number }): JSX.Element {
   const [cx, cy] = mutagenSlotCentre(group);
   const target: DropTarget = { kind: 'mutagen-slot', group };
+  const held = build.mutagenAt(group);
+  const taps = useBoardTaps(
+    () => {
+      onPick(target);
+    },
+    () => {
+      if (held !== null) handlers.onRemove({ kind: 'mutagen', mutagen: held, from: group });
+    },
+  );
   const over = handlers.overKey === dropTargetKey(target) ? ' over' : '';
   const half = MUTAGEN_SLOT_SIZE / 2;
   const position = { left: cx - half, top: cy - half };
@@ -280,7 +357,15 @@ function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }):
 
   if (bonus === null) {
     return (
-      <div className={`mutagen-slot${over}`} style={position} aria-label="Empty mutagen slot" />
+      <div
+        className={`mutagen-slot${over}`}
+        style={position}
+        role="button"
+        aria-label="Empty mutagen slot, click to pick a mutagen"
+        onClick={() => {
+          onPick(target);
+        }}
+      />
     );
   }
 
@@ -295,6 +380,7 @@ function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }):
         onMouseEnter={() => {
           handlers.onHoverMutagen(mutagen);
         }}
+        {...taps}
         {...boardItemProps({ kind: 'mutagen', mutagen: mutagen.id, from: group }, handlers)}
       >
         <MutagenGem mutagen={mutagen} />
@@ -315,10 +401,24 @@ function MutagenSlot({ group, build, handlers }: SlotProps & { group: number }):
 }
 
 // The mutation sits in the middle, its name to the left and what it does to the right.
-function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catalog }): JSX.Element {
+function MutationSlot({
+  catalog,
+  build,
+  handlers,
+  onPick,
+}: SlotProps & { catalog: Catalog }): JSX.Element {
   const [cx, cy] = BOARD_CENTRE;
   const radius = MUTATION_SLOT_RADIUS;
   const target: DropTarget = { kind: 'mutation-slot' };
+  const taps = useBoardTaps(
+    () => {
+      onPick(target);
+    },
+    () => {
+      const held = build.slottedMutation;
+      if (held !== null) handlers.onRemove({ kind: 'mutation', mutation: held, fromBoard: true });
+    },
+  );
   const over = handlers.overKey === dropTargetKey(target) ? ' over' : '';
   const mutation = catalog.mutation(build.slottedMutation);
   const innate = catalog.mutations.find((candidate) => candidate.innate);
@@ -329,7 +429,15 @@ function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catal
   if (mutation === undefined) {
     return (
       <>
-        <div className={`mutation-slot${over}`} style={circle} aria-label="Empty mutation slot">
+        <div
+          className={`mutation-slot${over}`}
+          style={circle}
+          role="button"
+          aria-label="Empty mutation slot, click to pick a mutation"
+          onClick={() => {
+            onPick(target);
+          }}
+        >
           {innate !== undefined && <MutationDisc mutation={innate} />}
         </div>
         <div className="mutation-title empty" style={nameBox}>
@@ -337,8 +445,8 @@ function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catal
           <span>{build.researchedCount} researched</span>
         </div>
         <p className="mutation-text empty" style={textBox}>
-          Drag a researched mutation onto the circle. Its colours decide which skills the four extra
-          slots around it take.
+          Drag a researched mutation onto the circle, or click it to pick one. Its colours decide
+          which skills the four extra slots around it take.
         </p>
       </>
     );
@@ -354,6 +462,7 @@ function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catal
         onMouseEnter={() => {
           handlers.onHoverMutation(mutation);
         }}
+        {...taps}
         {...boardItemProps({ kind: 'mutation', mutation: mutation.id, fromBoard: true }, handlers)}
       >
         <MutationDisc mutation={mutation} />
@@ -366,6 +475,154 @@ function MutationSlot({ catalog, build, handlers }: SlotProps & { catalog: Catal
         {mutation.description}
       </p>
     </>
+  );
+}
+
+type SlotChoice = {
+  readonly key: string;
+  readonly label: string;
+  readonly colour: string;
+  readonly item: DragItem;
+  readonly active: boolean;
+};
+
+type SlotChoiceList = {
+  readonly title: string;
+  // What the slot holds now, which emptying it takes off.
+  readonly held: DragItem | null;
+  readonly choices: readonly SlotChoice[];
+  readonly none: string;
+};
+
+// What a slot can take, with the rules of a drop on it.
+function choicesFor(catalog: Catalog, build: Build, target: DropTarget): SlotChoiceList {
+  switch (target.kind) {
+    case 'slot': {
+      const current = build.slotAt(target.index);
+      const group = GROUP_NAMES[slotGroup(target.index)] ?? '';
+      return {
+        title:
+          target.index < BASE_SLOTS
+            ? `Skill slot, ${group.toLowerCase()} group`
+            : 'Extra skill slot',
+        held: current === null ? null : { kind: 'skill', skill: current, from: target.index },
+        choices: catalog.skills.flatMap((skill): SlotChoice[] => {
+          const from = build.slotOf(skill);
+          const item: DragItem = { kind: 'skill', skill, from: from < 0 ? null : from };
+          if (!acceptsDrop(build, item, target)) return [];
+          return [
+            {
+              key: `${skill.tree}/${skill.name}`,
+              label: `${skill.name} ${build.rank(skill)}/${MAX_RANK}`,
+              colour: treeColour(skill.tree),
+              item,
+              active: skill === current,
+            },
+          ];
+        }),
+        none: 'Learn a skill that fits this slot first.',
+      };
+    }
+    case 'mutagen-slot': {
+      const current = build.mutagenAt(target.group);
+      const group = GROUP_NAMES[target.group] ?? '';
+      return {
+        title: `Mutagen slot, ${group.toLowerCase()} group`,
+        held: current === null ? null : { kind: 'mutagen', mutagen: current, from: target.group },
+        choices: catalog.mutagens.map((mutagen) => ({
+          key: mutagen.id,
+          label: mutagen.name,
+          colour: mutagenColour(mutagen),
+          item: { kind: 'mutagen', mutagen: mutagen.id, from: null },
+          active: mutagen.id === current,
+        })),
+        none: '',
+      };
+    }
+    case 'mutation-slot': {
+      const current = build.slottedMutation;
+      return {
+        title: 'Mutation slot',
+        held: current === null ? null : { kind: 'mutation', mutation: current, fromBoard: true },
+        choices: catalog.mutations
+          .filter((mutation) => build.canSlotMutation(mutation.id))
+          .map((mutation) => ({
+            key: mutation.id,
+            label: mutation.name,
+            colour: mutationColour(mutation),
+            item: { kind: 'mutation', mutation: mutation.id, fromBoard: false },
+            active: mutation.id === current,
+          })),
+        none: 'Research a mutation first.',
+      };
+    }
+  }
+}
+
+// The list opens under the board, which on a phone is out of sight.
+const bringIntoView = (element: HTMLElement | null): void => {
+  element?.scrollIntoView({ block: 'nearest' });
+};
+
+// The list of what a slot can take, under the board. Picking from it works without dragging, as on a
+// phone.
+function SlotChoices({
+  catalog,
+  build,
+  target,
+  handlers,
+  onClose,
+}: {
+  catalog: Catalog;
+  build: Build;
+  target: DropTarget;
+  handlers: BoardHandlers;
+  onClose: () => void;
+}): JSX.Element {
+  const { title, held, choices, none } = choicesFor(catalog, build, target);
+  return (
+    <section ref={bringIntoView} className="slot-choices" aria-label={title}>
+      <div className="slot-choices-head">
+        <b>{title}</b>
+        <span>
+          {held !== null && (
+            <button
+              type="button"
+              onClick={() => {
+                handlers.onRemove(held);
+                onClose();
+              }}
+            >
+              Empty it
+            </button>
+          )}
+          <button type="button" onClick={onClose}>
+            Close
+          </button>
+        </span>
+      </div>
+      {choices.length === 0 ? (
+        <p className="slot-choices-none">{none}</p>
+      ) : (
+        <div className="slot-choices-list">
+          {choices.map(({ key, label, colour, item, active }) => (
+            <button
+              key={key}
+              type="button"
+              className={active ? 'active' : undefined}
+              style={{ borderLeftColor: colour }}
+              aria-pressed={active}
+              onClick={() => {
+                handlers.onPlace(item, target);
+                onClose();
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 

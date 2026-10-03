@@ -16,7 +16,7 @@ export function MutagenPicker({ mutagens, onHover, onDragStart }: MutagenPickerP
     <div
       className="pane-content"
       style={{
-        width: PANE_WIDTH,
+        maxWidth: PANE_WIDTH,
         backgroundImage: `url("${backgroundUrl('mutagens')}")`,
         backgroundSize: '100% 100%',
       }}

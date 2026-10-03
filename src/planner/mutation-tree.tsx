@@ -3,6 +3,7 @@ import type { Build } from '../build/build';
 import type { Catalog, Mutation } from '../catalog/catalog';
 import { backgroundUrl, mutationColour } from './appearance';
 import type { DragItem } from './drag-and-drop';
+import { FitToWidth } from './fit-to-width';
 import { MUTATION_GRID, PANE_WIDTH, mutationCentre } from './geometry';
 import { MutationDisc } from './mutation-disc';
 import { useTouchTaps } from './use-touch-taps';
@@ -38,22 +39,24 @@ export function MutationTree({ catalog, build, ...handlers }: MutationTreeProps)
   );
 
   return (
-    <div
-      className="pane-content"
-      style={{
-        width: PANE_WIDTH,
-        height: MUTATION_GRID.height,
-        backgroundImage: `url("${backgroundUrl('mutations')}")`,
-        backgroundSize: '100% 100%',
-      }}
-    >
-      <svg width={PANE_WIDTH} height={MUTATION_GRID.height}>
-        {links}
-      </svg>
-      {catalog.mutations.map((mutation) => (
-        <MutationNode key={mutation.id} mutation={mutation} build={build} {...handlers} />
-      ))}
-    </div>
+    <FitToWidth width={PANE_WIDTH} height={MUTATION_GRID.height}>
+      <div
+        className="pane-content"
+        style={{
+          width: PANE_WIDTH,
+          height: MUTATION_GRID.height,
+          backgroundImage: `url("${backgroundUrl('mutations')}")`,
+          backgroundSize: '100% 100%',
+        }}
+      >
+        <svg width={PANE_WIDTH} height={MUTATION_GRID.height}>
+          {links}
+        </svg>
+        {catalog.mutations.map((mutation) => (
+          <MutationNode key={mutation.id} mutation={mutation} build={build} {...handlers} />
+        ))}
+      </div>
+    </FitToWidth>
   );
 }
 

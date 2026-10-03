@@ -58,6 +58,9 @@ export const mutationColour = (mutation: Mutation): string =>
 export const mutagenColour = (mutagen: Mutagen): string =>
   `var(--mut-${mutagen.tree.toLowerCase()})`;
 
+// The board does not number its slots, so a group is named after its corner.
+export const GROUP_NAMES = ['Top left', 'Top right', 'Bottom left', 'Bottom right'];
+
 // The diamonds show the name without the word "Mutagen", the info panel and the summary show it whole.
 export const mutagenLabel = (mutagen: Mutagen): string => mutagen.name.replace(/ Mutagen$/, '');
 

@@ -67,6 +67,9 @@ Each layer only imports from the layers above it in this list. The model knows n
 - **The tree backdrops are aligned to the nodes.** They are the in-game screenshots with the skill
   boxes removed, positioned by `TREE_SCALE` and `SCREENSHOT_ORIGIN` in `src/planner/geometry.ts`.
   Changing the scale moves the nodes and the backdrop together, changing one of them alone does not.
+- **The trees and the board keep their pixel layout.** `FitToWidth` scales them down on a narrow screen
+  instead of laying them out again, so a position read from the screen, such as where a drag is over the
+  board, is divided by that scale before it meets the layout, as `useDragAndDrop` does.
 
 ## Before you call a change done
 

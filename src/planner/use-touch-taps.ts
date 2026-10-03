@@ -1,7 +1,7 @@
 import { useEffect, useRef, type PointerEvent } from 'react';
 
 // Android's default double-tap timeout.
-const DOUBLE_TAP_MS = 300;
+export const DOUBLE_TAP_MS = 300;
 
 type TapHandlers = {
   readonly onPointerDown: (event: PointerEvent) => void;

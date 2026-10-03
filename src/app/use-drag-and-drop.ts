@@ -11,6 +11,7 @@ import {
   type DragItem,
   type DropTarget,
 } from '../planner/drag-and-drop';
+import { BOARD_SIZE } from '../planner/geometry';
 
 export type DragAndDrop = {
   readonly overKey: string | null;
@@ -41,9 +42,11 @@ export function useDragAndDrop(
       const board = boardRef.current?.getBoundingClientRect();
       if (board === undefined) return null;
       const current = latestBuild.current;
+      // The board may be shown scaled down, while the targets are laid out at its own size.
+      const scale = board.width / BOARD_SIZE.width;
       return snapTarget(
-        [event.clientX - board.left, event.clientY - board.top],
-        drag.icon,
+        [(event.clientX - board.left) / scale, (event.clientY - board.top) / scale],
+        drag.icon / scale,
         current.slotCount,
         (target) => acceptsDrop(current, drag.item, target),
       );

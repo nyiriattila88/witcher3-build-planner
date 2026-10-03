@@ -387,6 +387,8 @@ button:hover {
   text-align: center;
   cursor: pointer;
   user-select: none;
+  /* A double tap takes a rank or a research back instead of zooming the page. */
+  touch-action: manipulation;
 }
 
 .node:focus-visible {
@@ -551,6 +553,8 @@ button:hover {
   text-align: center;
   cursor: pointer;
   user-select: none;
+  /* A double tap takes a rank or a research back instead of zooming the page. */
+  touch-action: manipulation;
 }
 
 .mutation-ring {

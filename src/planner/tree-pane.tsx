@@ -13,6 +13,7 @@ import {
 } from './geometry';
 import { RankPips } from './rank-pips';
 import { SkillTooltip } from './skill-tooltip';
+import { useTouchTaps } from './use-touch-taps';
 
 type TreePaneProps = {
   readonly tree: SkillTree;
@@ -107,6 +108,14 @@ function SkillNode({
   const [x, y] = nodeCentre(skill.position);
   const state = rank > 0 ? 'learned' : build.isAvailable(skill) ? 'available' : 'locked';
   const slotted = build.slotOf(skill) >= 0 ? ' slotted' : '';
+  const taps = useTouchTaps(
+    () => {
+      onLearn(skill);
+    },
+    () => {
+      onUnlearn(skill);
+    },
+  );
 
   const onKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Enter' || event.key === ' ') onLearn(skill);
@@ -123,9 +132,8 @@ function SkillNode({
       tabIndex={0}
       aria-label={`${skill.name}, rank ${rank} of ${MAX_RANK}`}
       draggable={rank > 0}
-      onClick={() => {
-        onLearn(skill);
-      }}
+      onPointerDown={taps.onPointerDown}
+      onClick={taps.onClick}
       onContextMenu={(event) => {
         event.preventDefault();
         onUnlearn(skill);

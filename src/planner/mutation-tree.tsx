@@ -5,6 +5,7 @@ import { backgroundUrl, mutationColour } from './appearance';
 import type { DragItem } from './drag-and-drop';
 import { MUTATION_GRID, PANE_WIDTH, mutationCentre } from './geometry';
 import { MutationDisc } from './mutation-disc';
+import { useTouchTaps } from './use-touch-taps';
 
 type MutationTreeProps = {
   readonly catalog: Catalog;
@@ -73,6 +74,14 @@ function MutationNode({
       ? 'available'
       : 'locked';
   const slotted = build.slottedMutation === mutation.id ? ' slotted' : '';
+  const taps = useTouchTaps(
+    () => {
+      onResearch(mutation);
+    },
+    () => {
+      onUnresearch(mutation);
+    },
+  );
   return (
     <div
       className={`mutation ${state}${slotted}`}
@@ -81,9 +90,8 @@ function MutationNode({
       tabIndex={0}
       aria-label={`${mutation.name}, ${state}`}
       draggable={build.canSlotMutation(mutation.id)}
-      onClick={() => {
-        onResearch(mutation);
-      }}
+      onPointerDown={taps.onPointerDown}
+      onClick={taps.onClick}
       onContextMenu={(event) => {
         event.preventDefault();
         onUnresearch(mutation);

@@ -207,7 +207,7 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
         <ul className="help">
           <li>
             <b>Click</b> a skill to add a rank or a mutation to research it, <b>right-click</b> to
-            take it back.
+            take it back. On a touch screen, <b>tap</b> and <b>double-tap</b>.
           </li>
           <li>
             <b>Drag</b> a skill with points, a mutagen or a researched mutation onto the board.

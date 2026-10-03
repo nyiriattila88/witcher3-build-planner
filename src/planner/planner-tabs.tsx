@@ -28,7 +28,7 @@ const tabCount = (tab: PlannerTab, build: Build): readonly [count: string, meani
 
 export function PlannerTabs({ tabs, current, build, onSelect }: PlannerTabsProps): JSX.Element {
   return (
-    <nav className="tabs" aria-label="Skill trees, mutagens and mutations">
+    <nav className="tabs" aria-label="Skill trees, mutagens, mutations, toxicity and gear">
       {tabs.map((tab) => {
         const active = tabKey(tab) === tabKey(current);
         const [count, meaning] = tabCount(tab, build);

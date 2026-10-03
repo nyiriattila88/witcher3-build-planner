@@ -10,7 +10,7 @@ type SharePanelProps = {
 };
 
 const INTRO =
-  'The code holds the whole build: skill points, slots, mutagens, researched and slotted mutation. The page address carries it too, so a copied link opens the same build.';
+  'The code holds the whole build: skill points, slots, mutagens, mutations, the toxicity plan and the gear. The page address carries it too, so a copied link opens the same build.';
 
 const UNREADABLE =
   'The build code in the page address could not be read, so an empty build opened instead.';

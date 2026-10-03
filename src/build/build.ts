@@ -64,8 +64,8 @@ export type MutagenBonus = {
   readonly value: number;
 };
 
-// One character build: skill ranks, slotted skills, mutagens, mutations and the potions and decoctions
-// planned to be active together.
+// One character build: skill ranks, slotted skills, mutagens, mutations, the potions and decoctions
+// planned to be active together, and the gear worn with its runes and glyphs.
 // Every command leaves the build valid, so callers never have to repair it.
 export class Build {
   readonly #catalog: Catalog;

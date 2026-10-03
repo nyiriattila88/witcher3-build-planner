@@ -1,8 +1,7 @@
 import type { JSX } from 'react';
 import { MUTAGEN_GROUPS, type Build } from '../build/build';
 import { GEAR_SLOTS } from '../data/gear';
-import { treeColour } from './appearance';
-import { tabKey, tabName, type PlannerTab } from './planner-tab';
+import { tabColour, tabKey, tabName, type PlannerTab } from './planner-tab';
 
 type PlannerTabsProps = {
   readonly tabs: readonly PlannerTab[];
@@ -10,9 +9,6 @@ type PlannerTabsProps = {
   readonly build: Build;
   readonly onSelect: (tab: PlannerTab) => void;
 };
-
-const tabColour = (tab: PlannerTab): string =>
-  tab.kind === 'tree' ? treeColour(tab.tree) : `var(--tab-${tab.kind})`;
 
 // The number under a tab, and what it counts.
 const tabCount = (tab: PlannerTab, build: Build): readonly [count: string, meaning: string] => {

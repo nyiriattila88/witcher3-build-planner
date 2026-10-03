@@ -1,5 +1,6 @@
 import type { Catalog } from '../catalog/catalog';
 import type { TreeName } from '../data/skills';
+import { treeColour } from './appearance';
 
 export type PlannerTab =
   | { readonly kind: 'tree'; readonly tree: TreeName }
@@ -17,6 +18,9 @@ export const plannerTabs = (catalog: Catalog): readonly PlannerTab[] => [
 ];
 
 export const tabKey = (tab: PlannerTab): string => (tab.kind === 'tree' ? tab.tree : tab.kind);
+
+export const tabColour = (tab: PlannerTab): string =>
+  tab.kind === 'tree' ? treeColour(tab.tree) : `var(--tab-${tab.kind})`;
 
 export const tabName = (tab: PlannerTab): string => {
   switch (tab.kind) {

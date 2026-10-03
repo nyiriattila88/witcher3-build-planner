@@ -2,14 +2,13 @@ import { useMemo, useState, type JSX } from 'react';
 import type { BuildCodec } from '../build/build-code';
 import type { Catalog } from '../catalog/catalog';
 import { GAME_VERSION } from '../data/game-version';
-import { treeColour } from '../planner/appearance';
 import { BuildSummary } from '../planner/build-summary';
-import { applyDrop } from '../planner/drag-and-drop';
+import { applyDiscard, applyDrop } from '../planner/drag-and-drop';
 import { GearPlanner } from '../planner/gear-planner';
 import { InfoPanel, type InfoTarget } from '../planner/info-panel';
 import { MutagenPicker } from '../planner/mutagen-picker';
 import { MutationTree } from '../planner/mutation-tree';
-import { plannerTabs, tabName, type PlannerTab } from '../planner/planner-tab';
+import { plannerTabs, tabColour, tabName, type PlannerTab } from '../planner/planner-tab';
 import { PlannerTabs } from '../planner/planner-tabs';
 import { SharePanel } from '../planner/share-panel';
 import { SlotBoard } from '../planner/slot-board';
@@ -27,9 +26,6 @@ type AppProps = {
 };
 
 const REPOSITORY_URL = 'https://github.com/nyiriattila88/witcher3-build-planner';
-
-const tabColour = (tab: PlannerTab): string =>
-  tab.kind === 'tree' ? treeColour(tab.tree) : `var(--tab-${tab.kind})`;
 
 export function App({ catalog, codec, address }: AppProps): JSX.Element {
   const { build, code, link, unreadableAddress, apply, load, reset } = useBuild(
@@ -202,10 +198,7 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
           onDragStart={drag.start}
           onRemove={(item) => {
             apply((draft) => {
-              if (item.kind === 'skill' && item.from !== null) draft.unslot(item.from);
-              else if (item.kind === 'mutagen' && item.from !== null)
-                draft.removeMutagen(item.from);
-              else if (item.kind === 'mutation') draft.unslotMutation();
+              applyDiscard(draft, item);
             });
           }}
           onPlace={(item, target) => {

@@ -17,6 +17,7 @@ import {
   gearValue,
   statBonusText,
 } from './appearance';
+import { GameTooltip } from './game-tooltip';
 import { PANE_WIDTH } from './geometry';
 import type { InfoTarget } from './info-panel';
 import { usePaneTooltip } from './use-pane-tooltip';
@@ -103,21 +104,18 @@ type GearTooltipProps = ItemTip & {
 // The in-game tooltip of an item: what it is, its level, damage or armor and sockets, then its bonuses.
 function GearTooltip({ item, hint, weight, placement }: GearTooltipProps): JSX.Element {
   return (
-    <div className="game-tooltip" style={placement} role="tooltip">
-      <div className="game-tooltip-head">
-        <b>{item.name}</b>
-        <span>
-          {gearKindText(item, weight)} · Level {item.level} · {gearStatText(item)} · {item.sockets}{' '}
-          sockets
-        </span>
-      </div>
+    <GameTooltip
+      title={item.name}
+      subtitle={`${gearKindText(item, weight)} · Level ${item.level} · ${gearStatText(item)} · ${item.sockets} sockets`}
+      placement={placement}
+      hint={hint}
+    >
       {item.bonuses.map((bonus, i) => (
         <p key={bonus[0]} className={i === 0 ? 'game-tooltip-label' : undefined}>
           {statBonusText(bonus)}
         </p>
       ))}
-      <p className="game-tooltip-hint">{hint}</p>
-    </div>
+    </GameTooltip>
   );
 }
 

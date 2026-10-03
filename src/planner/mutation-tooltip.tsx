@@ -1,6 +1,7 @@
 import type { CSSProperties, JSX } from 'react';
 import type { Catalog, Mutation } from '../catalog/catalog';
 import { mutationMetaText } from './appearance';
+import { GameTooltip } from './game-tooltip';
 
 type MutationTooltipProps = {
   readonly mutation: Mutation;
@@ -15,12 +16,12 @@ export function MutationTooltip({
   placement,
 }: MutationTooltipProps): JSX.Element {
   return (
-    <div className="game-tooltip" style={placement} role="tooltip">
-      <div className="game-tooltip-head">
-        <b>{mutation.name}</b>
-        <span>{mutationMetaText(mutation, catalog)}</span>
-      </div>
+    <GameTooltip
+      title={mutation.name}
+      subtitle={mutationMetaText(mutation, catalog)}
+      placement={placement}
+    >
       <p className="game-tooltip-label">{mutation.description}</p>
-    </div>
+    </GameTooltip>
   );
 }

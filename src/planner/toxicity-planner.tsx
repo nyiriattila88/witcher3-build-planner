@@ -9,6 +9,7 @@ import {
   type PotionData,
 } from '../data/alchemy';
 import { decoctionIconUrl, formatDuration, potionIconUrl, potionTierName } from './appearance';
+import { GameTooltip } from './game-tooltip';
 import { PANE_WIDTH } from './geometry';
 import { SkillTooltip } from './skill-tooltip';
 import { usePaneTooltip } from './use-pane-tooltip';
@@ -319,16 +320,14 @@ export function ToxicityPlanner({
         />
       )}
       {tip?.content.kind === 'elixir' && (
-        <div className="game-tooltip" style={tip.placement} role="tooltip">
-          <div className="game-tooltip-head">
-            <b>{tip.content.title}</b>
-            <span>
-              Toxicity {tip.content.elixir.toxicity} · {formatDuration(tip.content.elixir.duration)}
-            </span>
-          </div>
+        <GameTooltip
+          title={tip.content.title}
+          subtitle={`Toxicity ${tip.content.elixir.toxicity} · ${formatDuration(tip.content.elixir.duration)}`}
+          placement={tip.placement}
+          hint={tip.content.hint}
+        >
           <p className="game-tooltip-label">{tip.content.elixir.effect}</p>
-          <p className="game-tooltip-hint">{tip.content.hint}</p>
-        </div>
+        </GameTooltip>
       )}
     </div>
   );

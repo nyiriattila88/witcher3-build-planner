@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.1 - 2026-10-03
+
+- An item's tooltip on the Gear tab names what it is first: the armor's weight class, such as Heavy
+  armor, or the kind of sword.
+- The school tiles show the damage or armor number and its unit on two lines everywhere.
+
 ## 2.7.0 - 2026-10-03
 
 - Every version of the school gear can be picked, from basic to grandmaster, with a button per version

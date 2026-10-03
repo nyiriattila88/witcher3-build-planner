@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.7.0 - 2026-10-03
+
+- Every version of the school gear can be picked, from basic to grandmaster, with a button per version
+  under each school the way the potions have one per tier. Manticore gear and Viper armor come in one
+  version, the Viper swords in two.
+- Wearing another version of the same item keeps the runes, glyphs and enchantment that still fit, as
+  upgrading does in the game. Only the final versions count towards the set bonuses.
+- Gear links of 2.6 keep opening the same build.
+
 ## 2.6.1 - 2026-10-03
 
 - The Gear tab shows the runeword or glyphword in one column and the sockets it would fill in the other,

@@ -46,11 +46,15 @@ export type Catalog = {
   readonly potions: readonly PotionData[];
   readonly decoctions: readonly DecoctionData[];
   readonly gear: readonly GearItemData[];
+  // The final version of every school's item for every slot, in the order of the gear.
+  readonly finalGear: readonly GearItemData[];
   // One entry per school, in the order of the gear.
   readonly setBonuses: readonly SetBonusData[];
   readonly upgrades: readonly UpgradeData[];
   readonly enchantments: readonly EnchantmentData[];
   readonly tree: (name: TreeName) => SkillTree;
+  // Every version of the school's item for the slot of this one, by level, the final one last.
+  readonly versions: (item: GearItemData) => readonly GearItemData[];
   readonly setBonus: (school: GearSchool) => SetBonusData;
   readonly skill: (tree: string, name: string) => Skill | undefined;
   readonly mutagen: (id: string | null) => Mutagen | undefined;
@@ -74,6 +78,9 @@ export type CatalogSources = {
 type MutableSkill = Omit<Skill, 'requires' | 'unlocks'> & { requires: Skill[]; unlocks: Skill[] };
 
 const skillKey = (tree: string, name: string): string => `${tree}/${name}`;
+
+// A school's item for one slot, through all of its versions.
+const gearLineKey = (item: GearItemData): string => `${item.school}/${item.slot}`;
 
 const assertUnique = (what: string, items: readonly { readonly name: string }[]): void => {
   const names = items.map((item) => item.name);
@@ -148,6 +155,19 @@ export function createCatalog(sources: CatalogSources): Catalog {
     throw new Error(`Gear of a school without set bonuses: ${schoolless[0]?.name ?? ''}`);
   }
 
+  const versionsByLine = new Map<string, GearItemData[]>();
+  for (const item of sources.gear) {
+    const key = gearLineKey(item);
+    const line = versionsByLine.get(key) ?? [];
+    const previous = line.at(-1);
+    if (previous !== undefined && previous.level > item.level) {
+      throw new Error(`${item.name} comes after the higher level ${previous.name}`);
+    }
+    versionsByLine.set(key, [...line, item]);
+  }
+  const versions = (item: GearItemData): readonly GearItemData[] =>
+    versionsByLine.get(gearLineKey(item)) ?? [item];
+
   const treesByName = new Map(trees.map((tree) => [tree.name, tree]));
   const mutagensById = new Map<string, Mutagen>(mutagens.map((mutagen) => [mutagen.id, mutagen]));
   const mutationsById = new Map<string, Mutation>(
@@ -163,6 +183,7 @@ export function createCatalog(sources: CatalogSources): Catalog {
     potions: sources.potions,
     decoctions: sources.decoctions,
     gear: sources.gear,
+    finalGear: sources.gear.filter((item) => versions(item).at(-1) === item),
     setBonuses: sources.setBonuses,
     upgrades: sources.upgrades,
     enchantments: sources.enchantments,
@@ -171,6 +192,7 @@ export function createCatalog(sources: CatalogSources): Catalog {
       if (tree === undefined) throw new Error(`Unknown skill tree "${name}"`);
       return tree;
     },
+    versions,
     setBonus: (school) => {
       const set = setBonusesBySchool.get(school);
       if (set === undefined) throw new Error(`No set bonuses for the ${school} school`);

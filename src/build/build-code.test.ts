@@ -189,6 +189,23 @@ describe('createBuildCodec', () => {
     expect(decoded).toEqual([null, null, null, null, null, null]);
   });
 
+  it('still opens the gear codes 2.6 wrote, when only the final versions existed', () => {
+    const build = decodeBuild('BEPNKUu99K6Yfk9jyAAAAAAAAAAA');
+
+    expect(GEAR_SLOTS.map((slot) => build.gearAt(slot)?.name ?? null)).toEqual([
+      'Grandmaster Feline steel sword',
+      'Grandmaster Feline silver sword',
+      'Grandmaster Feline armor',
+      'Grandmaster Feline gauntlets',
+      'Manticore trousers',
+      'Manticore boots',
+    ]);
+    expect([build.upgradeAt('steel', 0)?.name, build.enchantmentAt('armor')?.name]).toEqual([
+      'Greater Chernobog runestone',
+      'Eruption',
+    ]);
+  });
+
   it('still opens the codes 2.1.0 wrote with a "2." in front', () => {
     const code = '2.OB66AAAcCDjM';
 

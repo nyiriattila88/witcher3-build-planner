@@ -46,6 +46,9 @@ export const upgradeKind = (slot: GearSlot): UpgradeData['kind'] =>
 const enchantmentKind = (slot: GearSlot): EnchantmentData['kind'] | null =>
   SWORD_SLOTS.includes(slot) ? 'runeword' : slot === 'armor' ? 'glyphword' : null;
 
+export const holdsEnchantment = (item: GearItemData, enchantment: EnchantmentData): boolean =>
+  item.sockets >= ENCHANTMENT_SOCKETS && enchantment.kind === enchantmentKind(item.slot);
+
 export type MutagenBonus = {
   readonly mutagen: Mutagen;
   readonly matching: number;
@@ -445,13 +448,25 @@ export class Build {
     return this.#gear.size;
   }
 
-  // Another item comes with empty sockets, so its runes and enchantment go.
+  // Another version of the school's item keeps the runes, glyphs and enchantment that still fit, the
+  // way upgrading keeps them in the game. Any other item comes with empty sockets.
   equip(slot: GearSlot, item: GearItemData | null): void {
-    if (this.gearAt(slot) === item || (item !== null && item.slot !== slot)) return;
-    if (item === null) this.#gear.delete(slot);
-    else this.#gear.set(slot, item);
+    const worn = this.gearAt(slot);
+    if (worn === item || (item !== null && item.slot !== slot)) return;
+    const upgrades = this.#upgrades.get(slot) ?? [];
+    const enchantment = this.enchantmentAt(slot);
     this.#upgrades.delete(slot);
     this.#enchantments.delete(slot);
+    if (item === null) {
+      this.#gear.delete(slot);
+      return;
+    }
+    this.#gear.set(slot, item);
+    if (worn?.school !== item.school) return;
+    upgrades.slice(0, item.sockets).forEach((upgrade, socket) => {
+      this.setUpgrade(slot, socket, upgrade);
+    });
+    if (enchantment !== null) this.enchant(slot, enchantment);
   }
 
   upgradeAt(slot: GearSlot, socket: number): UpgradeData | null {
@@ -482,8 +497,8 @@ export class Build {
   }
 
   canEnchant(slot: GearSlot, enchantment: EnchantmentData): boolean {
-    const sockets = this.gearAt(slot)?.sockets ?? 0;
-    return sockets >= ENCHANTMENT_SOCKETS && enchantment.kind === enchantmentKind(slot);
+    const item = this.gearAt(slot);
+    return item !== null && holdsEnchantment(item, enchantment);
   }
 
   // An enchantment fills every socket, so the runes or glyphs in them go.
@@ -504,9 +519,11 @@ export class Build {
     this.#enchantments.clear();
   }
 
-  // Every piece of the final school gear counts towards its set bonuses.
+  // Only the final version of a school's item counts towards its set bonuses.
   setPieces(school: GearSchool): number {
-    return [...this.#gear.values()].filter((item) => item.school === school).length;
+    return [...this.#gear.values()].filter(
+      (item) => item.school === school && this.#catalog.versions(item).at(-1) === item,
+    ).length;
   }
 
   armorValue(): number {

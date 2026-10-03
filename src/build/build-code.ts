@@ -1,8 +1,8 @@
 import type { Catalog } from '../catalog/catalog';
 import { ALCHEMY_RECIPES, MANTICORE_ARMOR } from '../data/alchemy';
-import { GEAR_SLOTS } from '../data/gear';
+import { GEAR_SLOTS, type GearItemData } from '../data/gear';
 import type { TreeName } from '../data/skills';
-import { Build, MAX_RANK, MUTAGEN_GROUPS, upgradeKind } from './build';
+import { Build, holdsEnchantment, MAX_RANK, MUTAGEN_GROUPS, upgradeKind } from './build';
 import { createLegacyDecoder, LEGACY_PREFIX } from './legacy-build-code';
 
 export type BuildCodec = {
@@ -122,15 +122,19 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
     build.setKnownRecipes(
       ALCHEMY_RECIPES - choose(MISSING_RECIPES, ALCHEMY_RECIPES - build.knownRecipes),
     );
-    // The gear comes after the toxicity plan for the same reason.
+    // The gear comes after the toxicity plan for the same reason. A slot names the school by its final
+    // item and fills that item's sockets, and the version of each item comes at the very end, the final
+    // one first, so the codes 2.6 wrote with final items only keep their meaning.
+    const finalOf = (item: GearItemData): GearItemData => catalog.versions(item).at(-1) ?? item;
     for (const slot of GEAR_SLOTS) {
+      const worn = build.gearAt(slot);
       const item = choose(
-        [null, ...catalog.gear.filter((each) => each.slot === slot)],
-        build.gearAt(slot),
+        [null, ...catalog.finalGear.filter((each) => each.slot === slot)],
+        worn === null ? null : finalOf(worn),
       );
       if (item === null) continue;
-      build.equip(slot, item);
-      const words = catalog.enchantments.filter((word) => build.canEnchant(slot, word));
+      if (worn === null) build.equip(slot, item);
+      const words = catalog.enchantments.filter((word) => holdsEnchantment(item, word));
       const word = choose([null, ...words], build.enchantmentAt(slot));
       if (word !== null) {
         build.enchant(slot, word);
@@ -141,6 +145,10 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
         const upgrade = choose([null, ...fitting], build.upgradeAt(slot, socket));
         if (upgrade !== null) build.setUpgrade(slot, socket, upgrade);
       }
+    }
+    for (const slot of GEAR_SLOTS) {
+      const worn = build.gearAt(slot);
+      if (worn !== null) build.equip(slot, choose([...catalog.versions(worn)].reverse(), worn));
     }
   }
 

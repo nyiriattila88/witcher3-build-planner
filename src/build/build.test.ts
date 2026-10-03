@@ -337,6 +337,30 @@ describe('Build gear', () => {
     expect(build.upgradeAt('steel', 0)).toBeNull();
   });
 
+  it('keeps the runes that still fit when another version of the item is worn', () => {
+    const build = new Build(catalog);
+    build.equip('steel', gear('Grandmaster Feline steel sword'));
+    for (const socket of [0, 1, 2]) {
+      build.setUpgrade('steel', socket, upgrade('Greater Chernobog runestone'));
+    }
+
+    build.equip('steel', gear('Feline steel sword - enhanced'));
+
+    expect([0, 1, 2].map((socket) => build.upgradeAt('steel', socket)?.name ?? null)).toEqual([
+      'Greater Chernobog runestone',
+      'Greater Chernobog runestone',
+      null,
+    ]);
+  });
+
+  it('counts only the final version of an item towards the set bonuses', () => {
+    const build = new Build(catalog);
+    build.equip('armor', gear('Mastercrafted Feline armor'));
+    build.equip('gloves', gear('Grandmaster Feline gauntlets'));
+
+    expect(build.setPieces('Cat')).toBe(1);
+  });
+
   it('puts a rune only into a sword and a glyph only into an armor piece', () => {
     const build = new Build(catalog);
     build.equip('steel', gear('Grandmaster Feline steel sword'));

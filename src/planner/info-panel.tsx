@@ -12,6 +12,7 @@ import {
   iconUrl,
   mutagenEffect,
   mutagenIconUrl,
+  mutationMetaText,
   potionIconUrl,
   potionTierName,
   statBonusText,
@@ -137,14 +138,12 @@ function MutationInfo({
   build: Build;
   catalog: Catalog;
 }): JSX.Element {
-  const requires = mutation.requires.map((id) => catalog.mutation(id)?.name ?? id).join(' and ');
   const unlockedSlots = catalog.extraSlotUnlocks.filter(
     (needed) => build.researchedCount >= needed,
   ).length;
   const meta = (
     <>
-      {mutation.trees.join(' / ')} mutation · Research cost: {mutation.cost}
-      {requires === '' ? '' : ` · Requires: ${requires}`}
+      {mutationMetaText(mutation, catalog)}
       {mutation.innate && (
         <>
           <br />

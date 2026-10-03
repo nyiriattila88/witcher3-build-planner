@@ -1,11 +1,12 @@
-import type { DragEvent, JSX } from 'react';
+import { useState, type DragEvent, type JSX } from 'react';
 import type { Build } from '../build/build';
 import type { Catalog, Mutation } from '../catalog/catalog';
 import { backgroundUrl, mutationColour } from './appearance';
 import type { DragItem } from './drag-and-drop';
 import { FitToWidth } from './fit-to-width';
-import { MUTATION_GRID, PANE_WIDTH, mutationCentre } from './geometry';
+import { MUTATION_GRID, PANE_WIDTH, mutationCentre, tooltipPlacement } from './geometry';
 import { MutationDisc } from './mutation-disc';
+import { MutationTooltip } from './mutation-tooltip';
 import { useTouchTaps } from './use-touch-taps';
 
 type MutationTreeProps = {
@@ -17,7 +18,10 @@ type MutationTreeProps = {
   readonly onDragStart: (item: DragItem, event: DragEvent) => void;
 };
 
+const PANE_SIZE = { width: PANE_WIDTH, height: MUTATION_GRID.height };
+
 export function MutationTree({ catalog, build, ...handlers }: MutationTreeProps): JSX.Element {
+  const [hovered, setHovered] = useState<Mutation | null>(null);
   const links = catalog.mutations.flatMap((mutation) =>
     mutation.requires.map((requiredId) => {
       const required = catalog.mutation(requiredId);
@@ -39,28 +43,55 @@ export function MutationTree({ catalog, build, ...handlers }: MutationTreeProps)
   );
 
   return (
-    <FitToWidth width={PANE_WIDTH} height={MUTATION_GRID.height}>
+    <FitToWidth {...PANE_SIZE}>
       <div
         className="pane-content"
         style={{
-          width: PANE_WIDTH,
-          height: MUTATION_GRID.height,
+          ...PANE_SIZE,
           backgroundImage: `url("${backgroundUrl('mutations')}")`,
           backgroundSize: '100% 100%',
         }}
       >
-        <svg width={PANE_WIDTH} height={MUTATION_GRID.height}>
-          {links}
-        </svg>
+        <svg {...PANE_SIZE}>{links}</svg>
         {catalog.mutations.map((mutation) => (
-          <MutationNode key={mutation.id} mutation={mutation} build={build} {...handlers} />
+          <MutationNode
+            key={mutation.id}
+            mutation={mutation}
+            build={build}
+            {...handlers}
+            onHover={(target) => {
+              setHovered(target);
+              handlers.onHover(target);
+            }}
+            onLeave={() => {
+              setHovered(null);
+            }}
+            onDragStart={(item, event) => {
+              setHovered(null);
+              handlers.onDragStart(item, event);
+            }}
+          />
         ))}
+        {hovered !== null && (
+          <MutationTooltip
+            mutation={hovered}
+            catalog={catalog}
+            placement={tooltipPlacement(
+              mutationCentre(hovered.grid),
+              MUTATION_GRID.radius,
+              PANE_SIZE,
+            )}
+          />
+        )}
       </div>
     </FitToWidth>
   );
 }
 
-type MutationNodeProps = Omit<MutationTreeProps, 'catalog'> & { readonly mutation: Mutation };
+type MutationNodeProps = Omit<MutationTreeProps, 'catalog'> & {
+  readonly mutation: Mutation;
+  readonly onLeave: () => void;
+};
 
 function MutationNode({
   mutation,
@@ -68,6 +99,7 @@ function MutationNode({
   onResearch,
   onUnresearch,
   onHover,
+  onLeave,
   onDragStart,
 }: MutationNodeProps): JSX.Element {
   const [x, y] = mutationCentre(mutation.grid);
@@ -106,9 +138,11 @@ function MutationNode({
       onMouseEnter={() => {
         onHover(mutation);
       }}
+      onMouseLeave={onLeave}
       onFocus={() => {
         onHover(mutation);
       }}
+      onBlur={onLeave}
       onDragStart={(event) => {
         onDragStart({ kind: 'mutation', mutation: mutation.id, fromBoard: false }, event);
       }}

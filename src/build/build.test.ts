@@ -124,6 +124,16 @@ describe('Build skill slots', () => {
     expect(build.slotAt(0)).toBeNull();
   });
 
+  it('counts the rank of a skill only while it sits in a slot', () => {
+    const muscleMemory = skill('Combat', 'Muscle Memory');
+    const build = withPoints(muscleMemory, muscleMemory);
+    const unslotted = build.slottedRank(muscleMemory);
+
+    build.placeSkill(muscleMemory, 0);
+
+    expect([unslotted, build.slottedRank(muscleMemory)]).toEqual([0, 2]);
+  });
+
   it('swaps two slotted skills when one is dragged onto the other', () => {
     const muscleMemory = skill('Combat', 'Muscle Memory');
     const threeStrikes = skill('Combat', 'Three Strikes');
@@ -183,6 +193,18 @@ describe('Build mutations', () => {
 
     expect(atTwo).toEqual([true, false]);
     expect(atFour).toBe(true);
+  });
+
+  it('counts the extra slots that research has opened', () => {
+    const build = new Build(catalog);
+    const before = build.unlockedExtraSlots;
+
+    build.research('deadly-counter');
+    build.research('magic-sensibilities');
+    build.research('bloodbath');
+    build.research('piercing-cold');
+
+    expect([before, build.unlockedExtraSlots]).toEqual([0, 2]);
   });
 
   it('fills the extra slots only with the slotted mutation colours', () => {
@@ -272,6 +294,19 @@ describe('Build Toxicity', () => {
     build.placeSkill(acquiredTolerance, 0);
 
     expect([unslotted, build.maxToxicity()]).toEqual([100, 100 + ALCHEMY_RECIPES]);
+  });
+
+  it('places a threshold skill at the share of the maximum its rank gives, only from a slot', () => {
+    const build = withTrees('Alchemy');
+    const delayedRecovery = skill('Alchemy', 'Delayed Recovery');
+    build.addPoint(delayedRecovery);
+    build.addPoint(delayedRecovery);
+    const unslotted = build.toxicityThresholds();
+
+    build.placeSkill(delayedRecovery, 0);
+
+    expect(unslotted).toEqual([]);
+    expect(build.toxicityThresholds()).toEqual([{ skill: delayedRecovery, toxicity: 100 * 0.6 }]);
   });
 
   it('counts the known recipes, Metabolic Control and the Manticore armor pieces', () => {

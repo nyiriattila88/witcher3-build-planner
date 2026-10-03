@@ -138,16 +138,14 @@ function MutationInfo({
   build: Build;
   catalog: Catalog;
 }): JSX.Element {
-  const unlockedSlots = catalog.extraSlotUnlocks.filter(
-    (needed) => build.researchedCount >= needed,
-  ).length;
   const meta = (
     <>
       {mutationMetaText(mutation, catalog)}
       {mutation.innate && (
         <>
           <br />
-          Mutations researched: {build.researchedCount} · Extra slots unlocked: {unlockedSlots}
+          Mutations researched: {build.researchedCount} · Extra slots unlocked:{' '}
+          {build.unlockedExtraSlots}
         </>
       )}
     </>

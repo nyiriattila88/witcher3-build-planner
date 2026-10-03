@@ -1,5 +1,5 @@
 import { useRef, type CSSProperties, type JSX, type MouseEvent } from 'react';
-import { SET_PIECES, upgradeKind, type Build } from '../build/build';
+import { SET_PIECES, enchantmentKind, upgradeKind, type Build } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import {
   GEAR_SLOTS,
@@ -10,6 +10,7 @@ import {
 } from '../data/gear';
 import { ENCHANTMENT_SOCKETS, type EnchantmentData } from '../data/upgrades';
 import {
+  ENCHANTMENT_NAMES,
   GEAR_SLOT_NAMES,
   gearKindText,
   gearStatText,
@@ -286,7 +287,7 @@ function Sockets({
   const word = build.enchantmentAt(slot);
   const filled = build.isEnchantmentActive(slot);
   const upgrades = catalog.upgrades.filter((upgrade) => upgrade.kind === upgradeKind(slot));
-  const wordLabel = slot === 'armor' ? 'Glyphword' : 'Runeword';
+  const wordKind = enchantmentKind(slot);
   const sockets = Array.from({ length: catalog.maxSockets(slot) }, (_, socket) => {
     const held = build.upgradeAt(slot, socket);
     if (!build.isSocketOpen(slot, socket)) {
@@ -329,11 +330,11 @@ function Sockets({
           sockets
         )}
       </div>
-      {(words.length > 0 || word !== null) && (
+      {wordKind !== null && (words.length > 0 || word !== null) && (
         <div className="gear-column">
           {words.length > 0 ? (
             <Choice
-              label={wordLabel}
+              label={ENCHANTMENT_NAMES[wordKind]}
               options={words}
               held={word}
               empty="None, use the sockets"
@@ -350,7 +351,7 @@ function Sockets({
           ) : (
             word !== null && (
               <Idle
-                label={wordLabel}
+                label={ENCHANTMENT_NAMES[wordKind]}
                 text={word.name}
                 reason={`it needs an item with ${ENCHANTMENT_SOCKETS} sockets`}
               />

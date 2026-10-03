@@ -5,6 +5,7 @@ import {
   ALCHEMY_RECIPES,
   BASE_MAX_TOXICITY,
   MANTICORE_ARMOR,
+  SAFE_TOXICITY_SHARE,
   type DecoctionData,
   type PotionData,
 } from '../data/alchemy';
@@ -37,12 +38,6 @@ type Tip =
 const TIER_LABELS = ['I', 'II', 'III'];
 const TOO_TOXIC = 'Too toxic: it would take Toxicity above the maximum';
 
-// Skills whose effect starts at a share of the maximum, marked on the bar while they sit in a slot.
-const SKILL_THRESHOLDS = [
-  { tree: 'Alchemy', name: 'Delayed Recovery', shares: [0.7, 0.65, 0.6] },
-  { tree: 'Alchemy', name: 'High Tolerance', shares: [0.8, 0.8, 0.8] },
-] as const;
-
 const formatAmount = (value: number): string =>
   Number.isInteger(value) ? `${value}` : value.toFixed(1);
 
@@ -69,13 +64,8 @@ export function ToxicityPlanner({
         : null;
   const percent = Math.round((toxicity / max) * 100);
   const share = (value: number): string => `${Math.min(100, (value / max) * 100)}%`;
-  const slottedRank = (skill: Skill | undefined): number =>
-    skill !== undefined && build.slotOf(skill) >= 0 ? build.rank(skill) : 0;
-  const marks = SKILL_THRESHOLDS.flatMap(({ tree, name, shares }) => {
-    const skill = catalog.skill(tree, name);
-    const at = shares[slottedRank(skill) - 1];
-    return skill === undefined || at === undefined ? [] : [{ skill, value: max * at }];
-  });
+  // Skills that start to work at a share of the maximum are marked on the bar while slotted.
+  const marks = build.toxicityThresholds();
 
   const showTip = (event: MouseEvent, title: string, elixir: Elixir, hint: string): void => {
     tooltip.show(event.currentTarget.closest('.elixir'), { kind: 'elixir', title, elixir, hint });
@@ -92,7 +82,7 @@ export function ToxicityPlanner({
     value: number,
   ): JSX.Element => {
     const skill = catalog.skill(source.tree, source.name);
-    const rank = slottedRank(skill);
+    const rank = skill === undefined ? 0 : build.slottedRank(skill);
     return (
       <div
         className="skill"
@@ -133,13 +123,17 @@ export function ToxicityPlanner({
               style={{ left: share(overdose) }}
               title={`Overdose above ${formatAmount(overdose)}`}
             />
-            {marks.map(({ skill, value }) => (
+            {marks.map((mark) => (
               <span
-                key={skill.name}
+                key={mark.skill.name}
                 className="toxicity-mark skill"
-                style={{ left: share(value) }}
+                style={{ left: share(mark.toxicity) }}
                 onMouseEnter={(event) => {
-                  showSkillTip(event, skill, `Marked at ${formatAmount(value)} Toxicity`);
+                  showSkillTip(
+                    event,
+                    mark.skill,
+                    `Marked at ${formatAmount(mark.toxicity)} Toxicity`,
+                  );
                 }}
                 onMouseLeave={hideTip}
               />
@@ -151,7 +145,7 @@ export function ToxicityPlanner({
         </div>
         <p className="toxicity-line">
           Active <b>{toxicity}</b> of <b>{max}</b> Toxicity ({percent}%), overdose above{' '}
-          <b>{formatAmount(overdose)}</b> (50%)
+          <b>{formatAmount(overdose)}</b> ({Math.round(SAFE_TOXICITY_SHARE * 100)}%)
           {warning !== null && <span className="toxicity-warning"> {warning}</span>}
         </p>
         <dl className="toxicity-sources">

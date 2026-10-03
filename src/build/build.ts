@@ -31,6 +31,11 @@ export const METABOLIC_CONTROL = {
   name: 'Metabolic Control',
   perRank: 10,
 } as const;
+// From a slot, these start to work at a share of maximum Toxicity, by rank.
+const TOXICITY_THRESHOLD_SKILLS = [
+  { tree: 'Alchemy', name: 'Delayed Recovery', shares: [0.7, 0.65, 0.6] },
+  { tree: 'Alchemy', name: 'High Tolerance', shares: [0.8, 0.8, 0.8] },
+] as const;
 
 export const slotGroup = (slotIndex: number): number => Math.floor(slotIndex / SLOTS_PER_GROUP);
 
@@ -43,11 +48,14 @@ export const SET_PIECES = { first: 3, full: 6 } as const;
 export const upgradeKind = (slot: GearSlot): UpgradeData['kind'] =>
   SWORD_SLOTS.includes(slot) ? 'rune' : 'glyph';
 
-const enchantmentKind = (slot: GearSlot): EnchantmentData['kind'] | null =>
+export const enchantmentKind = (slot: GearSlot): EnchantmentData['kind'] | null =>
   SWORD_SLOTS.includes(slot) ? 'runeword' : slot === 'armor' ? 'glyphword' : null;
 
 export const holdsEnchantment = (item: GearItemData, enchantment: EnchantmentData): boolean =>
   item.sockets >= ENCHANTMENT_SOCKETS && enchantment.kind === enchantmentKind(item.slot);
+
+// The Toxicity at which a slotted skill starts to work.
+export type ToxicityThreshold = { readonly skill: Skill; readonly toxicity: number };
 
 export type MutagenBonus = {
   readonly mutagen: Mutagen;
@@ -198,10 +206,24 @@ export class Build {
     return this.#slots.indexOf(skill);
   }
 
+  // A skill works only from a slot, so out of one it brings no rank.
+  slottedRank(skill: Skill): number {
+    return this.slotOf(skill) >= 0 ? this.rank(skill) : 0;
+  }
+
   isSlotUnlocked(index: number): boolean {
     if (index < BASE_SLOTS) return true;
     const needed = this.#catalog.extraSlotUnlocks[index - BASE_SLOTS];
     return needed !== undefined && this.researchedCount >= needed;
+  }
+
+  // How many of the extra slots around the mutation research has opened.
+  get unlockedExtraSlots(): number {
+    const extra = Array.from(
+      { length: this.slotCount - BASE_SLOTS },
+      (_, each) => BASE_SLOTS + each,
+    );
+    return extra.filter((index) => this.isSlotUnlocked(index)).length;
   }
 
   // The trees the extra slots take: the colours of the slotted mutation.
@@ -279,9 +301,7 @@ export class Build {
     if (mutagen === undefined) return null;
     const groupSlots = this.#slots.slice(group * SLOTS_PER_GROUP, (group + 1) * SLOTS_PER_GROUP);
     const matching = groupSlots.filter((skill) => skill?.tree === mutagen.tree).length;
-    const synergySkill = this.#catalog.skill(SYNERGY.tree, SYNERGY.name);
-    const synergy =
-      synergySkill !== undefined && this.slotOf(synergySkill) >= 0 ? this.rank(synergySkill) : 0;
+    const synergy = this.#slottedRankOf(SYNERGY);
     const value = Math.floor(mutagen.bonus * (1 + matching) * (1 + synergy * SYNERGY.bonusPerRank));
     return { mutagen, matching, synergy, value };
   }
@@ -425,17 +445,28 @@ export class Build {
   // Skills only work from a slot, so an unslotted one adds nothing.
   acquiredTolerance(): number {
     return (
-      this.#slottedRank(ACQUIRED_TOLERANCE) * ACQUIRED_TOLERANCE.perRecipe * this.#knownRecipes
+      this.#slottedRankOf(ACQUIRED_TOLERANCE) * ACQUIRED_TOLERANCE.perRecipe * this.#knownRecipes
     );
   }
 
   metabolicControl(): number {
-    return this.#slottedRank(METABOLIC_CONTROL) * METABOLIC_CONTROL.perRank;
+    return this.#slottedRankOf(METABOLIC_CONTROL) * METABOLIC_CONTROL.perRank;
   }
 
   // Above this much Toxicity, Geralt takes overdose damage.
   overdoseToxicity(): number {
     return this.maxToxicity() * SAFE_TOXICITY_SHARE;
+  }
+
+  // Where the slotted skills that work above a share of the maximum start to.
+  toxicityThresholds(): readonly ToxicityThreshold[] {
+    return TOXICITY_THRESHOLD_SKILLS.flatMap((key) => {
+      const skill = this.#catalog.skill(key.tree, key.name);
+      const share = key.shares[this.#slottedRankOf(key) - 1];
+      return skill === undefined || share === undefined
+        ? []
+        : [{ skill, toxicity: this.maxToxicity() * share }];
+    });
   }
 
   // --- Gear
@@ -547,9 +578,9 @@ export class Build {
     return [...totals.values()];
   }
 
-  #slottedRank({ tree, name }: { readonly tree: string; readonly name: string }): number {
+  #slottedRankOf({ tree, name }: { readonly tree: string; readonly name: string }): number {
     const skill = this.#catalog.skill(tree, name);
-    return skill !== undefined && this.slotOf(skill) >= 0 ? this.rank(skill) : 0;
+    return skill === undefined ? 0 : this.slottedRank(skill);
   }
 
   #mutationById(id: MutationId): Mutation {

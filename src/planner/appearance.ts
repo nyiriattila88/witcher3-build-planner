@@ -2,6 +2,7 @@ import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
 import type { GearItemData, GearSlot, SetBonusData, StatBonus } from '../data/gear';
 import type { TreeName } from '../data/skills';
+import type { EnchantmentData } from '../data/upgrades';
 
 // Files under public/ are served below the base path, which is the repository name on GitHub Pages.
 // GitHub Pages lets a browser keep a file for ten minutes, so the release in the query makes it fetch
@@ -73,6 +74,11 @@ export const mutagenLabel = (mutagen: Mutagen): string => mutagen.name.replace(/
 
 export const mutagenEffect = (mutagen: Mutagen, value: number): string =>
   `${mutagen.effect} +${value}${mutagen.unit}`;
+
+export const ENCHANTMENT_NAMES: Readonly<Record<EnchantmentData['kind'], string>> = {
+  runeword: 'Runeword',
+  glyphword: 'Glyphword',
+};
 
 export const GEAR_SLOT_NAMES: Readonly<Record<GearSlot, string>> = {
   steel: 'Steel sword',

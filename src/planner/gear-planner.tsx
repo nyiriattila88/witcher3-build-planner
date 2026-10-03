@@ -8,7 +8,7 @@ import {
   type GearSlot,
   type SetBonusData,
 } from '../data/gear';
-import { ENCHANTMENT_SOCKETS } from '../data/upgrades';
+import { ENCHANTMENT_SOCKETS, type EnchantmentData } from '../data/upgrades';
 import {
   GEAR_SLOT_NAMES,
   gearKindText,
@@ -31,6 +31,10 @@ type GearPlannerProps = {
 type ItemTip = { readonly item: GearItemData; readonly hint: string };
 
 const wornValue = (item: GearItemData | null): string => (item === null ? 'none' : gearValue(item));
+
+// The runewords and glyphwords are listed by the Runewright level that offers them, then by name.
+const byLevelThenName = (one: EnchantmentData, other: EnchantmentData): number =>
+  one.level - other.level || one.name.localeCompare(other.name, 'en');
 
 // The schools side by side for every slot, so they mix freely, then the sockets of what is worn.
 export function GearPlanner(props: GearPlannerProps): JSX.Element {
@@ -278,7 +282,9 @@ function Sockets({
   slot,
   item,
 }: GearPlannerProps & { readonly slot: GearSlot; readonly item: GearItemData }): JSX.Element {
-  const words = catalog.enchantments.filter((word) => build.canEnchant(slot, word));
+  const words = catalog.enchantments
+    .filter((word) => build.canEnchant(slot, word))
+    .sort(byLevelThenName);
   const word = build.enchantmentAt(slot);
   const filled = build.isEnchantmentActive(slot);
   const upgrades = catalog.upgrades.filter((upgrade) => upgrade.kind === upgradeKind(slot));

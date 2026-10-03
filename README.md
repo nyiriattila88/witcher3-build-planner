@@ -38,6 +38,8 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
   maximum Toxicity: the base 100, Acquired Tolerance for the recipes you know, Metabolic Control and the
   Manticore armor pieces you wear. The share of the maximum stands beside the bar, the overdose threshold
   and the thresholds of slotted alchemy skills are marked on it, and every skill there opens its tooltip.
+  As in the game, a potion or decoction that would take the total above the maximum cannot be made
+  active.
 - **Shareable builds.** A short build code restores everything: points, slots, mutagens and
   mutations. The page address carries it as `?build=`, so a copied link opens the same build, and a plain
   address starts empty.

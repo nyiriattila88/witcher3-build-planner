@@ -870,6 +870,16 @@ button.elixir {
   box-shadow: 0 0 10px rgba(106, 168, 58, 0.25);
 }
 
+/* Too toxic to make active, the total would go above the maximum. */
+.elixir.blocked {
+  opacity: 0.45;
+}
+
+.elixir.blocked,
+.elixir .blocked {
+  cursor: not-allowed;
+}
+
 /* --- Info panel: fixed height, so the board below stays put while the pointer moves.
    360px fits the longest text at full width (353px, measured), a narrower window scrolls inside. */
 

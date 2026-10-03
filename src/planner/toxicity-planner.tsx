@@ -34,6 +34,7 @@ type Tip = { readonly placement: CSSProperties } & (
 );
 
 const TIER_LABELS = ['I', 'II', 'III'];
+const TOO_TOXIC = 'Too toxic: it would take Toxicity above the maximum';
 const MANTICORE_OPTIONS = Array.from({ length: MANTICORE_ARMOR.pieces + 1 }, (_, n) => n);
 const TIP_GAP = 10;
 
@@ -60,6 +61,12 @@ export function ToxicityPlanner({
   const toxicity = build.toxicity();
   const overdose = build.overdoseToxicity();
   const over = toxicity > overdose;
+  const warning =
+    toxicity > max
+      ? 'Above the maximum: take something off'
+      : over
+        ? 'Overdose: Vitality drains'
+        : null;
   const percent = Math.round((toxicity / max) * 100);
   const share = (value: number): string => `${Math.min(100, (value / max) * 100)}%`;
   const slottedRank = (skill: Skill | undefined): number =>
@@ -167,7 +174,7 @@ export function ToxicityPlanner({
         <p className="toxicity-line">
           Active <b>{toxicity}</b> of <b>{max}</b> Toxicity ({percent}%), overdose above{' '}
           <b>{formatAmount(overdose)}</b> (50%)
-          {over && <span className="toxicity-warning"> Overdose: Vitality drains</span>}
+          {warning !== null && <span className="toxicity-warning"> {warning}</span>}
         </p>
         <dl className="toxicity-sources">
           <div>
@@ -223,14 +230,21 @@ export function ToxicityPlanner({
       <div className="elixir-grid">
         {catalog.decoctions.map((decoction) => {
           const active = build.isDecoctionActive(decoction);
-          const hint = active ? 'Click to take it off' : 'Click to make it active';
+          const allowed = build.canActivateDecoction(decoction);
+          const hint = active
+            ? 'Click to take it off'
+            : allowed
+              ? 'Click to make it active'
+              : TOO_TOXIC;
           return (
             <button
               key={decoction.name}
               type="button"
-              className={active ? 'elixir active' : 'elixir'}
+              className={active ? 'elixir active' : allowed ? 'elixir' : 'elixir blocked'}
               aria-pressed={active}
+              aria-disabled={!allowed}
               onClick={(event) => {
+                if (!allowed) return;
                 onChange((draft) => {
                   draft.setDecoctionActive(decoction, !active);
                 });
@@ -266,14 +280,17 @@ export function ToxicityPlanner({
           const tier = build.potionTier(potion);
           const shown = potion.tiers[Math.max(0, tier - 1)] ?? potion.tiers[0];
           const shownTier = Math.max(1, tier);
-          const hint =
-            potion.tiers.length === 1
+          const blocked =
+            tier === 0 && potion.tiers.every((_, i) => !build.canSetPotionTier(potion, i + 1));
+          const hint = blocked
+            ? TOO_TOXIC
+            : potion.tiers.length === 1
               ? 'Click On to make it active'
               : 'Pick I, II or III to make one active';
           return (
             <div
               key={potion.name}
-              className={tier > 0 ? 'elixir active' : 'elixir'}
+              className={tier > 0 ? 'elixir active' : blocked ? 'elixir blocked' : 'elixir'}
               onMouseEnter={(event) => {
                 onHoverPotion(potion, shownTier);
                 showTip(event, potionTierName(potion, shownTier), shown, hint);
@@ -288,14 +305,17 @@ export function ToxicityPlanner({
               <span className="elixir-tiers">
                 {potion.tiers.map((each, i) => {
                   const chosen = tier === i + 1;
+                  const allowed = build.canSetPotionTier(potion, i + 1);
                   return (
                     <button
                       key={i}
                       type="button"
-                      className={chosen ? 'active' : undefined}
+                      className={chosen ? 'active' : allowed ? undefined : 'blocked'}
                       aria-pressed={chosen}
+                      aria-disabled={!allowed}
                       aria-label={potionTierName(potion, i + 1)}
                       onClick={() => {
+                        if (!allowed) return;
                         onChange((draft) => {
                           draft.setPotionTier(potion, chosen ? 0 : i + 1);
                         });
@@ -306,7 +326,11 @@ export function ToxicityPlanner({
                           event,
                           potionTierName(potion, i + 1),
                           each,
-                          chosen ? 'Click to take it off' : 'Click to make this one active',
+                          chosen
+                            ? 'Click to take it off'
+                            : allowed
+                              ? 'Click to make this one active'
+                              : TOO_TOXIC,
                         );
                       }}
                       onFocus={() => {

@@ -266,6 +266,21 @@ describe('Build Toxicity', () => {
     expect(max).toBe(100 + 40 + 10 + 4 * 5);
   });
 
+  it('lets a potion or decoction in only while the total stays within the maximum', () => {
+    const build = new Build(catalog);
+    build.setDecoctionActive(decoction('Water hag decoction'), true);
+    build.setDecoctionActive(decoction('Katakan decoction'), true);
+
+    const allowed = [
+      build.canActivateDecoction(decoction('Griffin decoction')),
+      build.canSetPotionTier(potion('Swallow'), 1),
+      build.canSetPotionTier(potion('White Honey'), 1),
+      build.canActivateDecoction(decoction('Katakan decoction')),
+    ];
+
+    expect(allowed).toEqual([false, false, true, true]);
+  });
+
   it('starts an overdose above half of the maximum', () => {
     const build = new Build(catalog);
     build.setManticorePieces(2);

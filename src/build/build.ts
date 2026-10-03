@@ -340,6 +340,21 @@ export class Build {
     else this.#decoctions.delete(decoction);
   }
 
+  // The game refuses a potion or decoction whose Toxicity would take the total above the maximum. The
+  // plan can still end up above it when the maximum drops later, which the planner shows as a warning.
+  canSetPotionTier(potion: PotionData, tier: number): boolean {
+    const held = potion.tiers[this.potionTier(potion) - 1]?.toxicity ?? 0;
+    const next = potion.tiers[tier - 1]?.toxicity ?? 0;
+    return next <= held || this.toxicity() - held + next <= this.maxToxicity();
+  }
+
+  canActivateDecoction(decoction: DecoctionData): boolean {
+    return (
+      this.isDecoctionActive(decoction) ||
+      this.toxicity() + decoction.toxicity <= this.maxToxicity()
+    );
+  }
+
   get manticorePieces(): number {
     return this.#manticorePieces;
   }

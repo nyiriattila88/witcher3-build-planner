@@ -7,7 +7,7 @@ import { ENCHANTMENT_SOCKETS, type EnchantmentData, type UpgradeData } from '../
 import {
   decoctionIconUrl,
   formatDuration,
-  GEAR_SLOT_NAMES,
+  gearKindText,
   gearStatText,
   iconUrl,
   mutagenEffect,
@@ -227,7 +227,7 @@ function GearInfo({
   const set = catalog.setBonus(item.school);
   const pieces = build.setPieces(item.school);
   const final = catalog.versions(item).at(-1) === item;
-  const kind = item.damage === null ? `${set.weight} armor` : GEAR_SLOT_NAMES[item.slot];
+  const kind = gearKindText(item, set.weight);
   const meta = (
     <>
       {item.school} school{item.tier === null ? '' : ` · ${item.tier}`} · {kind} · Level{' '}

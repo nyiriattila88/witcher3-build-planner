@@ -1,6 +1,6 @@
 import type { Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
-import type { GearItemData, GearSlot, StatBonus } from '../data/gear';
+import type { GearItemData, GearSlot, SetBonusData, StatBonus } from '../data/gear';
 import type { TreeName } from '../data/skills';
 
 // Files under public/ are served below the base path, which is the repository name on GitHub Pages.
@@ -80,5 +80,10 @@ export const statBonusText = ([stat, value, unit]: StatBonus): string => `+${val
 export const gearValue = (item: GearItemData): string =>
   item.damage === null ? `${item.armor ?? 0}` : `${item.damage[0]}-${item.damage[1]}`;
 
-export const gearStatText = (item: GearItemData): string =>
-  `${gearValue(item)} ${item.damage === null ? 'armor' : 'damage'}`;
+export const gearUnit = (item: GearItemData): string => (item.damage === null ? 'armor' : 'damage');
+
+export const gearStatText = (item: GearItemData): string => `${gearValue(item)} ${gearUnit(item)}`;
+
+// What an item is, the way the game names it: Medium armor, or the kind of sword.
+export const gearKindText = (item: GearItemData, weight: SetBonusData['weight']): string =>
+  item.damage === null ? `${weight} armor` : GEAR_SLOT_NAMES[item.slot];

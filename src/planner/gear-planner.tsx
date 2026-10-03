@@ -1,8 +1,15 @@
-import { useRef, type JSX, type MouseEvent } from 'react';
+import { useRef, type CSSProperties, type JSX, type MouseEvent } from 'react';
 import { SET_PIECES, upgradeKind, type Build } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import { GEAR_SLOTS, type GearItemData, type GearSlot, type SetBonusData } from '../data/gear';
-import { GEAR_SLOT_NAMES, gearStatText, gearValue, statBonusText } from './appearance';
+import {
+  GEAR_SLOT_NAMES,
+  gearKindText,
+  gearStatText,
+  gearUnit,
+  gearValue,
+  statBonusText,
+} from './appearance';
 import { PANE_WIDTH } from './geometry';
 import type { InfoTarget } from './info-panel';
 import { usePaneTooltip } from './use-pane-tooltip';
@@ -67,22 +74,38 @@ export function GearPlanner(props: GearPlannerProps): JSX.Element {
       ))}
 
       {tooltip.tip !== null && (
-        <div className="game-tooltip" style={tooltip.tip.placement} role="tooltip">
-          <div className="game-tooltip-head">
-            <b>{tooltip.tip.content.item.name}</b>
-            <span>
-              Level {tooltip.tip.content.item.level} · {gearStatText(tooltip.tip.content.item)} ·{' '}
-              {tooltip.tip.content.item.sockets} sockets
-            </span>
-          </div>
-          {tooltip.tip.content.item.bonuses.map((bonus, i) => (
-            <p key={bonus[0]} className={i === 0 ? 'game-tooltip-label' : undefined}>
-              {statBonusText(bonus)}
-            </p>
-          ))}
-          <p className="game-tooltip-hint">{tooltip.tip.content.hint}</p>
-        </div>
+        <GearTooltip
+          {...tooltip.tip.content}
+          weight={catalog.setBonus(tooltip.tip.content.item.school).weight}
+          placement={tooltip.tip.placement}
+        />
       )}
+    </div>
+  );
+}
+
+type GearTooltipProps = ItemTip & {
+  readonly weight: SetBonusData['weight'];
+  readonly placement: CSSProperties;
+};
+
+// The in-game tooltip of an item: what it is, its level, damage or armor and sockets, then its bonuses.
+function GearTooltip({ item, hint, weight, placement }: GearTooltipProps): JSX.Element {
+  return (
+    <div className="game-tooltip" style={placement} role="tooltip">
+      <div className="game-tooltip-head">
+        <b>{item.name}</b>
+        <span>
+          {gearKindText(item, weight)} · Level {item.level} · {gearStatText(item)} · {item.sockets}{' '}
+          sockets
+        </span>
+      </div>
+      {item.bonuses.map((bonus, i) => (
+        <p key={bonus[0]} className={i === 0 ? 'game-tooltip-label' : undefined}>
+          {statBonusText(bonus)}
+        </p>
+      ))}
+      <p className="game-tooltip-hint">{hint}</p>
     </div>
   );
 }
@@ -187,7 +210,8 @@ function SchoolTile({
       onMouseLeave={onLeave}
     >
       <span className="gear-school-name">{final.school}</span>
-      <span className="gear-school-stat">{gearStatText(shown)}</span>
+      <span className="gear-school-stat">{gearValue(shown)}</span>
+      <span className="gear-school-stat">{gearUnit(shown)}</span>
       <span className="tier-buttons">
         {versions.map((version, i) => {
           const chosen = version === worn;

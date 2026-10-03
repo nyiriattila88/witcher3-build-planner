@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.9.1 - 2026-10-03
+
+- On a phone a skill name no longer runs into the skill under it where two rows sit close, as at the top
+  of the Signs and Alchemy trees. A name may run wider than its skill to stay on one line.
+
 ## 2.9.0 - 2026-10-03
 
 - The planner works on a phone. The page turns into one column with the info panel right under the

@@ -1667,8 +1667,10 @@ button:focus-visible {
     font-size: 20px;
   }
 
-  /* The trees and the board are shown scaled down, so their labels grow to stay readable. */
+  /* The trees and the board are shown scaled down, so their labels grow to stay readable. A skill name
+     may run wider than its node, so it stays on one line where a node sits close above another. */
   .node-name {
+    width: 140px;
     font-size: 17px;
   }
 

@@ -127,16 +127,18 @@ export function BuildSummary({ build, catalog }: BuildSummaryProps): JSX.Element
     });
   }
 
-  const potions = catalog.potions.filter((potion) => build.potionTier(potion) > 0);
-  const decoctions = catalog.decoctions.filter((decoction) => build.isDecoctionActive(decoction));
+  const potions = catalog.potions.filter((potion) => build.toxicityPlan.potionTier(potion) > 0);
+  const decoctions = catalog.decoctions.filter((decoction) =>
+    build.toxicityPlan.isDecoctionActive(decoction),
+  );
   if (potions.length + decoctions.length > 0) {
     sections.push({
-      title: `Toxicity ${build.toxicity()} of ${build.maxToxicity()}`,
+      title: `Toxicity ${build.toxicityPlan.toxicity()} of ${build.maxToxicity()}`,
       colour: 'var(--tab-toxicity)',
       lines: [
         ...decoctions.map((decoction) => `${decoction.name} (${decoction.toxicity})`),
         ...potions.map((potion) => {
-          const tier = build.potionTier(potion);
+          const tier = build.toxicityPlan.potionTier(potion);
           return `${potionTierName(potion, tier)} (${potion.tiers[tier - 1]?.toxicity ?? 0})`;
         }),
       ],

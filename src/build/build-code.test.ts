@@ -26,10 +26,12 @@ const fingerprint = (build: Build): string =>
     mutagens: Array.from({ length: MUTAGEN_GROUPS }, (_, group) => build.mutagenAt(group)),
     researched: catalog.mutations.map((mutation) => build.isResearched(mutation.id)),
     mutation: build.slottedMutation,
-    potions: catalog.potions.map((potion) => build.potionTier(potion)),
-    decoctions: catalog.decoctions.map((decoction) => build.isDecoctionActive(decoction)),
+    potions: catalog.potions.map((potion) => build.toxicityPlan.potionTier(potion)),
+    decoctions: catalog.decoctions.map((decoction) =>
+      build.toxicityPlan.isDecoctionActive(decoction),
+    ),
     manticore: build.manticorePieces,
-    recipes: build.knownRecipes,
+    recipes: build.toxicityPlan.knownRecipes,
     gear: GEAR_SLOTS.map((slot) => [
       build.gear.itemAt(slot)?.name ?? null,
       build.gear.enchantmentAt(slot)?.name ?? null,
@@ -74,13 +76,14 @@ const aRandomBuild = (random: () => number): Build => {
     if (mutagen !== undefined && random() < 0.6) build.placeMutagen(mutagen.id, group);
   }
   for (const potion of catalog.potions) {
-    if (random() < 0.3) build.setPotionTier(potion, 1 + Math.floor(random() * potion.tiers.length));
+    if (random() < 0.3)
+      build.toxicityPlan.setPotionTier(potion, 1 + Math.floor(random() * potion.tiers.length));
   }
   for (const decoction of catalog.decoctions) {
-    if (random() < 0.15) build.setDecoctionActive(decoction, true);
+    if (random() < 0.15) build.toxicityPlan.activateDecoction(decoction);
   }
-  if (random() < 0.5) build.setManticorePieces(Math.floor(random() * 5));
-  if (random() < 0.5) build.setKnownRecipes(Math.floor(random() * 150));
+  if (random() < 0.5) build.toxicityPlan.setManticorePieces(Math.floor(random() * 5));
+  if (random() < 0.5) build.toxicityPlan.setKnownRecipes(Math.floor(random() * 150));
   for (const slot of GEAR_SLOTS) {
     const item = pick(catalog.gear.filter((each) => each.slot === slot));
     if (item === undefined || random() < 0.4) continue;

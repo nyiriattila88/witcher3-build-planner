@@ -185,7 +185,7 @@ function PotionInfo({
 }): JSX.Element {
   const icon = <img src={potionIconUrl(potion)} alt="" draggable={false} />;
   const shown = potion.tiers[tier - 1] ?? potion.tiers[0];
-  const active = build.potionTier(potion);
+  const active = build.toxicityPlan.potionTier(potion);
   const meta = `Potion · Toxicity ${shown.toxicity} · ${formatDuration(shown.duration)}${
     active > 0 ? ` · ${potionTierName(potion, active)} active` : ''
   }`;

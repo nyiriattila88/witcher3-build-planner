@@ -1,16 +1,10 @@
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
-import {
-  ALCHEMY_RECIPES,
-  BASE_MAX_TOXICITY,
-  MANTICORE_ARMOR,
-  SAFE_TOXICITY_SHARE,
-  type DecoctionData,
-  type PotionData,
-} from '../data/alchemy';
+import { BASE_MAX_TOXICITY, MANTICORE_ARMOR, SAFE_TOXICITY_SHARE } from '../data/alchemy';
 import type { ColourTree, MutagenId, MutationId } from '../data/mutations';
 import type { TreeName } from '../data/skills';
 import type { BuildSnapshot } from './build-snapshot';
 import { GearLoadout } from './gear-loadout';
+import { ToxicityPlan } from './toxicity-plan';
 
 export const MAX_RANK = 3;
 export const BASE_SLOTS = 12;
@@ -48,8 +42,8 @@ export type MutagenBonus = {
   readonly value: number;
 };
 
-// One character build: skill ranks, slotted skills, mutagens, mutations, the potions and decoctions
-// planned to be active together, and the gear worn with its runes and glyphs.
+// One character build: skill ranks, slotted skills, mutagens and mutations, with the toxicity plan and the
+// gear it owns.
 // Every command leaves the build valid, so callers never have to repair it.
 export class Build {
   readonly #catalog: Catalog;
@@ -58,10 +52,7 @@ export class Build {
   #mutagens: (MutagenId | null)[] = Array<MutagenId | null>(MUTAGEN_GROUPS).fill(null);
   #researched = new Set<MutationId>();
   #mutation: MutationId | null = null;
-  #potions = new Map<PotionData, number>();
-  #decoctions = new Set<DecoctionData>();
-  #manticorePieces = 0;
-  #knownRecipes: number = ALCHEMY_RECIPES;
+  #toxicityPlan = new ToxicityPlan();
   #gear: GearLoadout;
 
   constructor(catalog: Catalog) {
@@ -103,15 +94,17 @@ export class Build {
     copy.#mutagens = [...this.#mutagens];
     copy.#researched = new Set(this.#researched);
     copy.#mutation = this.#mutation;
-    copy.#potions = new Map(this.#potions);
-    copy.#decoctions = new Set(this.#decoctions);
-    copy.#manticorePieces = this.#manticorePieces;
-    copy.#knownRecipes = this.#knownRecipes;
+    copy.#toxicityPlan = this.#toxicityPlan.clone();
     copy.#gear = this.#gear.clone();
     return copy;
   }
 
-  // The gear has no rule that reaches beyond it, so it takes its commands directly.
+  // The elixirs and the gear have no rule that reaches back into the build, so they take their commands
+  // directly. The maximum Toxicity they meet comes from the build.
+  get toxicityPlan(): ToxicityPlan {
+    return this.#toxicityPlan;
+  }
+
   get gear(): GearLoadout {
     return this.#gear;
   }
@@ -122,10 +115,7 @@ export class Build {
       this.#ranks.size === 0 &&
       this.#researched.size === 0 &&
       this.mutagenCount === 0 &&
-      this.#potions.size === 0 &&
-      this.#decoctions.size === 0 &&
-      this.#manticorePieces === 0 &&
-      this.#knownRecipes === ALCHEMY_RECIPES &&
+      this.#toxicityPlan.isEmpty() &&
       this.#gear.isEmpty()
     );
   }
@@ -348,72 +338,12 @@ export class Build {
     this.#normalize();
   }
 
-  // --- Potions, decoctions and Toxicity
-
-  // The active version of a potion: 0 for none, then the base, enhanced and superior one.
-  potionTier(potion: PotionData): number {
-    return this.#potions.get(potion) ?? 0;
-  }
-
-  setPotionTier(potion: PotionData, tier: number): void {
-    const value = Math.min(potion.tiers.length, Math.max(0, Math.trunc(tier)));
-    if (value > 0) this.#potions.set(potion, value);
-    else this.#potions.delete(potion);
-  }
-
-  isDecoctionActive(decoction: DecoctionData): boolean {
-    return this.#decoctions.has(decoction);
-  }
-
-  setDecoctionActive(decoction: DecoctionData, active: boolean): void {
-    if (active) this.#decoctions.add(decoction);
-    else this.#decoctions.delete(decoction);
-  }
-
-  // The game refuses a potion or decoction whose Toxicity would take the total above the maximum. The
-  // plan can still end up above it when the maximum drops later, which the planner shows as a warning.
-  canSetPotionTier(potion: PotionData, tier: number): boolean {
-    const held = potion.tiers[this.potionTier(potion) - 1]?.toxicity ?? 0;
-    const next = potion.tiers[tier - 1]?.toxicity ?? 0;
-    return next <= held || this.toxicity() - held + next <= this.maxToxicity();
-  }
-
-  canActivateDecoction(decoction: DecoctionData): boolean {
-    return (
-      this.isDecoctionActive(decoction) ||
-      this.toxicity() + decoction.toxicity <= this.maxToxicity()
-    );
-  }
+  // --- Toxicity: how much the skills and the armor let Geralt take
 
   // The Manticore armor pieces worn. Codes written before the gear existed carry a count of their own,
   // which stands until armor is picked.
   get manticorePieces(): number {
-    return this.#gear.manticoreArmorPieces() ?? this.#manticorePieces;
-  }
-
-  setManticorePieces(pieces: number): void {
-    this.#manticorePieces = Math.min(MANTICORE_ARMOR.pieces, Math.max(0, Math.trunc(pieces)));
-  }
-
-  get knownRecipes(): number {
-    return this.#knownRecipes;
-  }
-
-  setKnownRecipes(count: number): void {
-    this.#knownRecipes = Math.min(ALCHEMY_RECIPES, Math.max(0, Math.trunc(count)));
-  }
-
-  resetElixirs(): void {
-    this.#potions.clear();
-    this.#decoctions.clear();
-  }
-
-  // Everything active at once: a decoction holds its Toxicity for as long as it lasts.
-  toxicity(): number {
-    let sum = 0;
-    for (const [potion, tier] of this.#potions) sum += potion.tiers[tier - 1]?.toxicity ?? 0;
-    for (const decoction of this.#decoctions) sum += decoction.toxicity;
-    return sum;
+    return this.#gear.manticoreArmorPieces() ?? this.#toxicityPlan.manticorePieces;
   }
 
   maxToxicity(): number {
@@ -428,7 +358,9 @@ export class Build {
   // Skills only work from a slot, so an unslotted one adds nothing.
   acquiredTolerance(): number {
     return (
-      this.#slottedRankOf(ACQUIRED_TOLERANCE) * ACQUIRED_TOLERANCE.perRecipe * this.#knownRecipes
+      this.#slottedRankOf(ACQUIRED_TOLERANCE) *
+      ACQUIRED_TOLERANCE.perRecipe *
+      this.#toxicityPlan.knownRecipes
     );
   }
 

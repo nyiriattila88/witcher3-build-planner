@@ -112,16 +112,17 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
       if (id !== null) build.placeMutagen(id, group);
     }
     // The toxicity plan comes last, so codes written before it existed keep meaning the same build.
+    const plan = build.toxicityPlan;
     for (const potion of catalog.potions) {
-      build.setPotionTier(potion, choose(upTo(potion.tiers.length), build.potionTier(potion)));
+      plan.setPotionTier(potion, choose(upTo(potion.tiers.length), plan.potionTier(potion)));
     }
     for (const decoction of catalog.decoctions) {
-      if (choose(FLAGS, build.isDecoctionActive(decoction)))
-        build.setDecoctionActive(decoction, true);
+      if (choose(FLAGS, plan.isDecoctionActive(decoction))) plan.activateDecoction(decoction);
     }
-    build.setManticorePieces(choose(MANTICORE_PIECES, build.manticorePieces));
-    build.setKnownRecipes(
-      ALCHEMY_RECIPES - choose(MISSING_RECIPES, ALCHEMY_RECIPES - build.knownRecipes),
+    // The pieces the build wears, so a code made with Manticore armor carries them for older readers.
+    plan.setManticorePieces(choose(MANTICORE_PIECES, build.manticorePieces));
+    plan.setKnownRecipes(
+      ALCHEMY_RECIPES - choose(MISSING_RECIPES, ALCHEMY_RECIPES - plan.knownRecipes),
     );
     // The gear comes after the toxicity plan for the same reason. A slot names the school by its final
     // item and fills that item's sockets, and the version of each item comes at the very end, the final

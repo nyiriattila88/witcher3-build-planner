@@ -53,7 +53,7 @@ export function ToxicityPlanner({
   const tooltip = usePaneTooltip<Tip>(pane);
   const tip = tooltip.tip;
   const max = build.maxToxicity();
-  const toxicity = build.toxicity();
+  const toxicity = build.toxicityPlan.toxicity();
   const overdose = build.overdoseToxicity();
   const over = toxicity > overdose;
   const warning =
@@ -170,11 +170,11 @@ export function ToxicityPlanner({
               type="number"
               min={0}
               max={ALCHEMY_RECIPES}
-              value={build.knownRecipes}
+              value={build.toxicityPlan.knownRecipes}
               onChange={(event) => {
                 const count = Number(event.target.value);
                 onChange((draft) => {
-                  draft.setKnownRecipes(count);
+                  draft.toxicityPlan.setKnownRecipes(count);
                 });
               }}
             />{' '}
@@ -187,8 +187,8 @@ export function ToxicityPlanner({
       <h3 className="elixir-heading">Decoctions</h3>
       <div className="elixir-grid">
         {catalog.decoctions.map((decoction) => {
-          const active = build.isDecoctionActive(decoction);
-          const allowed = build.canActivateDecoction(decoction);
+          const active = build.toxicityPlan.isDecoctionActive(decoction);
+          const allowed = build.toxicityPlan.canActivateDecoction(decoction, max);
           const hint = active
             ? 'Click to take it off'
             : allowed
@@ -204,7 +204,8 @@ export function ToxicityPlanner({
               onClick={(event) => {
                 if (!allowed) return;
                 onChange((draft) => {
-                  draft.setDecoctionActive(decoction, !active);
+                  if (active) draft.toxicityPlan.deactivateDecoction(decoction);
+                  else draft.toxicityPlan.activateDecoction(decoction);
                 });
                 showTip(
                   event,
@@ -235,11 +236,12 @@ export function ToxicityPlanner({
       <h3 className="elixir-heading">Potions</h3>
       <div className="elixir-grid">
         {catalog.potions.map((potion) => {
-          const tier = build.potionTier(potion);
+          const tier = build.toxicityPlan.potionTier(potion);
           const shown = potion.tiers[Math.max(0, tier - 1)] ?? potion.tiers[0];
           const shownTier = Math.max(1, tier);
           const blocked =
-            tier === 0 && potion.tiers.every((_, i) => !build.canSetPotionTier(potion, i + 1));
+            tier === 0 &&
+            potion.tiers.every((_, i) => !build.toxicityPlan.canSetPotionTier(potion, i + 1, max));
           const hint = blocked
             ? TOO_TOXIC
             : potion.tiers.length === 1
@@ -263,7 +265,7 @@ export function ToxicityPlanner({
               <span className="tier-buttons">
                 {potion.tiers.map((each, i) => {
                   const chosen = tier === i + 1;
-                  const allowed = build.canSetPotionTier(potion, i + 1);
+                  const allowed = build.toxicityPlan.canSetPotionTier(potion, i + 1, max);
                   return (
                     <button
                       key={i}
@@ -275,7 +277,7 @@ export function ToxicityPlanner({
                       onClick={() => {
                         if (!allowed) return;
                         onChange((draft) => {
-                          draft.setPotionTier(potion, chosen ? 0 : i + 1);
+                          draft.toxicityPlan.setPotionTier(potion, chosen ? 0 : i + 1);
                         });
                       }}
                       onMouseEnter={(event) => {

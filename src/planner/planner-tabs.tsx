@@ -20,7 +20,7 @@ const tabCount = (tab: PlannerTab, build: Build): readonly [count: string, meani
     case 'mutations':
       return [`${build.researchedCount}`, 'mutations researched'];
     case 'toxicity':
-      return [`${build.toxicity()}/${build.maxToxicity()}`, 'Toxicity of the maximum'];
+      return [`${build.toxicityPlan.toxicity()}/${build.maxToxicity()}`, 'Toxicity of the maximum'];
     case 'gear':
       return [`${build.gear.count}/${GEAR_SLOTS.length}`, 'items worn'];
   }

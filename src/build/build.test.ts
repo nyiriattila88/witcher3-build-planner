@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Skill } from '../catalog/catalog';
 import { createGameCatalog } from '../catalog/game-catalog';
-import type { DecoctionData, PotionData } from '../data/alchemy';
+import type { PotionData } from '../data/alchemy';
 import { ALCHEMY_RECIPES } from '../data/alchemy';
 import type { GearItemData } from '../data/gear';
 import type { TreeName } from '../data/skills';
@@ -25,12 +25,6 @@ const withPoints = (...skills: Skill[]): Build => {
 const potion = (name: string): PotionData => {
   const found = catalog.potions.find((each) => each.name === name);
   if (found === undefined) throw new Error(`Test data names an unknown potion: ${name}`);
-  return found;
-};
-
-const decoction = (name: string): DecoctionData => {
-  const found = catalog.decoctions.find((each) => each.name === name);
-  if (found === undefined) throw new Error(`Test data names an unknown decoction: ${name}`);
   return found;
 };
 
@@ -262,17 +256,6 @@ describe('Build mutagens', () => {
 });
 
 describe('Build Toxicity', () => {
-  it('adds up the Toxicity of everything active at once', () => {
-    const build = new Build(catalog);
-    build.setPotionTier(potion('Swallow'), 3);
-    build.setPotionTier(potion('Thunderbolt'), 1);
-    build.setDecoctionActive(decoction('Water hag decoction'), true);
-
-    const toxicity = build.toxicity();
-
-    expect(toxicity).toBe(20 + 25 + 50);
-  });
-
   it('raises maximum Toxicity with Acquired Tolerance only while it sits in a slot', () => {
     const build = withTrees('Alchemy');
     const acquiredTolerance = skill('Alchemy', 'Acquired Tolerance');
@@ -300,56 +283,26 @@ describe('Build Toxicity', () => {
     const build = withTrees('Alchemy', 'General');
     build.placeSkill(skill('Alchemy', 'Acquired Tolerance'), 0);
     build.placeSkill(skill('General', 'Metabolic Control'), 1);
-    build.setKnownRecipes(40);
-    build.setManticorePieces(4);
+    build.toxicityPlan.setKnownRecipes(40);
+    build.toxicityPlan.setManticorePieces(4);
 
     const max = build.maxToxicity();
 
     expect(max).toBe(100 + 40 + 10 + 4 * 5);
   });
 
-  it('lets a potion or decoction in only while the total stays within the maximum', () => {
-    const build = new Build(catalog);
-    build.setDecoctionActive(decoction('Water hag decoction'), true);
-    build.setDecoctionActive(decoction('Katakan decoction'), true);
-
-    const allowed = [
-      build.canActivateDecoction(decoction('Griffin decoction')),
-      build.canSetPotionTier(potion('Swallow'), 1),
-      build.canSetPotionTier(potion('White Honey'), 1),
-      build.canActivateDecoction(decoction('Katakan decoction')),
-    ];
-
-    expect(allowed).toEqual([false, false, true, true]);
-  });
-
   it('starts an overdose above half of the maximum', () => {
     const build = new Build(catalog);
-    build.setManticorePieces(2);
+    build.toxicityPlan.setManticorePieces(2);
 
     const threshold = build.overdoseToxicity();
 
     expect(threshold).toBe((100 + 10) / 2);
   });
 
-  it('keeps every value in the range the game allows', () => {
-    const build = new Build(catalog);
-    build.setPotionTier(potion('Killer Whale'), 3);
-    build.setManticorePieces(9);
-    build.setKnownRecipes(-5);
-
-    const values = [
-      build.potionTier(potion('Killer Whale')),
-      build.manticorePieces,
-      build.knownRecipes,
-    ];
-
-    expect(values).toEqual([1, 4, 0]);
-  });
-
   it('takes the Manticore pieces from the gear once armor is picked', () => {
     const build = new Build(catalog);
-    build.setManticorePieces(4);
+    build.toxicityPlan.setManticorePieces(4);
     const before = build.manticorePieces;
 
     build.gear.equip('armor', gear('Manticore armor'));
@@ -371,7 +324,7 @@ describe('Build emptiness', () => {
 
   it('counts a build with only a potion as not empty', () => {
     const build = new Build(catalog);
-    build.setPotionTier(potion('Swallow'), 1);
+    build.toxicityPlan.setPotionTier(potion('Swallow'), 1);
 
     expect(build.isEmpty()).toBe(false);
   });

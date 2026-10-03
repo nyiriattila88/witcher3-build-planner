@@ -56,7 +56,7 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
           draft.resetMutations();
           return;
         case 'toxicity':
-          draft.resetElixirs();
+          draft.toxicityPlan.clearElixirs();
           return;
         case 'gear':
           draft.gear.reset();
@@ -74,7 +74,7 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
       case 'mutagens':
         return 'Drag to a mutagen slot';
       case 'toxicity':
-        return `Toxicity ${build.toxicity()} of ${build.maxToxicity()}`;
+        return `Toxicity ${build.toxicityPlan.toxicity()} of ${build.maxToxicity()}`;
       case 'gear':
         return `Armor ${build.gear.armorValue()}`;
     }

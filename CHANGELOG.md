@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.8.0 - 2026-10-03
+
+- The runes, glyphs and runeword or glyphword picked for a slot stay when another item takes it. What the
+  new item has no socket for stays greyed out and idle, and counts again once an item with room for it
+  is worn. Emptying a slot clears it.
+- The sockets sit in the left column and the runeword or glyphword in the right one for every item.
+- Every gear name carries its tier in front, so Ursine steel sword - mastercrafted reads Mastercrafted
+  Ursine steel sword, like the armor and the grandmaster swords.
+- The version buttons are numbered by tier on every tile, V being grandmaster, and a tier a school does
+  not make stays greyed out in its place. Manticore gear is grandmaster only, the Viper armor and
+  venomous swords count as mastercrafted, the master who makes them.
+
 ## 2.7.2 - 2026-10-03
 
 - The armor tiles on the Gear tab show the weight class under the armor number, such as Heavy armor.

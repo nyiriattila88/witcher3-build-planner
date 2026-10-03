@@ -279,10 +279,12 @@ function SkillSlot({
         className={`slot${over}`}
         style={position}
         role="button"
+        tabIndex={0}
         aria-label="Empty skill slot, click to pick a skill"
         onClick={() => {
           onPick(target);
         }}
+        onKeyDown={taps.onKeyDown}
       >
         {accepts}
       </div>
@@ -298,12 +300,21 @@ function SkillSlot({
     <div
       className={`slot filled${over}`}
       style={{ ...position, color: treeColour(skill.tree) }}
+      role="button"
+      tabIndex={0}
       aria-label={`${skill.name} in slot ${index + 1}`}
       onMouseEnter={() => {
         onTip(index);
         handlers.onHoverSkill(skill);
       }}
       onMouseLeave={() => {
+        onTip(null);
+      }}
+      onFocus={() => {
+        onTip(index);
+        handlers.onHoverSkill(skill);
+      }}
+      onBlur={() => {
         onTip(null);
       }}
       {...taps}
@@ -361,10 +372,12 @@ function MutagenSlot({
         className={`mutagen-slot${over}`}
         style={position}
         role="button"
+        tabIndex={0}
         aria-label="Empty mutagen slot, click to pick a mutagen"
         onClick={() => {
           onPick(target);
         }}
+        onKeyDown={taps.onKeyDown}
       />
     );
   }
@@ -376,8 +389,13 @@ function MutagenSlot({
         className={`mutagen-slot filled${over}`}
         style={position}
         title={REMOVE_TIP}
+        role="button"
+        tabIndex={0}
         aria-label={mutagen.name}
         onMouseEnter={() => {
+          handlers.onHoverMutagen(mutagen);
+        }}
+        onFocus={() => {
           handlers.onHoverMutagen(mutagen);
         }}
         {...taps}
@@ -433,10 +451,12 @@ function MutationSlot({
           className={`mutation-slot${over}`}
           style={circle}
           role="button"
+          tabIndex={0}
           aria-label="Empty mutation slot, click to pick a mutation"
           onClick={() => {
             onPick(target);
           }}
+          onKeyDown={taps.onKeyDown}
         >
           {innate !== undefined && <MutationDisc mutation={innate} />}
         </div>
@@ -458,8 +478,13 @@ function MutationSlot({
         className={`mutation-slot filled${over}`}
         style={circle}
         title={REMOVE_TIP}
+        role="button"
+        tabIndex={0}
         aria-label={mutation.name}
         onMouseEnter={() => {
+          handlers.onHoverMutation(mutation);
+        }}
+        onFocus={() => {
           handlers.onHoverMutation(mutation);
         }}
         {...taps}

@@ -301,7 +301,8 @@ button:hover {
 /* The in-game selection: white corner brackets around the tile. */
 .node:hover .tile::before,
 .node:focus-visible .tile::before,
-.slot.filled:hover .tile::before {
+.slot.filled:hover .tile::before,
+.slot.filled:focus-visible .tile::before {
   content: '';
   position: absolute;
   inset: -7px;
@@ -392,7 +393,8 @@ button:hover {
   touch-action: manipulation;
 }
 
-.node:focus-visible {
+.node:focus-visible,
+.slot.filled:focus-visible {
   outline: none;
 }
 
@@ -1478,6 +1480,9 @@ button.elixir {
 }
 
 .mutation:focus-visible,
+.slot:focus-visible,
+.mutagen-slot:focus-visible,
+.mutation-slot:focus-visible,
 button:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;

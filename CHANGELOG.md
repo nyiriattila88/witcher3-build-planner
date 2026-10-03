@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.10.0 - 2026-10-03
+
+- Hovering a mutation in the mutation tree shows its tooltip beside it, the way a skill shows one in its
+  tree: its colours, research cost, what it requires and what it does.
+- The runewords and glyphwords of the Gear tab are listed by the Runewright level that offers them, then
+  by name.
+- Added to a phone's home screen, the planner shows the wolf medallion as its icon instead of a letter,
+  and on Android the browser bar takes the page's dark colour.
+
 ## 2.9.1 - 2026-10-03
 
 - On a phone a skill name no longer runs into the skill under it where two rows sit close, as at the top

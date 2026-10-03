@@ -91,6 +91,9 @@ const aRandomBuild = (random: () => number): Build => {
       const upgrade = pick(catalog.upgrades.filter((each) => build.canUpgrade(slot, socket, each)));
       if (upgrade !== undefined && random() < 0.6) build.setUpgrade(slot, socket, upgrade);
     }
+    // Another item for the slot, which may leave some of the plan idle.
+    const swap = pick(catalog.gear.filter((each) => each.slot === slot));
+    if (swap !== undefined && random() < 0.4) build.equip(slot, swap);
   }
   return build;
 };

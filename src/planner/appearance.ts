@@ -84,9 +84,15 @@ const gearUnit = (item: GearItemData): string => (item.damage === null ? 'armor'
 
 export const gearStatText = (item: GearItemData): string => `${gearValue(item)} ${gearUnit(item)}`;
 
-// The unit of that number, with the weight class for armor: damage, or Heavy armor.
-export const gearUnitText = (item: GearItemData, weight: SetBonusData['weight']): string =>
-  item.damage === null ? `${weight} ${gearUnit(item)}` : gearUnit(item);
+// The two lines under the school's name on its tile: the number alone, then what it is, with the weight
+// class for armor: 335-409 above damage, 240 above Heavy armor.
+export const gearTileLines = (
+  item: GearItemData,
+  weight: SetBonusData['weight'],
+): readonly [string, string] => [
+  gearValue(item),
+  item.damage === null ? `${weight} ${gearUnit(item)}` : gearUnit(item),
+];
 
 // What an item is, the way the game names it: Medium armor, or the kind of sword.
 export const gearKindText = (item: GearItemData, weight: SetBonusData['weight']): string =>

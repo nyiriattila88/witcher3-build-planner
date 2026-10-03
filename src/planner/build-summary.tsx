@@ -57,7 +57,7 @@ function gearLines(build: Build, catalog: Catalog): string[] {
   const items = GEAR_SLOTS.flatMap((slot) => {
     const item = build.gearAt(slot);
     if (item === null) return [];
-    const word = build.enchantmentAt(slot);
+    const word = build.isEnchantmentActive(slot) ? build.enchantmentAt(slot) : null;
     const inset = Array.from({ length: item.sockets }, (_, socket) =>
       build.upgradeAt(slot, socket),
     );

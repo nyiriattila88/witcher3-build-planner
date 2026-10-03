@@ -230,8 +230,7 @@ function GearInfo({
   const kind = gearKindText(item, set.weight);
   const meta = (
     <>
-      {item.school} school{item.tier === null ? '' : ` · ${item.tier}`} · {kind} · Level{' '}
-      {item.level}
+      {item.school} school · {item.tier} · {kind} · Level {item.level}
       <br />
       {gearStatText(item)} · {item.sockets} {item.sockets === 1 ? 'socket' : 'sockets'} ·{' '}
       {final ? `Set pieces worn: ${pieces}` : 'Only the final version counts for the set'}

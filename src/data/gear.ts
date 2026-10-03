@@ -1,9 +1,10 @@
 // Witcher school gear in every version, the regular game's values since patch 4.0 from The Witcher
-// Wiki. The versions of a school's item follow each other by level, the final one last. Build codes
+// Wiki. The versions of a school's item follow each other by level, the final one last. Every name
+// carries its tier in front, where the game puts it behind for the base game swords. Build codes
 // address items by their position in this list: append new items, never reorder them.
 
 export type GearSlot = 'steel' | 'silver' | 'armor' | 'gloves' | 'trousers' | 'boots';
-type GearTier = 'Basic' | 'Enhanced' | 'Superior' | 'Mastercrafted' | 'Grandmaster';
+export type GearTier = 'Basic' | 'Enhanced' | 'Superior' | 'Mastercrafted' | 'Grandmaster';
 export type GearSchool =
   'Bear' | 'Cat' | 'Griffin' | 'Wolf' | 'Forgotten Wolf' | 'Manticore' | 'Viper';
 export type StatBonus = readonly [stat: string, value: number, unit: '%' | ''];
@@ -12,8 +13,9 @@ export type GearItemData = {
   readonly name: string;
   readonly school: GearSchool;
   readonly slot: GearSlot;
-  // The step of the school's upgrade line, null for a school whose gear does not go through it.
-  readonly tier: GearTier | null;
+  // The step of the school's upgrade line. Manticore and Viper gear has none, its tier follows the
+  // craftsman who makes it: a grandmaster for Manticore, a master for the Viper armor and venomous swords.
+  readonly tier: GearTier;
   readonly level: number;
   // Runes for a sword, glyphs for an armor piece.
   readonly sockets: number;
@@ -42,6 +44,14 @@ export const GEAR_SLOTS: readonly GearSlot[] = [
   'boots',
 ];
 
+export const GEAR_TIERS: readonly GearTier[] = [
+  'Basic',
+  'Enhanced',
+  'Superior',
+  'Mastercrafted',
+  'Grandmaster',
+];
+
 export const GEAR: readonly GearItemData[] = [
   {
     name: 'Ursine steel sword',
@@ -59,7 +69,7 @@ export const GEAR: readonly GearItemData[] = [
   },
   // The wiki gives no level, 25 is the level of every other enhanced Ursine piece.
   {
-    name: 'Ursine steel sword - enhanced',
+    name: 'Enhanced Ursine steel sword',
     school: 'Bear',
     slot: 'steel',
     tier: 'Enhanced',
@@ -74,7 +84,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Ursine steel sword - superior',
+    name: 'Superior Ursine steel sword',
     school: 'Bear',
     slot: 'steel',
     tier: 'Superior',
@@ -89,7 +99,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Ursine steel sword - mastercrafted',
+    name: 'Mastercrafted Ursine steel sword',
     school: 'Bear',
     slot: 'steel',
     tier: 'Mastercrafted',
@@ -135,7 +145,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Feline steel sword - enhanced',
+    name: 'Enhanced Feline steel sword',
     school: 'Cat',
     slot: 'steel',
     tier: 'Enhanced',
@@ -149,7 +159,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Feline steel sword - superior',
+    name: 'Superior Feline steel sword',
     school: 'Cat',
     slot: 'steel',
     tier: 'Superior',
@@ -164,7 +174,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Feline steel sword - mastercrafted',
+    name: 'Mastercrafted Feline steel sword',
     school: 'Cat',
     slot: 'steel',
     tier: 'Mastercrafted',
@@ -210,7 +220,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Griffin steel sword - enhanced',
+    name: 'Enhanced Griffin steel sword',
     school: 'Griffin',
     slot: 'steel',
     tier: 'Enhanced',
@@ -224,7 +234,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Griffin steel sword - superior',
+    name: 'Superior Griffin steel sword',
     school: 'Griffin',
     slot: 'steel',
     tier: 'Superior',
@@ -239,7 +249,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Griffin steel sword - mastercrafted',
+    name: 'Mastercrafted Griffin steel sword',
     school: 'Griffin',
     slot: 'steel',
     tier: 'Mastercrafted',
@@ -288,7 +298,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Wolven steel sword - enhanced',
+    name: 'Enhanced Wolven steel sword',
     school: 'Wolf',
     slot: 'steel',
     tier: 'Enhanced',
@@ -304,7 +314,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Wolven steel sword - superior',
+    name: 'Superior Wolven steel sword',
     school: 'Wolf',
     slot: 'steel',
     tier: 'Superior',
@@ -321,7 +331,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Wolven steel sword - mastercrafted',
+    name: 'Mastercrafted Wolven steel sword',
     school: 'Wolf',
     slot: 'steel',
     tier: 'Mastercrafted',
@@ -373,7 +383,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Forgotten Wolven steel sword - mastercrafted',
+    name: 'Mastercrafted forgotten Wolven steel sword',
     school: 'Forgotten Wolf',
     slot: 'steel',
     tier: 'Mastercrafted',
@@ -412,7 +422,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Manticore steel sword',
     school: 'Manticore',
     slot: 'steel',
-    tier: null,
+    tier: 'Grandmaster',
     level: 40,
     sockets: 3,
     armor: null,
@@ -429,7 +439,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Viper steel sword',
     school: 'Viper',
     slot: 'steel',
-    tier: null,
+    tier: 'Basic',
     level: 2,
     sockets: 1,
     armor: null,
@@ -443,7 +453,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Viper venomous steel sword',
     school: 'Viper',
     slot: 'steel',
-    tier: null,
+    tier: 'Mastercrafted',
     level: 39,
     sockets: 3,
     armor: null,
@@ -473,7 +483,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Ursine silver sword - enhanced',
+    name: 'Enhanced Ursine silver sword',
     school: 'Bear',
     slot: 'silver',
     tier: 'Enhanced',
@@ -490,7 +500,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Ursine silver sword - superior',
+    name: 'Superior Ursine silver sword',
     school: 'Bear',
     slot: 'silver',
     tier: 'Superior',
@@ -507,7 +517,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Ursine silver sword - mastercrafted',
+    name: 'Mastercrafted Ursine silver sword',
     school: 'Bear',
     slot: 'silver',
     tier: 'Mastercrafted',
@@ -556,7 +566,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Feline silver sword - enhanced',
+    name: 'Enhanced Feline silver sword',
     school: 'Cat',
     slot: 'silver',
     tier: 'Enhanced',
@@ -571,7 +581,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Feline silver sword - superior',
+    name: 'Superior Feline silver sword',
     school: 'Cat',
     slot: 'silver',
     tier: 'Superior',
@@ -588,7 +598,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Feline silver sword - mastercrafted',
+    name: 'Mastercrafted Feline silver sword',
     school: 'Cat',
     slot: 'silver',
     tier: 'Mastercrafted',
@@ -636,7 +646,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Griffin silver sword - enhanced',
+    name: 'Enhanced Griffin silver sword',
     school: 'Griffin',
     slot: 'silver',
     tier: 'Enhanced',
@@ -650,7 +660,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Griffin silver sword - superior',
+    name: 'Superior Griffin silver sword',
     school: 'Griffin',
     slot: 'silver',
     tier: 'Superior',
@@ -666,7 +676,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Griffin silver sword - mastercrafted',
+    name: 'Mastercrafted Griffin silver sword',
     school: 'Griffin',
     slot: 'silver',
     tier: 'Mastercrafted',
@@ -716,7 +726,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Wolven silver sword - enhanced',
+    name: 'Enhanced Wolven silver sword',
     school: 'Wolf',
     slot: 'silver',
     tier: 'Enhanced',
@@ -732,7 +742,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Wolven silver sword - superior',
+    name: 'Superior Wolven silver sword',
     school: 'Wolf',
     slot: 'silver',
     tier: 'Superior',
@@ -749,7 +759,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Wolven silver sword - mastercrafted',
+    name: 'Mastercrafted Wolven silver sword',
     school: 'Wolf',
     slot: 'silver',
     tier: 'Mastercrafted',
@@ -801,7 +811,7 @@ export const GEAR: readonly GearItemData[] = [
     ],
   },
   {
-    name: 'Forgotten Wolven silver sword - mastercrafted',
+    name: 'Mastercrafted forgotten Wolven silver sword',
     school: 'Forgotten Wolf',
     slot: 'silver',
     tier: 'Mastercrafted',
@@ -840,7 +850,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Manticore silver sword',
     school: 'Manticore',
     slot: 'silver',
-    tier: null,
+    tier: 'Grandmaster',
     level: 40,
     sockets: 3,
     armor: null,
@@ -857,7 +867,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Viper silver sword',
     school: 'Viper',
     slot: 'silver',
-    tier: null,
+    tier: 'Basic',
     level: 1,
     sockets: 1,
     armor: null,
@@ -872,7 +882,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Viper venomous silver sword',
     school: 'Viper',
     slot: 'silver',
-    tier: null,
+    tier: 'Mastercrafted',
     level: 39,
     sockets: 3,
     armor: null,
@@ -1283,7 +1293,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Manticore armor',
     school: 'Manticore',
     slot: 'armor',
-    tier: null,
+    tier: 'Grandmaster',
     level: 40,
     sockets: 3,
     armor: 240,
@@ -1300,7 +1310,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Viper armor',
     school: 'Viper',
     slot: 'armor',
-    tier: null,
+    tier: 'Mastercrafted',
     level: 39,
     sockets: 3,
     armor: 235,
@@ -1708,7 +1718,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Manticore gauntlets',
     school: 'Manticore',
     slot: 'gloves',
-    tier: null,
+    tier: 'Grandmaster',
     level: 40,
     sockets: 2,
     armor: 87,
@@ -1725,7 +1735,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Viper gauntlets',
     school: 'Viper',
     slot: 'gloves',
-    tier: null,
+    tier: 'Mastercrafted',
     level: 39,
     sockets: 2,
     armor: 85,
@@ -2130,7 +2140,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Manticore trousers',
     school: 'Manticore',
     slot: 'trousers',
-    tier: null,
+    tier: 'Grandmaster',
     level: 40,
     sockets: 2,
     armor: 91,
@@ -2147,7 +2157,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Viper trousers',
     school: 'Viper',
     slot: 'trousers',
-    tier: null,
+    tier: 'Mastercrafted',
     level: 39,
     sockets: 2,
     armor: 89,
@@ -2555,7 +2565,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Manticore boots',
     school: 'Manticore',
     slot: 'boots',
-    tier: null,
+    tier: 'Grandmaster',
     level: 40,
     sockets: 2,
     armor: 91,
@@ -2572,7 +2582,7 @@ export const GEAR: readonly GearItemData[] = [
     name: 'Viper boots',
     school: 'Viper',
     slot: 'boots',
-    tier: null,
+    tier: 'Mastercrafted',
     level: 39,
     sockets: 2,
     armor: 89,

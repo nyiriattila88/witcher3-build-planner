@@ -42,9 +42,10 @@ skill trees, skill slots, mutagens and mutations, and a short build code that ca
   active.
 - **Witcher gear.** Wear the school gear of Bear, Cat, Griffin, Wolf, Forgotten Wolf, Manticore and
   Viper in any version from basic to grandmaster, one item per slot and mixed freely. Put runes into the
-  swords and glyphs into the armor socket by socket, or a runeword or glyphword from the Runewright.
-  Wearing 3 or 6 final pieces of a school shows its set bonuses, the Manticore pieces raise maximum
-  Toxicity, and every item, rune and glyph counts towards the total bonuses.
+  swords and glyphs into the armor socket by socket, or a runeword or glyphword from the Runewright. They
+  stay with the slot when the item changes, and what the new item has no socket for waits, greyed out,
+  until it fits again. Wearing 3 or 6 final pieces of a school shows its set bonuses, the Manticore
+  pieces raise maximum Toxicity, and every item, rune and glyph counts towards the total bonuses.
 - **Shareable builds.** A short build code restores everything: points, slots, mutagens, mutations, the
   toxicity plan and the gear. The page address carries it as `?build=`, so a copied link opens the same
   build, and a plain address starts empty.

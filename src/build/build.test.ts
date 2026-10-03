@@ -327,30 +327,47 @@ describe('Build Toxicity', () => {
 });
 
 describe('Build gear', () => {
-  it('empties the sockets when another item takes the slot', () => {
-    const build = new Build(catalog);
-    build.equip('steel', gear('Grandmaster Feline steel sword'));
-    build.setUpgrade('steel', 0, upgrade('Greater Chernobog runestone'));
-
-    build.equip('steel', gear('Grandmaster Ursine steel sword'));
-
-    expect(build.upgradeAt('steel', 0)).toBeNull();
-  });
-
-  it('keeps the runes that still fit when another version of the item is worn', () => {
+  it('keeps the runes of a slot when another item takes it, with the one it has no socket for idle', () => {
     const build = new Build(catalog);
     build.equip('steel', gear('Grandmaster Feline steel sword'));
     for (const socket of [0, 1, 2]) {
       build.setUpgrade('steel', socket, upgrade('Greater Chernobog runestone'));
     }
 
-    build.equip('steel', gear('Feline steel sword - enhanced'));
+    build.equip('steel', gear('Enhanced Ursine steel sword'));
 
-    expect([0, 1, 2].map((socket) => build.upgradeAt('steel', socket)?.name ?? null)).toEqual([
-      'Greater Chernobog runestone',
-      'Greater Chernobog runestone',
-      null,
+    expect([0, 1, 2].map((socket) => build.upgradeAt('steel', socket)?.name)).toEqual(
+      Array<string>(3).fill('Greater Chernobog runestone'),
+    );
+    expect([0, 1, 2].map((socket) => build.isSocketOpen('steel', socket))).toEqual([
+      true,
+      true,
+      false,
     ]);
+    expect(build.gearBonuses().find(([stat]) => stat === 'Attack Power')?.[1]).toBe(5 + 5);
+  });
+
+  it('brings an idle enchantment back once an item holds it again', () => {
+    const build = new Build(catalog);
+    build.equip('steel', gear('Grandmaster Feline steel sword'));
+    build.enchant('steel', enchantment('Replenishment'));
+
+    build.equip('steel', gear('Enhanced Feline steel sword'));
+    const onTwoSockets = build.isEnchantmentActive('steel');
+    build.equip('steel', gear('Grandmaster Ursine steel sword'));
+
+    expect([onTwoSockets, build.isEnchantmentActive('steel')]).toEqual([false, true]);
+  });
+
+  it('forgets the runes and enchantment of a slot that is emptied', () => {
+    const build = new Build(catalog);
+    build.equip('steel', gear('Grandmaster Feline steel sword'));
+    build.setUpgrade('steel', 0, upgrade('Greater Chernobog runestone'));
+
+    build.equip('steel', null);
+    build.equip('steel', gear('Grandmaster Feline steel sword'));
+
+    expect(build.upgradeAt('steel', 0)).toBeNull();
   });
 
   it('counts only the final version of an item towards the set bonuses', () => {
@@ -385,14 +402,25 @@ describe('Build gear', () => {
 
     build.enchant('armor', enchantment('Eruption'));
     build.enchant('boots', enchantment('Eruption'));
-    build.setUpgrade('armor', 1, upgrade('Greater Glyph of Igni'));
 
     expect([
       build.enchantmentAt('armor')?.name,
       build.enchantmentAt('boots'),
       build.upgradeAt('armor', 0),
-      build.upgradeAt('armor', 1),
-    ]).toEqual(['Eruption', null, null, null]);
+    ]).toEqual(['Eruption', null, null]);
+  });
+
+  it('lets a glyph take the place of the enchantment again', () => {
+    const build = new Build(catalog);
+    build.equip('armor', gear('Grandmaster Griffin armor'));
+    build.enchant('armor', enchantment('Eruption'));
+
+    build.setUpgrade('armor', 1, upgrade('Greater Glyph of Igni'));
+
+    expect([build.enchantmentAt('armor'), build.upgradeAt('armor', 1)?.name]).toEqual([
+      null,
+      'Greater Glyph of Igni',
+    ]);
   });
 
   it('takes the Manticore pieces from the gear once armor is picked', () => {

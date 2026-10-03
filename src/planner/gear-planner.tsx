@@ -1,12 +1,19 @@
 import { useRef, type CSSProperties, type JSX, type MouseEvent } from 'react';
 import { SET_PIECES, upgradeKind, type Build } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
-import { GEAR_SLOTS, type GearItemData, type GearSlot, type SetBonusData } from '../data/gear';
+import {
+  GEAR_SLOTS,
+  GEAR_TIERS,
+  type GearItemData,
+  type GearSlot,
+  type SetBonusData,
+} from '../data/gear';
+import { ENCHANTMENT_SOCKETS } from '../data/upgrades';
 import {
   GEAR_SLOT_NAMES,
   gearKindText,
   gearStatText,
-  gearUnitText,
+  gearTileLines,
   gearValue,
   statBonusText,
 } from './appearance';
@@ -172,7 +179,8 @@ function SlotPicker(props: SlotPickerProps): JSX.Element {
   );
 }
 
-const VERSION_LABELS = ['I', 'II', 'III', 'IV', 'V'];
+// One numeral per tier, so V means grandmaster on every tile.
+const TIER_NUMERALS = ['I', 'II', 'III', 'IV', 'V'];
 
 type SchoolTileProps = SlotPickerProps & {
   readonly final: GearItemData;
@@ -180,7 +188,8 @@ type SchoolTileProps = SlotPickerProps & {
   readonly worn: GearItemData | null;
 };
 
-// One school's item for the slot with a button per version, the way a potion has one per tier.
+// One school's item for the slot with a button per tier, the way a potion has one per version. A tier
+// the school does not make shows greyed out.
 function SchoolTile({
   catalog,
   onChange,
@@ -194,6 +203,7 @@ function SchoolTile({
 }: SchoolTileProps): JSX.Element {
   const wornHere = versions.find((version) => version === worn) ?? null;
   const shown = wornHere ?? final;
+  const [figure, detail] = gearTileLines(shown, catalog.setBonus(final.school).weight);
   const tileOf = (event: MouseEvent): Element | null => event.currentTarget.closest('.gear-school');
   return (
     <div
@@ -211,16 +221,22 @@ function SchoolTile({
       onMouseLeave={onLeave}
     >
       <span className="gear-school-name">{final.school}</span>
-      <span className="gear-school-stat">{gearValue(shown)}</span>
-      <span className="gear-school-stat">
-        {gearUnitText(shown, catalog.setBonus(final.school).weight)}
-      </span>
+      <span className="gear-school-stat">{figure}</span>
+      <span className="gear-school-stat">{detail}</span>
       <span className="tier-buttons">
-        {versions.map((version, i) => {
+        {GEAR_TIERS.map((tier, i) => {
+          const version = versions.find((each) => each.tier === tier);
+          if (version === undefined) {
+            return (
+              <button key={tier} type="button" disabled title={`No ${tier} version`}>
+                {TIER_NUMERALS[i]}
+              </button>
+            );
+          }
           const chosen = version === worn;
           return (
             <button
-              key={version.name}
+              key={tier}
               type="button"
               className={chosen ? 'active' : undefined}
               aria-pressed={chosen}
@@ -242,7 +258,7 @@ function SchoolTile({
                 onHover({ kind: 'gear', item: version });
               }}
             >
-              {versions.length === 1 ? 'On' : VERSION_LABELS[i]}
+              {TIER_NUMERALS[i]}
             </button>
           );
         })}
@@ -252,6 +268,8 @@ function SchoolTile({
 }
 
 // A runeword or glyphword fills every socket, otherwise each socket takes a rune or glyph of its own.
+// The sockets in the left column, the runeword or glyphword that would fill them in the right one. What
+// the item worn has no room for stays, greyed out, until an item with room for it is worn.
 function Sockets({
   catalog,
   build,
@@ -262,50 +280,101 @@ function Sockets({
 }: GearPlannerProps & { readonly slot: GearSlot; readonly item: GearItemData }): JSX.Element {
   const words = catalog.enchantments.filter((word) => build.canEnchant(slot, word));
   const word = build.enchantmentAt(slot);
+  const filled = build.isEnchantmentActive(slot);
   const upgrades = catalog.upgrades.filter((upgrade) => upgrade.kind === upgradeKind(slot));
-  const sockets = Array.from({ length: item.sockets }, (_, socket) => (
-    <Choice
-      key={socket}
-      label={`Socket ${socket + 1}`}
-      options={upgrades}
-      held={build.upgradeAt(slot, socket)}
-      empty="Empty"
-      describe={(each) => `${each.name}: ${statBonusText(each.bonus)}`}
-      onPick={(chosen) => {
-        onChange((draft) => {
-          draft.setUpgrade(slot, socket, chosen);
-        });
-      }}
-      onHover={(upgrade) => {
-        onHover({ kind: 'upgrade', upgrade });
-      }}
-    />
-  ));
-  // The enchantment in one column, the sockets it would fill in the other.
+  const wordLabel = slot === 'armor' ? 'Glyphword' : 'Runeword';
+  const sockets = Array.from({ length: catalog.maxSockets(slot) }, (_, socket) => {
+    const held = build.upgradeAt(slot, socket);
+    if (!build.isSocketOpen(slot, socket)) {
+      return held === null ? null : (
+        <Idle
+          key={socket}
+          label={`Socket ${socket + 1}`}
+          text={`${held.name}: ${statBonusText(held.bonus)}`}
+          reason="no socket for it on this item"
+        />
+      );
+    }
+    return (
+      <Choice
+        key={socket}
+        label={`Socket ${socket + 1}`}
+        options={upgrades}
+        held={held}
+        empty="Empty"
+        describe={(each) => `${each.name}: ${statBonusText(each.bonus)}`}
+        onPick={(chosen) => {
+          onChange((draft) => {
+            draft.setUpgrade(slot, socket, chosen);
+          });
+        }}
+        onHover={(upgrade) => {
+          onHover({ kind: 'upgrade', upgrade });
+        }}
+      />
+    );
+  });
   return (
     <div className="gear-sockets">
-      {words.length > 0 && (
+      <div className="gear-column">
+        {filled && word !== null ? (
+          <p className="gear-idle">Every socket is taken by {word.name}.</p>
+        ) : item.sockets === 0 && sockets.every((each) => each === null) ? (
+          <p className="gear-idle">This item has no sockets.</p>
+        ) : (
+          sockets
+        )}
+      </div>
+      {(words.length > 0 || word !== null) && (
         <div className="gear-column">
-          <Choice
-            label={slot === 'armor' ? 'Glyphword' : 'Runeword'}
-            options={words}
-            held={word}
-            empty="None, use the sockets"
-            describe={(each) => `${each.name} (level ${each.level})`}
-            onPick={(chosen) => {
-              onChange((draft) => {
-                draft.enchant(slot, chosen);
-              });
-            }}
-            onHover={(enchantment) => {
-              onHover({ kind: 'enchantment', enchantment });
-            }}
-          />
+          {words.length > 0 ? (
+            <Choice
+              label={wordLabel}
+              options={words}
+              held={word}
+              empty="None, use the sockets"
+              describe={(each) => `${each.name} (level ${each.level})`}
+              onPick={(chosen) => {
+                onChange((draft) => {
+                  draft.enchant(slot, chosen);
+                });
+              }}
+              onHover={(enchantment) => {
+                onHover({ kind: 'enchantment', enchantment });
+              }}
+            />
+          ) : (
+            word !== null && (
+              <Idle
+                label={wordLabel}
+                text={word.name}
+                reason={`it needs an item with ${ENCHANTMENT_SOCKETS} sockets`}
+              />
+            )
+          )}
+          {filled && word !== null && <p className="gear-enchantment">{word.effect}</p>}
         </div>
       )}
-      <div className="gear-column">
-        {word === null ? sockets : <p className="gear-enchantment">{word.effect}</p>}
-      </div>
+    </div>
+  );
+}
+
+// Something planned for the slot that the item worn has no room for, kept for an item that has.
+function Idle({
+  label,
+  text,
+  reason,
+}: {
+  label: string;
+  text: string;
+  reason: string;
+}): JSX.Element {
+  return (
+    <div className="gear-socket gear-idle">
+      <span>{label}</span>
+      <span>
+        {text}, idle: {reason}
+      </span>
     </div>
   );
 }

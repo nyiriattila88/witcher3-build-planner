@@ -448,50 +448,46 @@ export class Build {
     return this.#gear.size;
   }
 
-  // Another version of the school's item keeps the runes, glyphs and enchantment that still fit, the
-  // way upgrading keeps them in the game. Any other item comes with empty sockets.
+  // The runes, glyphs and enchantment planned for a slot stay when another item takes it. What the item
+  // has no socket for waits, inactive, for an item with room for it. An empty slot keeps nothing.
   equip(slot: GearSlot, item: GearItemData | null): void {
-    const worn = this.gearAt(slot);
-    if (worn === item || (item !== null && item.slot !== slot)) return;
-    const upgrades = this.#upgrades.get(slot) ?? [];
-    const enchantment = this.enchantmentAt(slot);
-    this.#upgrades.delete(slot);
-    this.#enchantments.delete(slot);
-    if (item === null) {
-      this.#gear.delete(slot);
+    if (this.gearAt(slot) === item || (item !== null && item.slot !== slot)) return;
+    if (item !== null) {
+      this.#gear.set(slot, item);
       return;
     }
-    this.#gear.set(slot, item);
-    if (worn?.school !== item.school) return;
-    upgrades.slice(0, item.sockets).forEach((upgrade, socket) => {
-      this.setUpgrade(slot, socket, upgrade);
-    });
-    if (enchantment !== null) this.enchant(slot, enchantment);
+    this.#gear.delete(slot);
+    this.#upgrades.delete(slot);
+    this.#enchantments.delete(slot);
   }
 
+  // What is planned for the socket, whether or not the item worn has it.
   upgradeAt(slot: GearSlot, socket: number): UpgradeData | null {
     return this.#upgrades.get(slot)?.[socket] ?? null;
   }
 
+  isSocketOpen(slot: GearSlot, socket: number): boolean {
+    return socket >= 0 && socket < (this.gearAt(slot)?.sockets ?? 0);
+  }
+
   canUpgrade(slot: GearSlot, socket: number, upgrade: UpgradeData): boolean {
-    const sockets = this.gearAt(slot)?.sockets ?? 0;
-    return (
-      socket >= 0 &&
-      socket < sockets &&
-      upgrade.kind === upgradeKind(slot) &&
-      !this.#enchantments.has(slot)
-    );
+    return this.isSocketOpen(slot, socket) && upgrade.kind === upgradeKind(slot);
   }
 
+  // A rune or glyph takes the place of the enchantment, which would fill its socket.
   setUpgrade(slot: GearSlot, socket: number, upgrade: UpgradeData | null): void {
-    const sockets = this.gearAt(slot)?.sockets ?? 0;
-    if (socket < 0 || socket >= sockets) return;
+    if (!this.isSocketOpen(slot, socket)) return;
     if (upgrade !== null && !this.canUpgrade(slot, socket, upgrade)) return;
-    const held = this.#upgrades.get(slot) ?? Array<UpgradeData | null>(sockets).fill(null);
-    held[socket] = upgrade;
+    const planned = this.#upgrades.get(slot) ?? [];
+    const length = Math.max(planned.length, socket + 1);
+    const held = Array.from({ length }, (_, each) =>
+      each === socket ? upgrade : (planned[each] ?? null),
+    );
     this.#upgrades.set(slot, held);
+    if (upgrade !== null) this.#enchantments.delete(slot);
   }
 
+  // What is planned for the slot, whether or not the item worn has room for it.
   enchantmentAt(slot: GearSlot): EnchantmentData | null {
     return this.#enchantments.get(slot) ?? null;
   }
@@ -501,7 +497,12 @@ export class Build {
     return item !== null && holdsEnchantment(item, enchantment);
   }
 
-  // An enchantment fills every socket, so the runes or glyphs in them go.
+  isEnchantmentActive(slot: GearSlot): boolean {
+    const enchantment = this.enchantmentAt(slot);
+    return enchantment !== null && this.canEnchant(slot, enchantment);
+  }
+
+  // An enchantment fills every socket, so it takes the place of the runes or glyphs planned for them.
   enchant(slot: GearSlot, enchantment: EnchantmentData | null): void {
     if (this.enchantmentAt(slot) === enchantment) return;
     if (enchantment === null) {
@@ -530,12 +531,14 @@ export class Build {
     return [...this.#gear.values()].reduce((sum, item) => sum + (item.armor ?? 0), 0);
   }
 
-  // What the worn items and their runes and glyphs add, one entry per stat.
+  // What the worn items and the runes and glyphs in their sockets add, one entry per stat.
   gearBonuses(): readonly StatBonus[] {
     const items = [...this.#gear.values()].flatMap((item) => item.bonuses);
-    const upgrades = [...this.#upgrades.values()]
-      .flat()
-      .flatMap((each) => (each === null ? [] : [each.bonus]));
+    const upgrades = [...this.#upgrades].flatMap(([slot, held]) =>
+      held.flatMap((upgrade, socket) =>
+        upgrade !== null && this.isSocketOpen(slot, socket) ? [upgrade.bonus] : [],
+      ),
+    );
     const totals = new Map<string, StatBonus>();
     for (const [stat, value, unit] of [...items, ...upgrades]) {
       const key = `${stat.toLowerCase()}|${unit}`;

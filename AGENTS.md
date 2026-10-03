@@ -38,9 +38,10 @@ Each layer only imports from the layers above it in this list. The model knows n
   known recipes) and then the gear (`src/data/gear.ts` with the runes, glyphs and enchantments of
   `src/data/upgrades.ts`) are walked last, which is why codes written before them still open; anything
   new belongs after the gear for the same reason. A code from before the gear keeps its own count of
-  Manticore pieces until armor is picked. Within the gear, a slot names its school by the final item and
-  the versions come at the very end, final first, which keeps the codes of 2.6 (final items only)
-  meaning the same. The pinned codes in `src/build/build-code.test.ts` guard this, never change them to
+  Manticore pieces until armor is picked. Within the gear, a slot names its school by the final item,
+  walks the sockets of that final item, which has the most sockets of its slot, and the versions come at
+  the very end, final first. That keeps the codes of 2.6 (final items only) meaning the same, and the
+  runes an item has no socket for are kept in the code too. The pinned codes in `src/build/build-code.test.ts` guard this, never change them to
   make a test pass.
 - **The address is the only state.** The build lives in the `build` parameter of the page address
   (`src/app/build-address.ts`), nothing is stored in the browser. A plain address opens an empty build,

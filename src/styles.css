@@ -852,6 +852,12 @@ button.elixir {
   font-size: 13px;
 }
 
+/* A tier the item does not come in keeps its place, so every numeral stays in the same column. */
+.tier-buttons button:disabled {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
 .elixir.active {
   border-color: var(--tab-toxicity);
   background: rgba(106, 168, 58, 0.14);
@@ -1016,6 +1022,14 @@ button.elixir {
   margin: 0;
   color: #ddd6ca;
   font-size: 15px;
+}
+
+/* Planned for the slot, but the item worn has no room for it, so it does not count. */
+.gear-idle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  opacity: 0.6;
 }
 
 /* --- Info panel: fixed height, so the board below stays put while the pointer moves.

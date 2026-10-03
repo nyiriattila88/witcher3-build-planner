@@ -1,5 +1,5 @@
 import type { DecoctionData, PotionData } from '../data/alchemy';
-import type { GearItemData, GearSchool, SetBonusData } from '../data/gear';
+import type { GearItemData, GearSchool, GearSlot, SetBonusData } from '../data/gear';
 import type {
   ColourTree,
   MutagenData,
@@ -55,6 +55,8 @@ export type Catalog = {
   readonly tree: (name: TreeName) => SkillTree;
   // Every version of the school's item for the slot of this one, by level, the final one last.
   readonly versions: (item: GearItemData) => readonly GearItemData[];
+  // The most sockets any item for the slot has.
+  readonly maxSockets: (slot: GearSlot) => number;
   readonly setBonus: (school: GearSchool) => SetBonusData;
   readonly skill: (tree: string, name: string) => Skill | undefined;
   readonly mutagen: (id: string | null) => Mutagen | undefined;
@@ -163,10 +165,23 @@ export function createCatalog(sources: CatalogSources): Catalog {
     if (previous !== undefined && previous.level > item.level) {
       throw new Error(`${item.name} comes after the higher level ${previous.name}`);
     }
+    if (line.some((other) => other.tier === item.tier)) {
+      throw new Error(`${item.name} shares its tier with another version`);
+    }
     versionsByLine.set(key, [...line, item]);
   }
   const versions = (item: GearItemData): readonly GearItemData[] =>
     versionsByLine.get(gearLineKey(item)) ?? [item];
+  const finalGear = sources.gear.filter((item) => versions(item).at(-1) === item);
+
+  // The build code keeps what is planned for a slot in the sockets of a final item, so every final item
+  // needs the most sockets of its slot.
+  const maxSockets = (slot: GearSlot): number =>
+    Math.max(0, ...sources.gear.filter((item) => item.slot === slot).map((item) => item.sockets));
+  const short = finalGear.find((item) => item.sockets < maxSockets(item.slot));
+  if (short !== undefined) {
+    throw new Error(`${short.name} has fewer sockets than other gear for its slot`);
+  }
 
   const treesByName = new Map(trees.map((tree) => [tree.name, tree]));
   const mutagensById = new Map<string, Mutagen>(mutagens.map((mutagen) => [mutagen.id, mutagen]));
@@ -183,7 +198,7 @@ export function createCatalog(sources: CatalogSources): Catalog {
     potions: sources.potions,
     decoctions: sources.decoctions,
     gear: sources.gear,
-    finalGear: sources.gear.filter((item) => versions(item).at(-1) === item),
+    finalGear,
     setBonuses: sources.setBonuses,
     upgrades: sources.upgrades,
     enchantments: sources.enchantments,
@@ -193,6 +208,7 @@ export function createCatalog(sources: CatalogSources): Catalog {
       return tree;
     },
     versions,
+    maxSockets,
     setBonus: (school) => {
       const set = setBonusesBySchool.get(school);
       if (set === undefined) throw new Error(`No set bonuses for the ${school} school`);

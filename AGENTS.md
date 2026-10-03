@@ -23,7 +23,7 @@ ESLint checks both, so a wrong import fails `pnpm check`.
 | -------------- | -------------------------------------------------------------------------------------------- |
 | `src/data/`    | The game data: skills and trees, mutagens, mutations, elixirs and gear. Plain typed values.  |
 | `src/catalog/` | Joins the data into lookups (prerequisites, unlocks, ids). Fails fast on a broken reference. |
-| `src/build/`   | The `Build` model with every game rule, its snapshot form and the build code.                |
+| `src/build/`   | The `Build` model and the parts it owns, with every game rule, and the build code.           |
 | `src/planner/` | React components and the pure UI logic beside them (colours, geometry, drag and drop).       |
 | `src/app/`     | State, the address bar and the page layout: `useBuild`, `useDragAndDrop`, `App`.             |
 | `src/main.tsx` | The composition root: builds the catalog, codec and address and renders `App`.               |
@@ -47,9 +47,11 @@ ESLint checks both, so a wrong import fails `pnpm check`.
 - **The address is the only state.** The build lives in the `build` parameter of the page address
   (`src/app/build-address.ts`), nothing is stored in the browser. A plain address opens an empty build,
   and a 1.x link with the code in its hash is moved into the parameter.
-- **Every rule lives in `Build`.** Components call its commands and never decide what is allowed.
-  Every command leaves the build valid (`#normalize`), so a new rule goes into `Build` with a test, not
-  into a component.
+- **Every rule lives in `Build` and the parts it owns.** `Build` keeps the skills, slots, mutagens and
+  mutations, whose rules reach into each other, and owns the gear (`GearLoadout`) and the toxicity plan
+  (`ToxicityPlan`), whose rules stay inside them. Components call their commands and never decide what
+  is allowed. Every command leaves the build valid (`#normalize`), so a new rule goes into the model
+  with a test, not into a component.
 - **React only sees a new build.** `Build` is mutable inside, so a change always goes through
   `apply(draft => ...)` from `useBuild`, which works on a clone. Mutating the build held in state skips
   the render and the address update.

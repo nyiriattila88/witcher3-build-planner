@@ -14,7 +14,7 @@ checks both (`import-x/no-restricted-paths` and `no-restricted-imports` in `esli
 | -------------- | ----------------------------------------------------------------------------------------- |
 | `src/data/`    | The game data as plain typed values: skills and trees, mutagens, mutations, elixirs, gear |
 | `src/catalog/` | The data joined into lookups, with prerequisites and unlocks resolved and checked         |
-| `src/build/`   | The `Build` model with every game rule, its snapshot form and the build code              |
+| `src/build/`   | The `Build` model and the parts it owns, with every game rule, and the build code         |
 | `src/planner/` | React components and the pure UI logic beside them: colours, geometry, drag and drop      |
 | `src/app/`     | State, the address bar, drag and drop and the page layout                                 |
 
@@ -37,6 +37,13 @@ maximum, which runes fit which sockets. Components ask it what is allowed and ca
 deciding that themselves.
 Every command ends by normalising the build, so taking the last point from a skill also takes the skills
 that only it kept unlocked, and the build is valid after any sequence of commands.
+
+`Build` keeps the skills, slots, mutagens and mutations itself, because their rules reach into each other:
+research opens slots, a slotted mutation decides what they take, a mutagen counts the skills around it. It
+owns two parts whose rules stay inside them, the gear (`GearLoadout`, `build.gear`) and the toxicity plan
+(`ToxicityPlan`, `build.toxicityPlan`), and these take their commands directly. What joins them to the
+rest stays in `Build`: the maximum Toxicity grows with slotted skills and Manticore armor, so the plan
+checks a new potion or decoction against the maximum the build gives it.
 
 `Build` is mutable inside, which keeps the commands simple. React never sees that: `useBuild` applies a
 change to a clone (`apply(draft => ...)`) and stores the clone, so every change is a new object for React

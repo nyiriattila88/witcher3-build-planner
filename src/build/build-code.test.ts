@@ -31,9 +31,9 @@ const fingerprint = (build: Build): string =>
     manticore: build.manticorePieces,
     recipes: build.knownRecipes,
     gear: GEAR_SLOTS.map((slot) => [
-      build.gearAt(slot)?.name ?? null,
-      build.enchantmentAt(slot)?.name ?? null,
-      [0, 1, 2].map((socket) => build.upgradeAt(slot, socket)?.name ?? null),
+      build.gear.itemAt(slot)?.name ?? null,
+      build.gear.enchantmentAt(slot)?.name ?? null,
+      [0, 1, 2].map((socket) => build.gear.upgradeAt(slot, socket)?.name ?? null),
     ]),
   });
 
@@ -84,16 +84,18 @@ const aRandomBuild = (random: () => number): Build => {
   for (const slot of GEAR_SLOTS) {
     const item = pick(catalog.gear.filter((each) => each.slot === slot));
     if (item === undefined || random() < 0.4) continue;
-    build.equip(slot, item);
-    const word = pick(catalog.enchantments.filter((each) => build.canEnchant(slot, each)));
-    if (word !== undefined && random() < 0.3) build.enchant(slot, word);
+    build.gear.equip(slot, item);
+    const word = pick(catalog.enchantments.filter((each) => build.gear.canEnchant(slot, each)));
+    if (word !== undefined && random() < 0.3) build.gear.enchant(slot, word);
     for (let socket = 0; socket < item.sockets; socket++) {
-      const upgrade = pick(catalog.upgrades.filter((each) => build.canUpgrade(slot, socket, each)));
-      if (upgrade !== undefined && random() < 0.6) build.setUpgrade(slot, socket, upgrade);
+      const upgrade = pick(
+        catalog.upgrades.filter((each) => build.gear.canUpgrade(slot, socket, each)),
+      );
+      if (upgrade !== undefined && random() < 0.6) build.gear.setUpgrade(slot, socket, upgrade);
     }
     // Another item for the slot, which may leave some of the plan idle.
     const swap = pick(catalog.gear.filter((each) => each.slot === slot));
-    if (swap !== undefined && random() < 0.4) build.equip(slot, swap);
+    if (swap !== undefined && random() < 0.4) build.gear.equip(slot, swap);
   }
   return build;
 };
@@ -195,7 +197,7 @@ describe('createBuildCodec', () => {
   it('still opens the gear codes 2.6 wrote, when only the final versions existed', () => {
     const build = decodeBuild('BEPNKUu99K6Yfk9jyAAAAAAAAAAA');
 
-    expect(GEAR_SLOTS.map((slot) => build.gearAt(slot)?.name ?? null)).toEqual([
+    expect(GEAR_SLOTS.map((slot) => build.gear.itemAt(slot)?.name ?? null)).toEqual([
       'Grandmaster Feline steel sword',
       'Grandmaster Feline silver sword',
       'Grandmaster Feline armor',
@@ -203,10 +205,10 @@ describe('createBuildCodec', () => {
       'Manticore trousers',
       'Manticore boots',
     ]);
-    expect([build.upgradeAt('steel', 0)?.name, build.enchantmentAt('armor')?.name]).toEqual([
-      'Greater Chernobog runestone',
-      'Eruption',
-    ]);
+    expect([
+      build.gear.upgradeAt('steel', 0)?.name,
+      build.gear.enchantmentAt('armor')?.name,
+    ]).toEqual(['Greater Chernobog runestone', 'Eruption']);
   });
 
   it('still opens the codes 2.1.0 wrote with a "2." in front', () => {

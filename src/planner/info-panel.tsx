@@ -1,5 +1,6 @@
 import type { JSX, ReactNode } from 'react';
-import { MAX_RANK, SET_PIECES, SYNERGY, type Build } from '../build/build';
+import { MAX_RANK, SYNERGY, type Build } from '../build/build';
+import { SET_PIECES } from '../build/gear-loadout';
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
 import type { GearItemData } from '../data/gear';
@@ -222,7 +223,7 @@ function GearInfo({
   catalog: Catalog;
 }): JSX.Element {
   const set = catalog.setBonus(item.school);
-  const pieces = build.setPieces(item.school);
+  const pieces = build.gear.setPieces(item.school);
   const final = catalog.versions(item).at(-1) === item;
   const kind = gearKindText(item, set.weight);
   const meta = (

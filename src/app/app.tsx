@@ -59,7 +59,7 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
           draft.resetElixirs();
           return;
         case 'gear':
-          draft.resetGear();
+          draft.gear.reset();
           return;
       }
     });
@@ -76,7 +76,7 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
       case 'toxicity':
         return `Toxicity ${build.toxicity()} of ${build.maxToxicity()}`;
       case 'gear':
-        return `Armor ${build.armorValue()}`;
+        return `Armor ${build.gear.armorValue()}`;
     }
   })();
 

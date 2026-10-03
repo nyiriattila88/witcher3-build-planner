@@ -5,7 +5,6 @@ import type { DecoctionData, PotionData } from '../data/alchemy';
 import { ALCHEMY_RECIPES } from '../data/alchemy';
 import type { GearItemData } from '../data/gear';
 import type { TreeName } from '../data/skills';
-import type { EnchantmentData, UpgradeData } from '../data/upgrades';
 import { Build } from './build';
 import type { BuildSnapshot } from './build-snapshot';
 
@@ -38,18 +37,6 @@ const decoction = (name: string): DecoctionData => {
 const gear = (name: string): GearItemData => {
   const found = catalog.gear.find((each) => each.name === name);
   if (found === undefined) throw new Error(`Test data names unknown gear: ${name}`);
-  return found;
-};
-
-const upgrade = (name: string): UpgradeData => {
-  const found = catalog.upgrades.find((each) => each.name === name);
-  if (found === undefined) throw new Error(`Test data names an unknown upgrade: ${name}`);
-  return found;
-};
-
-const enchantment = (name: string): EnchantmentData => {
-  const found = catalog.enchantments.find((each) => each.name === name);
-  if (found === undefined) throw new Error(`Test data names an unknown enchantment: ${name}`);
   return found;
 };
 
@@ -359,136 +346,16 @@ describe('Build Toxicity', () => {
 
     expect(values).toEqual([1, 4, 0]);
   });
-});
-
-describe('Build gear', () => {
-  it('keeps the runes of a slot when another item takes it, with the one it has no socket for idle', () => {
-    const build = new Build(catalog);
-    build.equip('steel', gear('Grandmaster Feline steel sword'));
-    for (const socket of [0, 1, 2]) {
-      build.setUpgrade('steel', socket, upgrade('Greater Chernobog runestone'));
-    }
-
-    build.equip('steel', gear('Enhanced Ursine steel sword'));
-
-    expect([0, 1, 2].map((socket) => build.upgradeAt('steel', socket)?.name)).toEqual(
-      Array<string>(3).fill('Greater Chernobog runestone'),
-    );
-    expect([0, 1, 2].map((socket) => build.isSocketOpen('steel', socket))).toEqual([
-      true,
-      true,
-      false,
-    ]);
-    expect(build.gearBonuses().find(([stat]) => stat === 'Attack Power')?.[1]).toBe(5 + 5);
-  });
-
-  it('brings an idle enchantment back once an item holds it again', () => {
-    const build = new Build(catalog);
-    build.equip('steel', gear('Grandmaster Feline steel sword'));
-    build.enchant('steel', enchantment('Replenishment'));
-
-    build.equip('steel', gear('Enhanced Feline steel sword'));
-    const onTwoSockets = build.isEnchantmentActive('steel');
-    build.equip('steel', gear('Grandmaster Ursine steel sword'));
-
-    expect([onTwoSockets, build.isEnchantmentActive('steel')]).toEqual([false, true]);
-  });
-
-  it('forgets the runes and enchantment of a slot that is emptied', () => {
-    const build = new Build(catalog);
-    build.equip('steel', gear('Grandmaster Feline steel sword'));
-    build.setUpgrade('steel', 0, upgrade('Greater Chernobog runestone'));
-
-    build.equip('steel', null);
-    build.equip('steel', gear('Grandmaster Feline steel sword'));
-
-    expect(build.upgradeAt('steel', 0)).toBeNull();
-  });
-
-  it('counts only the final version of an item towards the set bonuses', () => {
-    const build = new Build(catalog);
-    build.equip('armor', gear('Mastercrafted Feline armor'));
-    build.equip('gloves', gear('Grandmaster Feline gauntlets'));
-
-    expect(build.setPieces('Cat')).toBe(1);
-  });
-
-  it('puts a rune only into a sword and a glyph only into an armor piece', () => {
-    const build = new Build(catalog);
-    build.equip('steel', gear('Grandmaster Feline steel sword'));
-    build.equip('boots', gear('Grandmaster Feline boots'));
-
-    build.setUpgrade('steel', 0, upgrade('Greater Glyph of Quen'));
-    build.setUpgrade('boots', 0, upgrade('Greater Chernobog runestone'));
-    build.setUpgrade('boots', 1, upgrade('Greater Glyph of Quen'));
-
-    expect([
-      build.upgradeAt('steel', 0),
-      build.upgradeAt('boots', 0),
-      build.upgradeAt('boots', 1)?.name,
-    ]).toEqual([null, null, 'Greater Glyph of Quen']);
-  });
-
-  it('enchants a sword or chest armor with three sockets, and the enchantment fills them', () => {
-    const build = new Build(catalog);
-    build.equip('armor', gear('Grandmaster Griffin armor'));
-    build.equip('boots', gear('Grandmaster Griffin boots'));
-    build.setUpgrade('armor', 0, upgrade('Greater Glyph of Quen'));
-
-    build.enchant('armor', enchantment('Eruption'));
-    build.enchant('boots', enchantment('Eruption'));
-
-    expect([
-      build.enchantmentAt('armor')?.name,
-      build.enchantmentAt('boots'),
-      build.upgradeAt('armor', 0),
-    ]).toEqual(['Eruption', null, null]);
-  });
-
-  it('lets a glyph take the place of the enchantment again', () => {
-    const build = new Build(catalog);
-    build.equip('armor', gear('Grandmaster Griffin armor'));
-    build.enchant('armor', enchantment('Eruption'));
-
-    build.setUpgrade('armor', 1, upgrade('Greater Glyph of Igni'));
-
-    expect([build.enchantmentAt('armor'), build.upgradeAt('armor', 1)?.name]).toEqual([
-      null,
-      'Greater Glyph of Igni',
-    ]);
-  });
 
   it('takes the Manticore pieces from the gear once armor is picked', () => {
     const build = new Build(catalog);
     build.setManticorePieces(4);
     const before = build.manticorePieces;
 
-    build.equip('armor', gear('Manticore armor'));
-    build.equip('gloves', gear('Grandmaster Feline gauntlets'));
+    build.gear.equip('armor', gear('Manticore armor'));
+    build.gear.equip('gloves', gear('Grandmaster Feline gauntlets'));
 
     expect([before, build.manticorePieces, build.maxToxicity()]).toEqual([4, 1, 105]);
-  });
-
-  it('counts every piece of a school towards its set bonuses', () => {
-    const build = new Build(catalog);
-    for (const name of ['steel sword', 'silver sword', 'armor', 'gauntlets']) {
-      build.equip(gear(`Grandmaster Feline ${name}`).slot, gear(`Grandmaster Feline ${name}`));
-    }
-    build.equip('boots', gear('Viper boots'));
-
-    expect([build.setPieces('Cat'), build.setPieces('Viper')]).toEqual([4, 1]);
-  });
-
-  it('adds up the bonuses of the worn items and their runes per stat', () => {
-    const build = new Build(catalog);
-    build.equip('armor', gear('Grandmaster Feline armor'));
-    build.equip('gloves', gear('Grandmaster Feline gauntlets'));
-    build.equip('steel', gear('Grandmaster Feline steel sword'));
-    build.setUpgrade('steel', 0, upgrade('Greater Chernobog runestone'));
-
-    const attackPower = build.gearBonuses().find(([stat]) => stat === 'Attack Power');
-
-    expect(attackPower).toEqual(['Attack Power', 22 + 11 + 5, '%']);
   });
 });
 

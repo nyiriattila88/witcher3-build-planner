@@ -1,5 +1,6 @@
 import { useRef, type CSSProperties, type JSX, type MouseEvent } from 'react';
-import { SET_PIECES, enchantmentKind, upgradeKind, type Build } from '../build/build';
+import type { Build } from '../build/build';
+import { SET_PIECES, enchantmentKind, upgradeKind } from '../build/gear-loadout';
 import type { Catalog } from '../catalog/catalog';
 import {
   GEAR_SLOTS,
@@ -44,7 +45,7 @@ export function GearPlanner(props: GearPlannerProps): JSX.Element {
   const pane = useRef<HTMLDivElement>(null);
   const tooltip = usePaneTooltip<ItemTip>(pane);
   const sets = catalog.setBonuses.flatMap((set) => {
-    const pieces = build.setPieces(set.school);
+    const pieces = build.gear.setPieces(set.school);
     return pieces > 0 ? [{ set, pieces }] : [];
   });
 
@@ -54,15 +55,15 @@ export function GearPlanner(props: GearPlannerProps): JSX.Element {
         <dl className="gear-totals">
           <div>
             <dt>Armor</dt>
-            <dd>{build.armorValue()}</dd>
+            <dd>{build.gear.armorValue()}</dd>
           </div>
           <div>
             <dt>Steel sword damage</dt>
-            <dd>{wornValue(build.gearAt('steel'))}</dd>
+            <dd>{wornValue(build.gear.itemAt('steel'))}</dd>
           </div>
           <div>
             <dt>Silver sword damage</dt>
-            <dd>{wornValue(build.gearAt('silver'))}</dd>
+            <dd>{wornValue(build.gear.itemAt('silver'))}</dd>
           </div>
         </dl>
         {sets.length === 0 ? (
@@ -151,7 +152,7 @@ type SlotPickerProps = GearPlannerProps & {
 
 function SlotPicker(props: SlotPickerProps): JSX.Element {
   const { catalog, build, onChange, onHover, slot } = props;
-  const worn = build.gearAt(slot);
+  const worn = build.gear.itemAt(slot);
   return (
     <section className="gear-slot">
       <h3 className="elixir-heading">{GEAR_SLOT_NAMES[slot]}</h3>
@@ -246,7 +247,7 @@ function SchoolTile({
               aria-label={version.name}
               onClick={() => {
                 onChange((draft) => {
-                  draft.equip(slot, chosen ? null : version);
+                  draft.gear.equip(slot, chosen ? null : version);
                 });
               }}
               onMouseEnter={(event) => {
@@ -282,15 +283,15 @@ function Sockets({
   item,
 }: GearPlannerProps & { readonly slot: GearSlot; readonly item: GearItemData }): JSX.Element {
   const words = catalog.enchantments
-    .filter((word) => build.canEnchant(slot, word))
+    .filter((word) => build.gear.canEnchant(slot, word))
     .sort(byLevelThenName);
-  const word = build.enchantmentAt(slot);
-  const filled = build.isEnchantmentActive(slot);
+  const word = build.gear.enchantmentAt(slot);
+  const filled = build.gear.isEnchantmentActive(slot);
   const upgrades = catalog.upgrades.filter((upgrade) => upgrade.kind === upgradeKind(slot));
   const wordKind = enchantmentKind(slot);
   const sockets = Array.from({ length: catalog.maxSockets(slot) }, (_, socket) => {
-    const held = build.upgradeAt(slot, socket);
-    if (!build.isSocketOpen(slot, socket)) {
+    const held = build.gear.upgradeAt(slot, socket);
+    if (!build.gear.isSocketOpen(slot, socket)) {
       return held === null ? null : (
         <Idle
           key={socket}
@@ -310,7 +311,7 @@ function Sockets({
         describe={(each) => `${each.name}: ${statBonusText(each.bonus)}`}
         onPick={(chosen) => {
           onChange((draft) => {
-            draft.setUpgrade(slot, socket, chosen);
+            draft.gear.setUpgrade(slot, socket, chosen);
           });
         }}
         onHover={(upgrade) => {
@@ -341,7 +342,7 @@ function Sockets({
               describe={(each) => `${each.name} (level ${each.level})`}
               onPick={(chosen) => {
                 onChange((draft) => {
-                  draft.enchant(slot, chosen);
+                  draft.gear.enchant(slot, chosen);
                 });
               }}
               onHover={(enchantment) => {

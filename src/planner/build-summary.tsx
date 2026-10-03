@@ -1,11 +1,6 @@
 import type { JSX, ReactNode } from 'react';
-import {
-  MAX_RANK,
-  MUTAGEN_GROUPS,
-  SET_PIECES,
-  type Build,
-  type MutagenBonus,
-} from '../build/build';
+import { MAX_RANK, MUTAGEN_GROUPS, type Build, type MutagenBonus } from '../build/build';
+import { SET_PIECES } from '../build/gear-loadout';
 import type { Catalog } from '../catalog/catalog';
 import { GEAR_SLOTS } from '../data/gear';
 import {
@@ -46,7 +41,7 @@ function totalBonuses(
         add(mutagen.effect, value, mutagen.unit, mutagenColour(mutagen));
     }
   }
-  for (const [stat, value, unit] of build.gearBonuses()) add(stat, value, unit, null);
+  for (const [stat, value, unit] of build.gear.bonuses()) add(stat, value, unit, null);
   return [...totals.values()].map(({ stat, value, unit, colour }) => (
     <>
       <span style={colour === null ? undefined : { color: colour }}>{stat}</span> +{value}
@@ -58,17 +53,17 @@ function totalBonuses(
 // What is worn, with the runes, glyphs or enchantment in it, then the set bonuses that apply.
 function gearLines(build: Build, catalog: Catalog): string[] {
   const items = GEAR_SLOTS.flatMap((slot) => {
-    const item = build.gearAt(slot);
+    const item = build.gear.itemAt(slot);
     if (item === null) return [];
-    const word = build.isEnchantmentActive(slot) ? build.enchantmentAt(slot) : null;
+    const word = build.gear.isEnchantmentActive(slot) ? build.gear.enchantmentAt(slot) : null;
     const inset = Array.from({ length: item.sockets }, (_, socket) =>
-      build.upgradeAt(slot, socket),
+      build.gear.upgradeAt(slot, socket),
     );
     const extras = word === null ? inset.flatMap((each) => each?.name ?? []) : [word.name];
     return [extras.length > 0 ? `${item.name} (${extras.join(', ')})` : item.name];
   });
   const sets = catalog.setBonuses.flatMap(({ school, three }) => {
-    const pieces = build.setPieces(school);
+    const pieces = build.gear.setPieces(school);
     if (pieces < SET_PIECES.first || three === null) return [];
     const bonuses = pieces >= SET_PIECES.full ? '3 and 6 piece bonuses' : '3 piece bonus';
     return [`${school} set, ${pieces} pieces: ${bonuses}`];
@@ -148,9 +143,9 @@ export function BuildSummary({ build, catalog }: BuildSummaryProps): JSX.Element
     });
   }
 
-  if (build.gearCount > 0) {
+  if (build.gear.count > 0) {
     sections.push({
-      title: `Gear, armor ${build.armorValue()}`,
+      title: `Gear, armor ${build.gear.armorValue()}`,
       colour: 'var(--tab-gear)',
       lines: gearLines(build, catalog),
     });

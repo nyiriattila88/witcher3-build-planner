@@ -2,7 +2,8 @@ import type { Catalog } from '../catalog/catalog';
 import { ALCHEMY_RECIPES, MANTICORE_ARMOR } from '../data/alchemy';
 import { GEAR_SLOTS, type GearItemData } from '../data/gear';
 import type { TreeName } from '../data/skills';
-import { Build, holdsEnchantment, MAX_RANK, MUTAGEN_GROUPS, upgradeKind } from './build';
+import { Build, MAX_RANK, MUTAGEN_GROUPS } from './build';
+import { holdsEnchantment, upgradeKind } from './gear-loadout';
 import { createLegacyDecoder, LEGACY_PREFIX } from './legacy-build-code';
 
 export type BuildCodec = {
@@ -127,28 +128,29 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
     // one first, so the codes 2.6 wrote with final items only keep their meaning.
     const finalOf = (item: GearItemData): GearItemData => catalog.versions(item).at(-1) ?? item;
     for (const slot of GEAR_SLOTS) {
-      const worn = build.gearAt(slot);
+      const worn = build.gear.itemAt(slot);
       const item = choose(
         [null, ...catalog.finalGear.filter((each) => each.slot === slot)],
         worn === null ? null : finalOf(worn),
       );
       if (item === null) continue;
-      if (worn === null) build.equip(slot, item);
+      if (worn === null) build.gear.equip(slot, item);
       const words = catalog.enchantments.filter((word) => holdsEnchantment(item, word));
-      const word = choose([null, ...words], build.enchantmentAt(slot));
+      const word = choose([null, ...words], build.gear.enchantmentAt(slot));
       if (word !== null) {
-        build.enchant(slot, word);
+        build.gear.enchant(slot, word);
         continue;
       }
       const fitting = catalog.upgrades.filter((upgrade) => upgrade.kind === upgradeKind(slot));
       for (let socket = 0; socket < item.sockets; socket++) {
-        const upgrade = choose([null, ...fitting], build.upgradeAt(slot, socket));
-        if (upgrade !== null) build.setUpgrade(slot, socket, upgrade);
+        const upgrade = choose([null, ...fitting], build.gear.upgradeAt(slot, socket));
+        if (upgrade !== null) build.gear.setUpgrade(slot, socket, upgrade);
       }
     }
     for (const slot of GEAR_SLOTS) {
-      const worn = build.gearAt(slot);
-      if (worn !== null) build.equip(slot, choose([...catalog.versions(worn)].reverse(), worn));
+      const worn = build.gear.itemAt(slot);
+      if (worn !== null)
+        build.gear.equip(slot, choose([...catalog.versions(worn)].reverse(), worn));
     }
   }
 

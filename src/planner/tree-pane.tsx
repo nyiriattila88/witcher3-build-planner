@@ -1,4 +1,4 @@
-import { useState, type DragEvent, type JSX, type KeyboardEvent } from 'react';
+import { useState, type DragEvent, type JSX } from 'react';
 import { MAX_RANK, type Build } from '../build/build';
 import type { Skill, SkillTree } from '../catalog/catalog';
 import { backgroundUrl, iconUrl, treeColour } from './appearance';
@@ -14,7 +14,7 @@ import {
 } from './geometry';
 import { RankPips } from './rank-pips';
 import { SkillTooltip } from './skill-tooltip';
-import { useTouchTaps } from './use-touch-taps';
+import { useNodeControls } from './use-node-controls';
 
 type TreePaneProps = {
   readonly tree: SkillTree;
@@ -111,7 +111,7 @@ function SkillNode({
   const [x, y] = nodeCentre(skill.position);
   const state = rank > 0 ? 'learned' : build.isAvailable(skill) ? 'available' : 'locked';
   const slotted = build.slotOf(skill) >= 0 ? ' slotted' : '';
-  const taps = useTouchTaps(
+  const controls = useNodeControls(
     () => {
       onLearn(skill);
     },
@@ -119,13 +119,6 @@ function SkillNode({
       onUnlearn(skill);
     },
   );
-
-  const onKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Enter' || event.key === ' ') onLearn(skill);
-    else if (event.key === 'Delete' || event.key === 'Backspace') onUnlearn(skill);
-    else return;
-    event.preventDefault();
-  };
 
   return (
     <div
@@ -135,13 +128,7 @@ function SkillNode({
       tabIndex={0}
       aria-label={`${skill.name}, rank ${rank} of ${MAX_RANK}`}
       draggable={rank > 0}
-      onPointerDown={taps.onPointerDown}
-      onClick={taps.onClick}
-      onContextMenu={(event) => {
-        event.preventDefault();
-        onUnlearn(skill);
-      }}
-      onKeyDown={onKeyDown}
+      {...controls}
       onMouseEnter={() => {
         onHover(skill);
       }}

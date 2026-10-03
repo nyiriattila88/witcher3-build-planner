@@ -7,7 +7,7 @@ import { FitToWidth } from './fit-to-width';
 import { MUTATION_GRID, PANE_WIDTH, mutationCentre, tooltipPlacement } from './geometry';
 import { MutationDisc } from './mutation-disc';
 import { MutationTooltip } from './mutation-tooltip';
-import { useTouchTaps } from './use-touch-taps';
+import { useNodeControls } from './use-node-controls';
 
 type MutationTreeProps = {
   readonly catalog: Catalog;
@@ -109,7 +109,7 @@ function MutationNode({
       ? 'available'
       : 'locked';
   const slotted = build.slottedMutation === mutation.id ? ' slotted' : '';
-  const taps = useTouchTaps(
+  const controls = useNodeControls(
     () => {
       onResearch(mutation);
     },
@@ -125,16 +125,7 @@ function MutationNode({
       tabIndex={0}
       aria-label={`${mutation.name}, ${state}`}
       draggable={build.canSlotMutation(mutation.id)}
-      onPointerDown={taps.onPointerDown}
-      onClick={taps.onClick}
-      onContextMenu={(event) => {
-        event.preventDefault();
-        onUnresearch(mutation);
-      }}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') onResearch(mutation);
-        else if (event.key === 'Delete' || event.key === 'Backspace') onUnresearch(mutation);
-      }}
+      {...controls}
       onMouseEnter={() => {
         onHover(mutation);
       }}

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.1 - 2026-10-03
+
+- The Gear tab shows the runeword or glyphword in one column and the sockets it would fill in the other,
+  with the socket choices lined up below each other.
+- The school buttons name their numbers as damage or armor, and the seven of them always fit the pane.
+
 ## 2.6.0 - 2026-10-03
 
 - A Gear tab picks the witcher school gear worn: the final version of Bear, Cat, Griffin, Wolf, Forgotten

@@ -95,7 +95,8 @@ Agent instructions for AI-assisted changes are in [AGENTS.md](AGENTS.md). Change
 - Mutation discs: cut from an in-game screenshot on the Improved Mutations page on Nexus Mods. Mutagen
   orbs: The Witcher Wiki on Fandom.
 - Potions and decoctions, their Toxicity, durations and effects and the Manticore armor: The Witcher Wiki
-  on Fandom, with the values since patch 4.0. The overdose threshold at half of the maximum: the list of
+  on Fandom, with the values since patch 4.0, and the Fextralife Witcher 3 wiki pages edited after 4.0
+  where the two disagree. The effect values are written into the in-game descriptions. The overdose threshold at half of the maximum: the list of
   changes of the next-gen update 4.0. The 167 alchemy recipes: what players measured with Acquired
   Tolerance since 4.0 (148 in the base game, 150 with Hearts of Stone).
 - Game version: the Remastered patch notes on thewitcher.com. Patches 5.00b and 5.00c changed no

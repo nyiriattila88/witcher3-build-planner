@@ -183,9 +183,7 @@ function PotionInfo({
         <p key={i} className={i + 1 === active ? 'info-rank reached' : 'info-rank'}>
           <b>{potion.tiers.length === 1 ? 'Potion' : TIER_NAMES[i]}</b>
           <span>
-            {[...each.effects, `Toxicity ${each.toxicity} · ${formatDuration(each.duration)}`].join(
-              '\n',
-            )}
+            {`${each.effect}\nToxicity ${each.toxicity} · ${formatDuration(each.duration)}`}
           </span>
         </p>
       ))}
@@ -198,7 +196,7 @@ function DecoctionInfo({ decoction }: { decoction: DecoctionData }): JSX.Element
   const meta = `Decoction · Toxicity ${decoction.toxicity} · ${formatDuration(decoction.duration)}`;
   return (
     <InfoLayout icon={icon} title={decoction.name} meta={meta}>
-      <p className="info-text">{decoction.effects.join(' ')}</p>
+      <p className="info-text">{decoction.effect}</p>
     </InfoLayout>
   );
 }

@@ -339,11 +339,7 @@ export function ToxicityPlanner({
               Toxicity {tip.elixir.toxicity} · {formatDuration(tip.elixir.duration)}
             </span>
           </div>
-          {tip.elixir.effects.map((effect, i) => (
-            <p key={i} className={i === 0 ? 'game-tooltip-label' : undefined}>
-              {effect}
-            </p>
-          ))}
+          <p className="game-tooltip-label">{tip.elixir.effect}</p>
           <p className="game-tooltip-hint">{tip.hint}</p>
         </div>
       )}

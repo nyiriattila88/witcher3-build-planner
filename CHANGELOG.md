@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.9.0 - 2026-10-03
+
+- The planner works on a phone. The page turns into one column with the info panel right under the
+  pane, the skill trees, the mutation tree and the slot board scale down to the width of the screen with
+  larger labels, and the Mutagens, Toxicity and Gear tabs fit their grids to it.
+- A click on a slot of the board lists what can go in, the skills that fit, the mutagens or the
+  researched mutations, and picking one puts it there, so the board fills without dragging. A slot that
+  holds something can be emptied from the same list.
+- On a touch screen a double tap takes a skill, mutagen or mutation off the board, as a double click
+  does.
+- The tooltips that follow the pointer stay hidden on a touch screen, where the info panel shows the
+  same text.
+
 ## 2.8.0 - 2026-10-03
 
 - The runes, glyphs and runeword or glyphword picked for a slot stay when another item takes it. What the

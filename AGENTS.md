@@ -1,8 +1,8 @@
 # Instructions for AI agents
 
-This file is for anyone changing this repository with an AI assistant or agent. What the planner is and
-how to run it is in the [README](README.md). This file records what has to be done after a change, and
-what is easy to break.
+This file is for anyone changing this repository with an AI assistant or agent. The [README](README.md)
+says what the planner is and [docs/architecture.md](docs/architecture.md) how it is built and run. This
+file records what has to be done after a change, and what is easy to break.
 
 ## Commands
 

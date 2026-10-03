@@ -1,7 +1,8 @@
 # Witcher 3 Remastered Build Planner
 
-[![Deploy to GitHub Pages](https://github.com/nyiriattila88/witcher3-build-planner/actions/workflows/deploy.yml/badge.svg)](https://github.com/nyiriattila88/witcher3-build-planner/actions/workflows/deploy.yml)
-[![Version](https://img.shields.io/github/package-json/v/nyiriattila88/witcher3-build-planner?label=version)](CHANGELOG.md)
+[![CI](https://github.com/nyiriattila88/witcher3-build-planner/actions/workflows/ci.yml/badge.svg)](https://github.com/nyiriattila88/witcher3-build-planner/actions/workflows/ci.yml)
+[![Release](https://github.com/nyiriattila88/witcher3-build-planner/actions/workflows/release.yml/badge.svg)](https://github.com/nyiriattila88/witcher3-build-planner/actions/workflows/release.yml)
+[![Version](https://img.shields.io/github/v/release/nyiriattila88/witcher3-build-planner?label=version)](https://github.com/nyiriattila88/witcher3-build-planner/releases)
 [![Last commit](https://img.shields.io/github/last-commit/nyiriattila88/witcher3-build-planner)](https://github.com/nyiriattila88/witcher3-build-planner/commits/main)
 [![Live](https://img.shields.io/badge/live-GitHub%20Pages-2ea44f?logo=github)](https://nyiriattila88.github.io/witcher3-build-planner/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
@@ -11,93 +12,60 @@
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
 ![Vitest](https://img.shields.io/badge/tested%20with-Vitest-6e9f18?logo=vitest&logoColor=white)
 
-A build planner for **The Witcher 3: Wild Hunt Remastered**, game version 5.00c: the four reworked
-skill trees, skill slots, mutagens and mutations, and a short build code that carries a whole build.
+Plan a character for **The Witcher 3: Wild Hunt Remastered** before you spend a single point in the game.
+The Remastered release reworked the skill trees, renamed skills, moved them and added new ones, so the
+planners made for earlier versions no longer match what the game shows. This one follows the game as it
+is now, version 5.00c, from the skill trees to the mutations, the potions and the witcher gear, and it fits
+a whole build into one link you can send to a friend or keep for later.
 
-**[Open the planner](https://nyiriattila88.github.io/witcher3-build-planner/)**
+**[Open the planner](https://nyiriattila88.github.io/witcher3-build-planner/)**. It runs in the browser on
+a computer or a phone, with nothing to install.
 
 ![A Combat build with Bloodbath: the tree, the slotted skills under red mutagens around the mutation, and two of the extra slots](docs/screenshot.png)
 
-## Features
+## What you can do
 
-- **The remastered trees as the game draws them.** Combat, Signs, Alchemy and General with the in-game
-  layout, links, icons and backdrops, three ranks per skill and the tooltip wording of the game.
-- **The unlock rules.** A skill opens once a linked parent has a point. Taking the last point from a
-  skill also takes every skill that only it kept unlocked, so a branch unwinds in one go. A right-click
-  takes a rank back, and on a touch screen a double tap does.
-- **Skill slots and mutagens.** Drag skills into twelve slots in four groups, or click a slot and pick
-  from the list of what fits there. A mutagen's bonus grows with every matching skill in its group and
-  with Synergy, and the board shows which slots count.
-- **Total bonuses.** The build summary adds up what the slotted skills give through their tree, such as
-  Adrenaline Point gain for Combat, and what the mutagens give, one line per stat.
-- **Mutations.** Research them in order, slot one in the centre, and fill the four extra slots around it, which open with
-  research and take only the mutation's colours. Unresearching a mutation also takes the ones that need it.
-- **The in-game character screen.** Tooltips with the current and the next level, mutagen orbs in their
-  diamonds, mutation emblems and the bonus of each slot group, as the game shows them. A double click
-  or a double tap takes a skill, mutagen or mutation off the board.
-- **Toxicity planner.** Pick the potions and decoctions that are active together and see them against the
-  maximum Toxicity: the base 100, Acquired Tolerance for the recipes you know, Metabolic Control and the
-  Manticore armor pieces you wear. The share of the maximum stands beside the bar, the overdose threshold
-  and the thresholds of slotted alchemy skills are marked on it, and every skill there opens its tooltip.
-  As in the game, a potion or decoction that would take the total above the maximum cannot be made
-  active.
-- **Witcher gear.** Wear the school gear of Bear, Cat, Griffin, Wolf, Forgotten Wolf, Manticore and
-  Viper in any version from basic to grandmaster, one item per slot and mixed freely. Put runes into the
-  swords and glyphs into the armor socket by socket, or a runeword or glyphword from the Runewright. They
-  stay with the slot when the item changes, and what the new item has no socket for waits, greyed out,
-  until it fits again. Wearing 3 or 6 final pieces of a school shows its set bonuses, the Manticore
-  pieces raise maximum Toxicity, and every item, rune and glyph counts towards the total bonuses.
-- **On a phone too.** The trees and the board scale down to the width of the screen with larger labels,
-  the info panel comes right after the pane, and the board's slots are filled by tapping, so nothing
-  needs dragging.
-- **Shareable builds.** A short build code restores everything: points, slots, mutagens, mutations, the
-  toxicity plan and the gear. The page address carries it as `?build=`, so a copied link opens the same
-  build, and a plain address starts empty.
-- **Always know what is live.** The header shows the planner version and the game version the data
-  matches, the footer the commit and the build date.
+- **Spend points in the four skill trees.** Combat, Signs, Alchemy and General look the way the game draws
+  them, with its links, icons and tooltip texts and three ranks per skill. A skill opens once a linked
+  skill before it has a point, and taking that point back closes the branch behind it.
+- **Slot skills and mutagens.** Twelve skill slots sit in four groups, each with a mutagen whose bonus
+  grows with every skill of its colour in the group and with Synergy. The board shows which slots count.
+- **Research mutations.** Research them in order, slot one in the centre, and fill the four extra skill
+  slots around it, which open as you research more and take only the mutation's colours.
+- **Plan potions and decoctions.** Pick what is active together and see it against your maximum Toxicity,
+  which grows with Acquired Tolerance for the recipes you know, Metabolic Control and Manticore armor. The
+  overdose threshold is marked, and as in the game nothing goes over the maximum.
+- **Choose witcher gear.** Bear, Cat, Griffin, Wolf, Forgotten Wolf, Manticore and Viper gear in every
+  version from basic to grandmaster, mixed freely, with runes and glyphs socket by socket or a runeword or
+  glyphword from the Runewright, and the set bonuses of 3 and 6 pieces.
+- **See the totals.** The build summary adds up what the slotted skills, the mutagens and the gear give,
+  one line per stat.
+- **Share a build.** The page address carries the whole build, so copying the link shares it. A short
+  build code does the same where a link does not fit.
+- **Use it on a phone.** The trees and the board fit the screen, a tap on a board slot lists what can go
+  in, and the page can sit on the home screen with its own icon.
 
-## Built with
+## How to use it
 
-React 19 and TypeScript in strict mode, bundled by Vite, tested with Vitest. ESLint runs type-aware
-(typescript-eslint `strictTypeChecked`), formatting is Prettier, unused code is caught by knip, and pnpm
-manages the dependencies. Every push to `main` runs the checks and the tests in GitHub Actions and deploys
-the site to GitHub Pages.
+| To                                            | With a mouse                                    | On a touch screen     |
+| --------------------------------------------- | ----------------------------------------------- | --------------------- |
+| Add a rank or research a mutation             | Click                                           | Tap                   |
+| Take it back                                  | Right-click                                     | Double tap            |
+| Put a skill, mutagen or mutation on the board | Drag it onto a slot, or click the slot and pick | Tap the slot and pick |
+| Take it off the board                         | Double-click, or drag it off the board          | Double tap            |
 
-## How it works
+Hover over a skill, a mutation or a piece of gear to see its tooltip. The info panel explains whatever is
+under the pointer in full, and the header names the planner version and the game version the data
+matches.
 
-The game rules know nothing about React. Each layer only imports from the ones above it:
+## For developers
 
-| Layer          | What it holds                                                                       |
-| -------------- | ----------------------------------------------------------------------------------- |
-| `src/data/`    | The game data as typed values: skills and trees, mutagens, mutations, elixirs, gear |
-| `src/catalog/` | The data joined into lookups, with prerequisites and unlocks resolved at startup    |
-| `src/build/`   | The `Build` model and every rule, and the build code                                |
-| `src/planner/` | React components and the pure UI logic beside them                                  |
-| `src/app/`     | State, the address bar, drag and drop and the page layout                           |
+The planner is React 19 and TypeScript, built with Vite and deployed to GitHub Pages from every tagged
+release. How it is put together, from the rule model to the build code format, and how to run it locally is in
+[docs/architecture.md](docs/architecture.md). Every version is in the [CHANGELOG](CHANGELOG.md) and on the
+[releases page](https://github.com/nyiriattila88/witcher3-build-planner/releases).
 
-A `Build` keeps itself valid after every command, so the components never decide what is allowed. The
-build code is one mixed-radix number in base64url. It walks the build field by field, and each field
-offers only what the rules allow at that point: a rank only for a skill that is available, a slot only the
-learned skills it accepts and no earlier slot holds. A build with a few points gets a code of a dozen
-characters, one with every skill, slot, mutagen and mutation filled about 50. Every build has exactly one
-code, and tests pin codes made by earlier versions, so a shared build keeps opening the same way.
-
-## Development
-
-Requirements: Node 24 and pnpm 10 (Corepack picks the pinned version).
-
-```bash
-pnpm install
-pnpm dev        # http://localhost:5173/witcher3-build-planner/
-pnpm check      # typecheck, lint, formatting, unused code
-pnpm test
-pnpm build      # the static site in dist/
-```
-
-Agent instructions for AI-assisted changes are in [AGENTS.md](AGENTS.md). Changes per version are in the
-[CHANGELOG](CHANGELOG.md).
-
-## Sources
+## Where the data comes from
 
 - Skill names and per-rank values: LAMBKING's "Complete Skill Tree Reference" posts on r/witcher.
 - Tooltip wording: the Fextralife Witcher 3 wiki, checked against Hack the Minotaur's remaster skill tree

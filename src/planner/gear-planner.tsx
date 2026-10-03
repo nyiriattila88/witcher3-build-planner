@@ -164,7 +164,7 @@ function SlotPicker({
                 }}
               >
                 <span className="gear-school-name">{item.school}</span>
-                <span className="gear-school-stat">{gearValue(item)}</span>
+                <span className="gear-school-stat">{gearStatText(item)}</span>
               </button>
             );
           })}
@@ -195,47 +195,49 @@ function Sockets({
   const words = catalog.enchantments.filter((word) => build.canEnchant(slot, word));
   const word = build.enchantmentAt(slot);
   const upgrades = catalog.upgrades.filter((upgrade) => upgrade.kind === upgradeKind(slot));
+  const sockets = Array.from({ length: item.sockets }, (_, socket) => (
+    <Choice
+      key={socket}
+      label={`Socket ${socket + 1}`}
+      options={upgrades}
+      held={build.upgradeAt(slot, socket)}
+      empty="Empty"
+      describe={(each) => `${each.name}: ${statBonusText(each.bonus)}`}
+      onPick={(chosen) => {
+        onChange((draft) => {
+          draft.setUpgrade(slot, socket, chosen);
+        });
+      }}
+      onHover={(upgrade) => {
+        onHover({ kind: 'upgrade', upgrade });
+      }}
+    />
+  ));
+  // The enchantment in one column, the sockets it would fill in the other.
   return (
     <div className="gear-sockets">
       {words.length > 0 && (
-        <Choice
-          label={slot === 'armor' ? 'Glyphword' : 'Runeword'}
-          options={words}
-          held={word}
-          empty="None, use the sockets"
-          describe={(each) => `${each.name} (level ${each.level})`}
-          onPick={(chosen) => {
-            onChange((draft) => {
-              draft.enchant(slot, chosen);
-            });
-          }}
-          onHover={(enchantment) => {
-            onHover({ kind: 'enchantment', enchantment });
-          }}
-        />
-      )}
-      {word !== null ? (
-        <p className="gear-enchantment">{word.effect}</p>
-      ) : (
-        Array.from({ length: item.sockets }, (_, socket) => (
+        <div className="gear-column">
           <Choice
-            key={socket}
-            label={`Socket ${socket + 1}`}
-            options={upgrades}
-            held={build.upgradeAt(slot, socket)}
-            empty="Empty"
-            describe={(each) => `${each.name}: ${statBonusText(each.bonus)}`}
+            label={slot === 'armor' ? 'Glyphword' : 'Runeword'}
+            options={words}
+            held={word}
+            empty="None, use the sockets"
+            describe={(each) => `${each.name} (level ${each.level})`}
             onPick={(chosen) => {
               onChange((draft) => {
-                draft.setUpgrade(slot, socket, chosen);
+                draft.enchant(slot, chosen);
               });
             }}
-            onHover={(upgrade) => {
-              onHover({ kind: 'upgrade', upgrade });
+            onHover={(enchantment) => {
+              onHover({ kind: 'enchantment', enchantment });
             }}
           />
-        ))
+        </div>
       )}
+      <div className="gear-column">
+        {word === null ? sockets : <p className="gear-enchantment">{word.effect}</p>}
+      </div>
     </div>
   );
 }

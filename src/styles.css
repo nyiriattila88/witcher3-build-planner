@@ -936,9 +936,10 @@ button.elixir {
   color: var(--gold);
 }
 
+/* Seven equal columns, so a long school name wraps instead of pushing the row out of the pane. */
 .gear-schools {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -970,15 +971,21 @@ button.elixir {
 }
 
 .gear-sockets {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 18px;
   margin-top: 8px;
 }
 
-.gear-socket {
+.gear-column {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gear-socket {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
   align-items: center;
   gap: 6px;
   color: var(--muted);
@@ -986,7 +993,7 @@ button.elixir {
 }
 
 .gear-socket select {
-  max-width: 330px;
+  width: 100%;
   padding: 4px 6px;
   border: 1px solid #555;
   background: #0b0c0e;
@@ -996,7 +1003,6 @@ button.elixir {
 }
 
 .gear-enchantment {
-  flex-basis: 100%;
   margin: 0;
   color: #ddd6ca;
   font-size: 15px;

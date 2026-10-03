@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.11.0 - 2026-10-03
+
+- The board works from the keyboard: Tab reaches every open slot, Enter or Space opens the list of what
+  fits there, and Delete or Backspace takes the skill, mutagen or mutation off.
+- Space on a selected mutation researches it without scrolling the page, the way it works on a skill.
+- A link whose build code cannot be read now says so in the build code panel and keeps the code in the
+  address bar until the build is changed, instead of quietly opening an empty build.
+- The build code panel names everything the code holds, the toxicity plan and the gear too.
+
 ## 2.10.0 - 2026-10-03
 
 - Hovering a mutation in the mutation tree shows its tooltip beside it, the way a skill shows one in its

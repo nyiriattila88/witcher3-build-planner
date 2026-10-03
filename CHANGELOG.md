@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.0 - 2026-10-03
+
+- On a touch screen a double tap takes a skill rank back or unresearches a mutation, the way a
+  right-click does with a mouse. A single tap waits a moment before it counts, so the two can be told
+  apart, and a double tap no longer zooms the page there. Mouse clicks count at once, as before.
+
 ## 2.3.1 - 2026-10-03
 
 - Potion and decoction descriptions carry their values in the text, the way the skills do: Katakan

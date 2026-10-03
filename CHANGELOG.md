@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.6.0 - 2026-10-03
+
+- A Gear tab picks the witcher school gear worn: the final version of Bear, Cat, Griffin, Wolf, Forgotten
+  Wolf, Manticore and Viper gear, one item per slot, mixed freely, with its armor, damage and bonuses
+  from The Witcher Wiki.
+- Swords take runes and armor takes glyphs, socket by socket. A sword or chest armor with 3 sockets can
+  take a runeword or glyphword from the Runewright instead, which fills every socket.
+- Wearing 3 or 6 pieces of a school shows its set bonuses, with the per-piece values worked out.
+- The Total bonuses add up the gear, its runes and glyphs together with the skills and mutagens, per
+  stat. The Manticore armor pieces on the Toxicity tab now come from the gear. Codes written before keep
+  their own count until armor is picked.
+
 ## 2.5.0 - 2026-10-03
 
 - A potion or decoction that would take the active Toxicity above the maximum can no longer be made

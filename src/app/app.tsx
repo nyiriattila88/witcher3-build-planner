@@ -32,7 +32,11 @@ const tabColour = (tab: PlannerTab): string =>
   tab.kind === 'tree' ? treeColour(tab.tree) : `var(--tab-${tab.kind})`;
 
 export function App({ catalog, codec, address }: AppProps): JSX.Element {
-  const { build, code, link, apply, load, reset } = useBuild(catalog, codec, address);
+  const { build, code, link, unreadableAddress, apply, load, reset } = useBuild(
+    catalog,
+    codec,
+    address,
+  );
   const tabs = useMemo(() => plannerTabs(catalog), [catalog]);
   const [tab, setTab] = useState<PlannerTab>(() => tabs[0] ?? { kind: 'mutagens' });
   const [info, setInfo] = useState<InfoTarget>({ kind: 'tab', tab });
@@ -186,7 +190,7 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
             Reset All
           </button>
         </div>
-        <SharePanel code={code} link={link} onLoad={load} />
+        <SharePanel code={code} link={link} onLoad={load} unreadableAddress={unreadableAddress} />
       </main>
       <aside className="side">
         <InfoPanel target={info} build={build} catalog={catalog} />

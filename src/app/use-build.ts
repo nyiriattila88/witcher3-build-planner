@@ -9,6 +9,8 @@ export type BuildState = {
   readonly code: string;
   // The page address that opens this build.
   readonly link: string;
+  // The page was opened with a build code that could not be read, so it shows an empty build.
+  readonly unreadableAddress: boolean;
   // Runs a change on a copy of the build, so React sees a new value.
   readonly apply: (change: (draft: Build) => void) => void;
   // Takes a build code or a shared link. Returns false when the text holds no build code.
@@ -17,14 +19,17 @@ export type BuildState = {
 };
 
 export function useBuild(catalog: Catalog, codec: BuildCodec, address: BuildAddress): BuildState {
-  const [build, setBuild] = useState(() => codec.decode(address.code()) ?? new Build(catalog));
+  const [opened] = useState(() => openBuild(catalog, codec, address.code()));
+  const [build, setBuild] = useState(opened.build);
   const code = useMemo(() => codec.encode(build), [codec, build]);
   // An empty build keeps the plain page address.
   const shared = build.isEmpty() ? null : code;
+  // A code that could not be read stays in the address bar until the build changes, so it can be checked.
+  const keepsAddress = opened.unreadable && build === opened.build;
 
   useEffect(() => {
-    address.show(shared);
-  }, [address, shared]);
+    if (!keepsAddress) address.show(shared);
+  }, [address, shared, keepsAddress]);
 
   const apply = useCallback((change: (draft: Build) => void) => {
     setBuild((current) => {
@@ -48,5 +53,23 @@ export function useBuild(catalog: Catalog, codec: BuildCodec, address: BuildAddr
     setBuild(new Build(catalog));
   }, [catalog]);
 
-  return { build, code, link: address.linkTo(shared), apply, load, reset };
+  return {
+    build,
+    code,
+    link: address.linkTo(shared),
+    unreadableAddress: opened.unreadable,
+    apply,
+    load,
+    reset,
+  };
 }
+
+// The build of the address the page was opened with, and whether the code in it could not be read.
+const openBuild = (
+  catalog: Catalog,
+  codec: BuildCodec,
+  text: string,
+): { readonly build: Build; readonly unreadable: boolean } => {
+  const decoded = codec.decode(text);
+  return { build: decoded ?? new Build(catalog), unreadable: text !== '' && decoded === null };
+};

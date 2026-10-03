@@ -5,14 +5,24 @@ type SharePanelProps = {
   readonly link: string;
   // Takes a build code or a shared link. Returns false when the text holds no build code.
   readonly onLoad: (text: string) => boolean;
+  // The page was opened with a build code that could not be read.
+  readonly unreadableAddress: boolean;
 };
 
 const INTRO =
   'The code holds the whole build: skill points, slots, mutagens, researched and slotted mutation. The page address carries it too, so a copied link opens the same build.';
 
-export function SharePanel({ code, link, onLoad }: SharePanelProps): JSX.Element {
+const UNREADABLE =
+  'The build code in the page address could not be read, so an empty build opened instead.';
+
+export function SharePanel({
+  code,
+  link,
+  onLoad,
+  unreadableAddress,
+}: SharePanelProps): JSX.Element {
   const [pasted, setPasted] = useState('');
-  const [message, setMessage] = useState(INTRO);
+  const [message, setMessage] = useState(unreadableAddress ? UNREADABLE : INTRO);
 
   const copy = async (text: string, copied: string): Promise<void> => {
     try {

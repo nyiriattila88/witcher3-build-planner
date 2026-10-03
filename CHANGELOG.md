@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.3.1 - 2026-10-03
+
+- Potion and decoction descriptions carry their values in the text, the way the skills do: Katakan
+  decoction increases critical hit chance by 10%, Nightwraith decoction maximum Vitality by 50 per foe
+  killed.
+- The values are the ones since patch 4.0. A value noted with its pre-4.0 version was dropped before,
+  which left Katakan, Leshen and others without a number. Limits from the wiki pages are in too, such as
+  up to 25% resistance for Griffin and up to 30% Attack Power for Succubus.
+- Swallow and Troll decoction show their Vitality regeneration both outside and during combat.
+
 ## 2.3.0 - 2026-10-02
 
 - The build summary opens with the total bonuses: the tree bonus of every slotted skill, added up per

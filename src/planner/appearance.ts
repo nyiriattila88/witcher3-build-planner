@@ -80,9 +80,13 @@ export const statBonusText = ([stat, value, unit]: StatBonus): string => `+${val
 export const gearValue = (item: GearItemData): string =>
   item.damage === null ? `${item.armor ?? 0}` : `${item.damage[0]}-${item.damage[1]}`;
 
-export const gearUnit = (item: GearItemData): string => (item.damage === null ? 'armor' : 'damage');
+const gearUnit = (item: GearItemData): string => (item.damage === null ? 'armor' : 'damage');
 
 export const gearStatText = (item: GearItemData): string => `${gearValue(item)} ${gearUnit(item)}`;
+
+// The unit of that number, with the weight class for armor: damage, or Heavy armor.
+export const gearUnitText = (item: GearItemData, weight: SetBonusData['weight']): string =>
+  item.damage === null ? `${weight} ${gearUnit(item)}` : gearUnit(item);
 
 // What an item is, the way the game names it: Medium armor, or the kind of sword.
 export const gearKindText = (item: GearItemData, weight: SetBonusData['weight']): string =>

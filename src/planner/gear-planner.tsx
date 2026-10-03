@@ -6,7 +6,7 @@ import {
   GEAR_SLOT_NAMES,
   gearKindText,
   gearStatText,
-  gearUnit,
+  gearUnitText,
   gearValue,
   statBonusText,
 } from './appearance';
@@ -182,6 +182,7 @@ type SchoolTileProps = SlotPickerProps & {
 
 // One school's item for the slot with a button per version, the way a potion has one per tier.
 function SchoolTile({
+  catalog,
   onChange,
   onHover,
   onTip,
@@ -211,7 +212,9 @@ function SchoolTile({
     >
       <span className="gear-school-name">{final.school}</span>
       <span className="gear-school-stat">{gearValue(shown)}</span>
-      <span className="gear-school-stat">{gearUnit(shown)}</span>
+      <span className="gear-school-stat">
+        {gearUnitText(shown, catalog.setBonus(final.school).weight)}
+      </span>
       <span className="tier-buttons">
         {versions.map((version, i) => {
           const chosen = version === worn;

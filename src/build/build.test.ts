@@ -11,7 +11,7 @@ import type { BuildSnapshot } from './build-snapshot';
 const catalog = createGameCatalog();
 
 const skill = (tree: TreeName, name: string): Skill => {
-  const found = catalog.skill(tree, name);
+  const found = catalog.findSkill(tree, name);
   if (found === undefined) throw new Error(`Test data names an unknown skill: ${tree}/${name}`);
   return found;
 };

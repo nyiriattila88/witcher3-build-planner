@@ -39,7 +39,7 @@ export function SlotBoard({ catalog, build, boardRef, ...handlers }: SlotBoardPr
                 key={group}
                 group={group}
                 build={build}
-                mutagen={catalog.mutagen(build.mutagenAt(group))}
+                mutagen={build.mutagenBonus(group)?.mutagen}
               />
             ))}
           </svg>

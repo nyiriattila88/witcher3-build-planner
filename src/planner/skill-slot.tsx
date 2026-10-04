@@ -50,8 +50,7 @@ export function SkillSlot({
   }
 
   const accepts = index >= BASE_SLOTS ? <AcceptedTrees build={build} /> : null;
-  const mutagen =
-    index < BASE_SLOTS ? catalog.mutagen(build.mutagenAt(slotGroup(index))) : undefined;
+  const mutagen = index < BASE_SLOTS ? build.mutagenBonus(slotGroup(index))?.mutagen : undefined;
   if (skill === null) {
     return (
       <div

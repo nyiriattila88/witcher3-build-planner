@@ -25,8 +25,10 @@ once and hands them to `App`.
 
 `src/catalog/catalog.ts` joins the data and checks it on the way: names are unique, every link and
 mutation requirement points at something that exists, the versions of a gear item rise in level with one
-per tier, and every school has its set bonuses. A broken reference stops the page at startup with a message
-that names it, instead of turning up later as a wrong number in a tooltip. `catalog.test.ts` builds the
+per tier, every school has its set bonuses, and the skills the rules read by name, such as Synergy,
+exist. A broken reference stops the page at startup with a message that names it, instead of turning up
+later as a wrong number in a tooltip. Lookups by a checked id always find what they look for, only names
+read from outside, such as an old build code, go through the find lookups that may come back empty. `catalog.test.ts` builds the
 catalog from the real data and pins examples taken from the in-game screenshots.
 
 ## The rules live in `Build`

@@ -7,7 +7,7 @@ import type {
   MutationData,
   MutationId,
 } from '../data/mutations';
-import type { SkillTreeData, TreeBonus, TreeName } from '../data/skills';
+import type { KeySkill, SkillName, SkillTreeData, TreeBonus, TreeName } from '../data/skills';
 import type { TreeLayout } from '../data/tree-layout';
 import type { EnchantmentData, UpgradeData } from '../data/upgrades';
 
@@ -58,13 +58,19 @@ export type Catalog = {
   // The most sockets any item for the slot has.
   readonly maxSockets: (slot: GearSlot) => number;
   readonly setBonus: (school: GearSchool) => SetBonusData;
-  readonly skill: (tree: string, name: string) => Skill | undefined;
-  readonly mutagen: (id: string | null) => Mutagen | undefined;
-  readonly mutation: (id: string | null) => Mutation | undefined;
+  readonly mutagen: (id: MutagenId) => Mutagen;
+  readonly mutation: (id: MutationId) => Mutation;
+  // The skills another rule reads, resolved once when the catalog is made.
+  readonly keySkills: Readonly<Record<KeySkill, Skill>>;
+  // Names read from outside, such as an old build code, where an unknown name is no error.
+  readonly findSkill: (tree: string, name: string) => Skill | undefined;
+  readonly findMutagen: (id: string) => Mutagen | undefined;
+  readonly findMutation: (id: string) => Mutation | undefined;
 };
 
 export type CatalogSources = {
   readonly skillTrees: readonly SkillTreeData[];
+  readonly keySkills: Readonly<Record<KeySkill, SkillName>>;
   readonly treeLayout: Readonly<Record<TreeName, TreeLayout>>;
   readonly mutagens: Readonly<Record<MutagenId, MutagenData>>;
   readonly mutations: Readonly<Record<MutationId, MutationData>>;
@@ -129,6 +135,23 @@ export function createCatalog(sources: CatalogSources): Catalog {
 
     return { name: treeData.tree, bonus: treeData.bonus, skills: treeSkills, links };
   });
+
+  const keySkill = (key: KeySkill): Skill => {
+    const { tree, name } = sources.keySkills[key];
+    const skill = skillsByKey.get(skillKey(tree, name));
+    if (skill === undefined) {
+      throw new Error(`No ${tree} skill "${name}" for the rules that read ${key}`);
+    }
+    return skill;
+  };
+  // Resolved now, so a skill renamed in the data stops the start instead of counting as unslotted.
+  const keySkills: Record<KeySkill, Skill> = {
+    synergy: keySkill('synergy'),
+    acquiredTolerance: keySkill('acquiredTolerance'),
+    metabolicControl: keySkill('metabolicControl'),
+    delayedRecovery: keySkill('delayedRecovery'),
+    highTolerance: keySkill('highTolerance'),
+  };
 
   // Object.keys returns string[] even for a record keyed by a union of literal ids.
   const mutagenIds = Object.keys(sources.mutagens) as MutagenId[];
@@ -214,8 +237,19 @@ export function createCatalog(sources: CatalogSources): Catalog {
       if (set === undefined) throw new Error(`No set bonuses for the ${school} school`);
       return set;
     },
-    skill: (tree, name) => skillsByKey.get(skillKey(tree, name)),
-    mutagen: (id) => (id === null ? undefined : mutagensById.get(id)),
-    mutation: (id) => (id === null ? undefined : mutationsById.get(id)),
+    mutagen: (id) => {
+      const mutagen = mutagensById.get(id);
+      if (mutagen === undefined) throw new Error(`Unknown mutagen "${id}"`);
+      return mutagen;
+    },
+    mutation: (id) => {
+      const mutation = mutationsById.get(id);
+      if (mutation === undefined) throw new Error(`Unknown mutation "${id}"`);
+      return mutation;
+    },
+    keySkills,
+    findSkill: (tree, name) => skillsByKey.get(skillKey(tree, name)),
+    findMutagen: (id) => mutagensById.get(id),
+    findMutation: (id) => mutationsById.get(id),
   };
 }

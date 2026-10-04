@@ -24,8 +24,7 @@ export function MutationTree({ catalog, build, ...handlers }: MutationTreeProps)
   const [hovered, setHovered] = useState<Mutation | null>(null);
   const links = catalog.mutations.flatMap((mutation) =>
     mutation.requires.map((requiredId) => {
-      const required = catalog.mutation(requiredId);
-      const [x1, y1] = mutationCentre(required?.grid ?? mutation.grid);
+      const [x1, y1] = mutationCentre(catalog.mutation(requiredId).grid);
       const [x2, y2] = mutationCentre(mutation.grid);
       const active = build.isResearched(requiredId) && build.isResearched(mutation.id);
       return (

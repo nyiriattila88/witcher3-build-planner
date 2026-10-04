@@ -26,7 +26,8 @@ export function MutationSlot({
     },
   );
   const over = handlers.overKey === dropTargetKey(target) ? ' over' : '';
-  const mutation = catalog.mutation(build.slottedMutation);
+  const slotted = build.slottedMutation;
+  const mutation = slotted === null ? undefined : catalog.mutation(slotted);
   const innate = catalog.mutations.find((candidate) => candidate.innate);
   const circle = { left: cx - radius, top: cy - radius, width: 2 * radius, height: 2 * radius };
   const nameBox = { right: BOARD_SIZE.width - (cx - radius - 20), top: cy - 34 };

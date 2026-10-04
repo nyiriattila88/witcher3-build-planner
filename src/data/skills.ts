@@ -23,6 +23,20 @@ export type SkillTreeData = {
   readonly skills: readonly SkillData[];
 };
 
+export type SkillName = { readonly tree: TreeName; readonly name: string };
+
+// Skills whose rank another rule reads: Synergy for the mutagens, the alchemy skills for maximum
+// Toxicity and its marks. The catalog stops the start when one of them is missing.
+export const KEY_SKILLS = {
+  synergy: { tree: 'General', name: 'Synergy' },
+  acquiredTolerance: { tree: 'Alchemy', name: 'Acquired Tolerance' },
+  metabolicControl: { tree: 'General', name: 'Metabolic Control' },
+  delayedRecovery: { tree: 'Alchemy', name: 'Delayed Recovery' },
+  highTolerance: { tree: 'Alchemy', name: 'High Tolerance' },
+} as const satisfies Readonly<Record<string, SkillName>>;
+
+export type KeySkill = keyof typeof KEY_SKILLS;
+
 export const SKILL_TREES: readonly SkillTreeData[] = [
   {
     tree: 'Combat',

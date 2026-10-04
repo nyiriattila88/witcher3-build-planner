@@ -1,7 +1,7 @@
-import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
+import type { Catalog, Mutagen, Skill } from '../catalog/catalog';
 import { BASE_MAX_TOXICITY, MANTICORE_ARMOR, SAFE_TOXICITY_SHARE } from '../data/alchemy';
 import type { ColourTree, MutagenId, MutationId } from '../data/mutations';
-import type { TreeName } from '../data/skills';
+import type { KeySkill, TreeName } from '../data/skills';
 import type { BuildSnapshot } from './build-snapshot';
 import { GearLoadout } from './gear-loadout';
 import { ToxicityPlan } from './toxicity-plan';
@@ -11,23 +11,15 @@ export const BASE_SLOTS = 12;
 export const SLOTS_PER_GROUP = 3;
 export const MUTAGEN_GROUPS = BASE_SLOTS / SLOTS_PER_GROUP;
 // While it sits in a slot, Synergy raises every mutagen bonus by 10% per rank.
-export const SYNERGY = { tree: 'General', name: 'Synergy', bonusPerRank: 0.1 } as const;
+export const SYNERGY = { skill: 'synergy', bonusPerRank: 0.1 } as const;
 // From a slot, Acquired Tolerance raises maximum Toxicity by 1 per learned recipe and rank, Metabolic
 // Control by 10 per rank.
-export const ACQUIRED_TOLERANCE = {
-  tree: 'Alchemy',
-  name: 'Acquired Tolerance',
-  perRecipe: 1,
-} as const;
-export const METABOLIC_CONTROL = {
-  tree: 'General',
-  name: 'Metabolic Control',
-  perRank: 10,
-} as const;
+export const ACQUIRED_TOLERANCE = { skill: 'acquiredTolerance', perRecipe: 1 } as const;
+export const METABOLIC_CONTROL = { skill: 'metabolicControl', perRank: 10 } as const;
 // From a slot, these start to work at a share of maximum Toxicity, by rank.
 const TOXICITY_THRESHOLD_SKILLS = [
-  { tree: 'Alchemy', name: 'Delayed Recovery', shares: [0.7, 0.65, 0.6] },
-  { tree: 'Alchemy', name: 'High Tolerance', shares: [0.8, 0.8, 0.8] },
+  { skill: 'delayedRecovery', shares: [0.7, 0.65, 0.6] },
+  { skill: 'highTolerance', shares: [0.8, 0.8, 0.8] },
 ] as const;
 
 export const slotGroup = (slotIndex: number): number => Math.floor(slotIndex / SLOTS_PER_GROUP);
@@ -69,21 +61,22 @@ export class Build {
     const build = new Build(catalog);
     for (const [tree, ranks] of Object.entries(snapshot.points)) {
       for (const [name, rank] of Object.entries(ranks)) {
-        const skill = catalog.skill(tree, name);
+        const skill = catalog.findSkill(tree, name);
         const value = Math.min(MAX_RANK, Math.max(0, Math.trunc(rank)));
         if (skill !== undefined && value > 0) build.#ranks.set(skill, value);
       }
     }
     for (const id of snapshot.researched) {
-      const mutation = catalog.mutation(id);
+      const mutation = catalog.findMutation(id);
       if (mutation !== undefined && !mutation.innate) build.#researched.add(mutation.id);
     }
-    build.#mutation = catalog.mutation(snapshot.mutation)?.id ?? null;
+    build.#mutation =
+      snapshot.mutation === null ? null : (catalog.findMutation(snapshot.mutation)?.id ?? null);
     snapshot.mutagens.slice(0, MUTAGEN_GROUPS).forEach((id, group) => {
-      build.#mutagens[group] = catalog.mutagen(id)?.id ?? null;
+      build.#mutagens[group] = id === null ? null : (catalog.findMutagen(id)?.id ?? null);
     });
     snapshot.slots.slice(0, build.slotCount).forEach((entry, index) => {
-      const skill = entry === null ? undefined : catalog.skill(entry.tree, entry.name);
+      const skill = entry === null ? undefined : catalog.findSkill(entry.tree, entry.name);
       if (skill !== undefined && build.slotOf(skill) < 0) build.#slots[index] = skill;
     });
     build.#normalize();
@@ -208,7 +201,7 @@ export class Build {
 
   // The trees the extra slots take: the colours of the slotted mutation.
   extraSlotTrees(): readonly ColourTree[] {
-    return this.#catalog.mutation(this.#mutation)?.trees ?? [];
+    return this.#mutation === null ? [] : this.#catalog.mutation(this.#mutation).trees;
   }
 
   slotAccepts(index: number, skill: Skill): boolean {
@@ -272,17 +265,18 @@ export class Build {
 
   slotMatchesMutagen(index: number): boolean {
     if (index >= BASE_SLOTS) return false;
-    const mutagen = this.#catalog.mutagen(this.mutagenAt(slotGroup(index)));
-    return mutagen !== undefined && this.slotAt(index)?.tree === mutagen.tree;
+    const id = this.mutagenAt(slotGroup(index));
+    return id !== null && this.slotAt(index)?.tree === this.#catalog.mutagen(id).tree;
   }
 
   // Every skill of the mutagen's colour in the same group adds the base bonus once more.
   mutagenBonus(group: number): MutagenBonus | null {
-    const mutagen = this.#catalog.mutagen(this.mutagenAt(group));
-    if (mutagen === undefined) return null;
+    const id = this.mutagenAt(group);
+    if (id === null) return null;
+    const mutagen = this.#catalog.mutagen(id);
     const groupSlots = this.#slots.slice(group * SLOTS_PER_GROUP, (group + 1) * SLOTS_PER_GROUP);
     const matching = groupSlots.filter((skill) => skill?.tree === mutagen.tree).length;
-    const synergy = this.#slottedRankOf(SYNERGY);
+    const synergy = this.#slottedRankOf(SYNERGY.skill);
     const value = Math.floor(mutagen.bonus * (1 + matching) * (1 + synergy * SYNERGY.bonusPerRank));
     return { mutagen, matching, synergy, value };
   }
@@ -299,12 +293,12 @@ export class Build {
 
   researchCost(): number {
     let sum = 0;
-    for (const id of this.#researched) sum += this.#mutationById(id).cost;
+    for (const id of this.#researched) sum += this.#catalog.mutation(id).cost;
     return sum;
   }
 
   isResearched(id: MutationId): boolean {
-    return this.#researched.has(id) || this.#mutationById(id).innate;
+    return this.#researched.has(id) || this.#catalog.mutation(id).innate;
   }
 
   canResearch(id: MutationId): boolean {
@@ -363,14 +357,14 @@ export class Build {
   // Skills only work from a slot, so an unslotted one adds nothing.
   acquiredTolerance(): number {
     return (
-      this.#slottedRankOf(ACQUIRED_TOLERANCE) *
+      this.#slottedRankOf(ACQUIRED_TOLERANCE.skill) *
       ACQUIRED_TOLERANCE.perRecipe *
       this.#toxicityPlan.knownRecipes
     );
   }
 
   metabolicControl(): number {
-    return this.#slottedRankOf(METABOLIC_CONTROL) * METABOLIC_CONTROL.perRank;
+    return this.#slottedRankOf(METABOLIC_CONTROL.skill) * METABOLIC_CONTROL.perRank;
   }
 
   // Above this much Toxicity, Geralt takes overdose damage.
@@ -380,12 +374,11 @@ export class Build {
 
   // Where the slotted skills that work above a share of the maximum start to.
   toxicityThresholds(): readonly ToxicityThreshold[] {
-    return TOXICITY_THRESHOLD_SKILLS.flatMap((key) => {
-      const skill = this.#catalog.skill(key.tree, key.name);
-      const share = key.shares[this.#slottedRankOf(key) - 1];
-      return skill === undefined || share === undefined
+    return TOXICITY_THRESHOLD_SKILLS.flatMap(({ skill, shares }) => {
+      const share = shares[this.#slottedRankOf(skill) - 1];
+      return share === undefined
         ? []
-        : [{ skill, toxicity: this.maxToxicity() * share }];
+        : [{ skill: this.#catalog.keySkills[skill], toxicity: this.maxToxicity() * share }];
     });
   }
 
@@ -394,19 +387,12 @@ export class Build {
     return Number.isInteger(index) && index >= 0 && index < this.#slots.length;
   }
 
-  #slottedRankOf({ tree, name }: { readonly tree: string; readonly name: string }): number {
-    const skill = this.#catalog.skill(tree, name);
-    return skill === undefined ? 0 : this.slottedRank(skill);
-  }
-
-  #mutationById(id: MutationId): Mutation {
-    const mutation = this.#catalog.mutation(id);
-    if (mutation === undefined) throw new Error(`Unknown mutation "${id}"`);
-    return mutation;
+  #slottedRankOf(key: KeySkill): number {
+    return this.slottedRank(this.#catalog.keySkills[key]);
   }
 
   #requirementsResearched(id: MutationId): boolean {
-    return this.#mutationById(id).requires.every((required) => this.isResearched(required));
+    return this.#catalog.mutation(id).requires.every((required) => this.isResearched(required));
   }
 
   // Drops whatever the rules no longer allow. Removals can cascade, so it repeats until nothing changes.

@@ -67,7 +67,7 @@ export const mutagenColour = (mutagen: Mutagen): string =>
 
 // A mutation's colours, its research cost and what has to be researched before it.
 export const mutationMetaText = (mutation: Mutation, catalog: Catalog): string => {
-  const requires = mutation.requires.map((id) => catalog.mutation(id)?.name ?? id).join(' and ');
+  const requires = mutation.requires.map((id) => catalog.mutation(id).name).join(' and ');
   const cost = `${mutation.trees.join(' / ')} mutation · Research cost: ${mutation.cost}`;
   return requires === '' ? cost : `${cost} · Requires: ${requires}`;
 };

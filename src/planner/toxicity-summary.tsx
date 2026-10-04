@@ -7,6 +7,7 @@ import {
   MANTICORE_ARMOR,
   SAFE_TOXICITY_SHARE,
 } from '../data/alchemy';
+import type { KeySkill } from '../data/skills';
 import type { ToxicityTips } from './elixir-tile';
 
 type ToxicitySummaryProps = {
@@ -146,26 +147,21 @@ function SkillSource({
 }: {
   catalog: Catalog;
   build: Build;
-  source: { readonly tree: string; readonly name: string };
+  source: { readonly skill: KeySkill };
   value: number;
   tips: ToxicityTips;
 }): JSX.Element {
-  const skill = catalog.skill(source.tree, source.name);
-  const rank = skill === undefined ? 0 : build.slottedRank(skill);
+  const skill = catalog.keySkills[source.skill];
+  const rank = build.slottedRank(skill);
   return (
     <div
       className="skill"
       onMouseEnter={(event) => {
-        if (skill !== undefined)
-          tips.showSkill(
-            event,
-            skill,
-            rank > 0 ? undefined : 'Counts only while it sits in a slot',
-          );
+        tips.showSkill(event, skill, rank > 0 ? undefined : 'Counts only while it sits in a slot');
       }}
       onMouseLeave={tips.hide}
     >
-      <dt>{source.name}</dt>
+      <dt>{skill.name}</dt>
       <dd>{rank > 0 ? `+${value} (rank ${rank})` : 'not slotted'}</dd>
     </div>
   );

@@ -1,7 +1,7 @@
 import { DECOCTIONS, POTIONS } from '../data/alchemy';
 import { GEAR, SET_BONUSES } from '../data/gear';
 import { EXTRA_SLOT_UNLOCKS, MUTAGENS, MUTATIONS } from '../data/mutations';
-import { SKILL_TREES } from '../data/skills';
+import { KEY_SKILLS, SKILL_TREES } from '../data/skills';
 import { TREE_LAYOUT } from '../data/tree-layout';
 import { ENCHANTMENTS, UPGRADES } from '../data/upgrades';
 import { createCatalog, type Catalog } from './catalog';
@@ -10,6 +10,7 @@ import { createCatalog, type Catalog } from './catalog';
 export const createGameCatalog = (): Catalog =>
   createCatalog({
     skillTrees: SKILL_TREES,
+    keySkills: KEY_SKILLS,
     treeLayout: TREE_LAYOUT,
     mutagens: MUTAGENS,
     mutations: MUTATIONS,

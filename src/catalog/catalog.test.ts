@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { MUTAGENS, MUTATIONS } from '../data/mutations';
-import { SKILL_TREES } from '../data/skills';
+import { MUTAGENS, MUTATIONS, type MutationId } from '../data/mutations';
+import { KEY_SKILLS, SKILL_TREES } from '../data/skills';
 import { TREE_LAYOUT } from '../data/tree-layout';
 import { createCatalog } from './catalog';
 import { createGameCatalog } from './game-catalog';
@@ -19,8 +19,8 @@ describe('createCatalog', () => {
   it('takes the prerequisites from the screenshots, not from the Reddit text', () => {
     const catalog = createGameCatalog();
 
-    const rend = catalog.skill('Combat', 'Rend');
-    const floodOfAnger = catalog.skill('Combat', 'Flood of Anger');
+    const rend = catalog.findSkill('Combat', 'Rend');
+    const floodOfAnger = catalog.findSkill('Combat', 'Flood of Anger');
 
     expect(names(rend?.requires ?? [])).toEqual(['Crushing Blow', 'Razor Focus', 'Whirl']);
     expect(names(floodOfAnger?.requires ?? [])).not.toContain('Razor Focus');
@@ -60,6 +60,7 @@ describe('createCatalog', () => {
     const create = (): unknown =>
       createCatalog({
         skillTrees: SKILL_TREES,
+        keySkills: KEY_SKILLS,
         treeLayout: brokenLayout,
         mutagens: MUTAGENS,
         mutations: MUTATIONS,
@@ -73,5 +74,62 @@ describe('createCatalog', () => {
       });
 
     expect(create).toThrow(/Nonexistent/);
+  });
+
+  it('resolves the skills the rules read once, when it is made', () => {
+    const catalog = createGameCatalog();
+
+    const resolved = Object.values(catalog.keySkills).map((skill) => `${skill.tree}/${skill.name}`);
+
+    expect(resolved).toEqual([
+      'General/Synergy',
+      'Alchemy/Acquired Tolerance',
+      'General/Metabolic Control',
+      'Alchemy/Delayed Recovery',
+      'Alchemy/High Tolerance',
+    ]);
+  });
+
+  it('refuses data that no longer has a skill the rules read', () => {
+    const renamed = { ...KEY_SKILLS, synergy: { tree: 'General', name: 'Synergy II' } } as const;
+
+    const create = (): unknown =>
+      createCatalog({
+        skillTrees: SKILL_TREES,
+        keySkills: renamed,
+        treeLayout: TREE_LAYOUT,
+        mutagens: MUTAGENS,
+        mutations: MUTATIONS,
+        extraSlotUnlocks: [2, 4, 8, 12],
+        potions: [],
+        decoctions: [],
+        gear: [],
+        setBonuses: [],
+        upgrades: [],
+        enchantments: [],
+      });
+
+    expect(create).toThrow(/Synergy II/);
+  });
+
+  it('finds a name read from outside, and nothing for one it does not know', () => {
+    const catalog = createGameCatalog();
+
+    const found = [
+      catalog.findSkill('Combat', 'Rend')?.name,
+      catalog.findSkill('Combat', 'Nonexistent'),
+      catalog.findMutagen('green')?.name,
+      catalog.findMutation('not-a-mutation'),
+    ];
+
+    expect(found).toEqual(['Rend', undefined, 'Green Mutagen', undefined]);
+  });
+
+  it('stops at an unknown id, which only a programmer error can bring', () => {
+    const catalog = createGameCatalog();
+
+    const lookUp = (): unknown => catalog.mutation('not-a-mutation' as MutationId);
+
+    expect(lookUp).toThrow(/not-a-mutation/);
   });
 });

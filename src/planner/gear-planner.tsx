@@ -1,5 +1,5 @@
 import { useRef, type CSSProperties, type JSX, type MouseEvent } from 'react';
-import type { Build } from '../build/build';
+import type { Build, BuildView } from '../build/build';
 import { SET_PIECES, enchantmentKind, upgradeKind } from '../build/gear-loadout';
 import type { Catalog } from '../catalog/catalog';
 import {
@@ -27,7 +27,7 @@ import { usePaneTooltip } from './use-pane-tooltip';
 
 type GearPlannerProps = {
   readonly catalog: Catalog;
-  readonly build: Build;
+  readonly build: BuildView;
   readonly onChange: (change: (draft: Build) => void) => void;
   readonly onHover: (target: InfoTarget) => void;
 };

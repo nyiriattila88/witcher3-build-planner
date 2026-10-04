@@ -1,5 +1,5 @@
 import { useState, type DragEvent, type JSX } from 'react';
-import { MAX_RANK, type Build } from '../build/build';
+import { MAX_RANK, type BuildView } from '../build/build';
 import type { Skill, SkillTree } from '../catalog/catalog';
 import { backgroundUrl, iconUrl, treeColour } from './appearance';
 import type { DragItem } from './drag-and-drop';
@@ -18,7 +18,7 @@ import { useNodeControls } from './use-node-controls';
 
 type TreePaneProps = {
   readonly tree: SkillTree;
-  readonly build: Build;
+  readonly build: BuildView;
   readonly onLearn: (skill: Skill) => void;
   readonly onUnlearn: (skill: Skill) => void;
   readonly onHover: (skill: Skill) => void;

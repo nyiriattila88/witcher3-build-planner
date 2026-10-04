@@ -4,6 +4,7 @@ import type { ColourTree, MutagenId, MutationId } from '../data/mutations';
 import type { KeySkill, TreeName } from '../data/skills';
 import type { BuildSnapshot } from './build-snapshot';
 import { GearLoadout } from './gear-loadout';
+import type { QueryView } from './query-view';
 import { ToxicityPlan } from './toxicity-plan';
 
 export const MAX_RANK = 3;
@@ -35,6 +36,13 @@ export type MutagenBonus = {
   readonly matching: number;
   readonly synergy: number;
   readonly value: number;
+};
+
+// What the components read of a build. They change one only through useBuild's apply, on a draft copy,
+// so the build React holds never changes under it.
+export type BuildView = Omit<QueryView<Build>, 'clone' | 'gear' | 'toxicityPlan'> & {
+  readonly gear: Omit<QueryView<GearLoadout>, 'clone'>;
+  readonly toxicityPlan: Omit<QueryView<ToxicityPlan>, 'clone'>;
 };
 
 // One character build: skill ranks, slotted skills, mutagens and mutations, with the toxicity plan and the

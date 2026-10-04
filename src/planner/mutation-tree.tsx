@@ -1,5 +1,5 @@
 import { useState, type DragEvent, type JSX } from 'react';
-import type { Build } from '../build/build';
+import type { BuildView } from '../build/build';
 import type { Catalog, Mutation } from '../catalog/catalog';
 import { backgroundUrl, mutationColour } from './appearance';
 import type { DragItem } from './drag-and-drop';
@@ -11,7 +11,7 @@ import { useNodeControls } from './use-node-controls';
 
 type MutationTreeProps = {
   readonly catalog: Catalog;
-  readonly build: Build;
+  readonly build: BuildView;
   readonly onResearch: (mutation: Mutation) => void;
   readonly onUnresearch: (mutation: Mutation) => void;
   readonly onHover: (mutation: Mutation) => void;

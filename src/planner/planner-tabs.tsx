@@ -1,17 +1,17 @@
 import type { JSX } from 'react';
-import { MUTAGEN_GROUPS, type Build } from '../build/build';
+import { MUTAGEN_GROUPS, type BuildView } from '../build/build';
 import { GEAR_SLOTS } from '../data/gear';
 import { tabColour, tabKey, tabName, type PlannerTab } from './planner-tab';
 
 type PlannerTabsProps = {
   readonly tabs: readonly PlannerTab[];
   readonly current: PlannerTab;
-  readonly build: Build;
+  readonly build: BuildView;
   readonly onSelect: (tab: PlannerTab) => void;
 };
 
 // The number under a tab, and what it counts.
-const tabCount = (tab: PlannerTab, build: Build): readonly [count: string, meaning: string] => {
+const tabCount = (tab: PlannerTab, build: BuildView): readonly [count: string, meaning: string] => {
   switch (tab.kind) {
     case 'tree':
       return [`${build.treePoints(tab.tree)}`, 'points spent'];

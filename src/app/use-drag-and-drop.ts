@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent, type RefObject } from 'react';
-import type { Build } from '../build/build';
+import type { Build, BuildView } from '../build/build';
 import {
   acceptsDrop,
   applyDiscard,
@@ -23,7 +23,7 @@ export type DragAndDrop = {
 type Drag = { readonly item: DragItem; readonly icon: number };
 
 export function useDragAndDrop(
-  build: Build,
+  build: BuildView,
   apply: (change: (draft: Build) => void) => void,
 ): DragAndDrop {
   const dragged = useRef<Drag | null>(null);

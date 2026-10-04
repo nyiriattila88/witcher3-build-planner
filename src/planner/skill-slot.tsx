@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { BASE_SLOTS, slotGroup, type Build } from '../build/build';
+import { BASE_SLOTS, slotGroup, type BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import { iconUrl, mutagenColour, treeColour } from './appearance';
 import { boardItemProps, type SlotProps } from './board-item';
@@ -110,7 +110,7 @@ export function SkillSlot({
 }
 
 // Coloured segments along the bottom of slots 13-16 show which trees they take.
-function AcceptedTrees({ build }: { build: Build }): JSX.Element | null {
+function AcceptedTrees({ build }: { build: BuildView }): JSX.Element | null {
   const trees = build.extraSlotTrees();
   if (trees.length === 0) return null;
   return (

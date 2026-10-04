@@ -1,5 +1,5 @@
 import type { JSX, ReactNode } from 'react';
-import { MAX_RANK, MUTAGEN_GROUPS, type Build, type MutagenBonus } from '../build/build';
+import { MAX_RANK, MUTAGEN_GROUPS, type BuildView, type MutagenBonus } from '../build/build';
 import { SET_PIECES } from '../build/gear-loadout';
 import type { Catalog } from '../catalog/catalog';
 import { GEAR_SLOTS } from '../data/gear';
@@ -11,7 +11,7 @@ import {
   treeColour,
 } from './appearance';
 
-type BuildSummaryProps = { readonly build: Build; readonly catalog: Catalog };
+type BuildSummaryProps = { readonly build: BuildView; readonly catalog: Catalog };
 
 type StatTotal = { stat: string; value: number; unit: string; colour: string | null };
 
@@ -20,7 +20,7 @@ const marker = (slotted: boolean): string => (slotted ? '◆ ' : '');
 // One line per stat: the tree bonuses of the slotted skills, the mutagens in tree order, then the gear
 // with its runes and glyphs. Bonuses to the same stat add up, coloured after where the first came from.
 function totalBonuses(
-  build: Build,
+  build: BuildView,
   catalog: Catalog,
   mutagens: readonly MutagenBonus[],
 ): ReactNode[] {
@@ -51,7 +51,7 @@ function totalBonuses(
 }
 
 // What is worn, with the runes, glyphs or enchantment in it, then the set bonuses that apply.
-function gearLines(build: Build, catalog: Catalog): string[] {
+function gearLines(build: BuildView, catalog: Catalog): string[] {
   const items = GEAR_SLOTS.flatMap((slot) => {
     const item = build.gear.itemAt(slot);
     if (item === null) return [];

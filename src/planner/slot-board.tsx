@@ -1,5 +1,5 @@
 import { useState, type JSX, type RefObject } from 'react';
-import { MUTAGEN_GROUPS, type Build } from '../build/build';
+import { MUTAGEN_GROUPS, type BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import { helixUrl } from './appearance';
 import { REMOVE_TIP, type BoardHandlers } from './board-item';
@@ -15,7 +15,7 @@ import { GroupBracket, GroupHeader } from './slot-group';
 
 type SlotBoardProps = BoardHandlers & {
   readonly catalog: Catalog;
-  readonly build: Build;
+  readonly build: BuildView;
   // Drops are measured against the board, see useDragAndDrop.
   readonly boardRef: RefObject<HTMLDivElement | null>;
 };

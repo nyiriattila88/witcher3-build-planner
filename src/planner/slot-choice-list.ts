@@ -1,4 +1,4 @@
-import { BASE_SLOTS, MAX_RANK, slotGroup, type Build } from '../build/build';
+import { BASE_SLOTS, MAX_RANK, slotGroup, type BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import { GROUP_NAMES, mutagenColour, mutationColour, treeColour } from './appearance';
 import { acceptsDrop, type DragItem, type DropTarget } from './drag-and-drop';
@@ -20,7 +20,11 @@ type SlotChoiceList = {
 };
 
 // What a slot can take, with the rules of a drop on it.
-export function slotChoicesFor(catalog: Catalog, build: Build, target: DropTarget): SlotChoiceList {
+export function slotChoicesFor(
+  catalog: Catalog,
+  build: BuildView,
+  target: DropTarget,
+): SlotChoiceList {
   switch (target.kind) {
     case 'slot': {
       const current = build.slotAt(target.index);

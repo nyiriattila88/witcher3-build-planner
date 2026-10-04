@@ -1,5 +1,5 @@
 import type { DragEvent } from 'react';
-import type { Build } from '../build/build';
+import type { BuildView } from '../build/build';
 import type { Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DragItem, DropTarget } from './drag-and-drop';
 
@@ -16,7 +16,7 @@ export type BoardHandlers = {
 };
 
 export type SlotProps = {
-  readonly build: Build;
+  readonly build: BuildView;
   readonly handlers: BoardHandlers;
   // Opens the list of what the slot can take.
   readonly onPick: (target: DropTarget) => void;

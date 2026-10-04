@@ -1,5 +1,5 @@
 import { useRef, type JSX } from 'react';
-import type { Build } from '../build/build';
+import type { Build, BuildView } from '../build/build';
 import type { Catalog, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
 import { formatDuration } from './appearance';
@@ -14,7 +14,7 @@ import { usePaneTooltip } from './use-pane-tooltip';
 
 type ToxicityPlannerProps = {
   readonly catalog: Catalog;
-  readonly build: Build;
+  readonly build: BuildView;
   readonly onChange: (change: (draft: Build) => void) => void;
   readonly onHoverPotion: (potion: PotionData, tier: number) => void;
   readonly onHoverDecoction: (decoction: DecoctionData) => void;

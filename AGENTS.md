@@ -53,8 +53,8 @@ ESLint checks both, so a wrong import fails `pnpm check`.
   is allowed. Every command leaves the build valid (`#normalize`), so a new rule goes into the model
   with a test, not into a component.
 - **React only sees a new build.** `Build` is mutable inside, so a change always goes through
-  `apply(draft => ...)` from `useBuild`, which works on a clone. Mutating the build held in state skips
-  the render and the address update.
+  `apply(draft => ...)` from `useBuild`, which works on a clone. Components get a `BuildView`, which
+  leaves the commands out, so the build held in state cannot be changed by mistake: only a draft can.
 - **The tree links come from the in-game screenshots**, not from the Reddit text, which lists a few
   wrong ones (Razor Focus does not unlock Flood of Anger). `src/catalog/catalog.test.ts` pins examples.
 - **Rank texts follow the game.** Rank 1 is the in-game tooltip wording, ranks 2 and 3 put the

@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { ACQUIRED_TOLERANCE, METABOLIC_CONTROL, type Build } from '../build/build';
+import { ACQUIRED_TOLERANCE, METABOLIC_CONTROL, type Build, type BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import {
   ALCHEMY_RECIPES,
@@ -12,7 +12,7 @@ import type { ToxicityTips } from './elixir-tile';
 
 type ToxicitySummaryProps = {
   readonly catalog: Catalog;
-  readonly build: Build;
+  readonly build: BuildView;
   readonly onChange: (change: (draft: Build) => void) => void;
   readonly tips: ToxicityTips;
 };
@@ -146,7 +146,7 @@ function SkillSource({
   tips,
 }: {
   catalog: Catalog;
-  build: Build;
+  build: BuildView;
   source: { readonly skill: KeySkill };
   value: number;
   tips: ToxicityTips;

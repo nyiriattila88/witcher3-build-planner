@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import type { Build } from '../build/build';
+import type { BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import type { BoardHandlers } from './board-item';
 import type { DropTarget } from './drag-and-drop';
@@ -20,7 +20,7 @@ export function SlotChoices({
   onClose,
 }: {
   catalog: Catalog;
-  build: Build;
+  build: BuildView;
   target: DropTarget;
   handlers: BoardHandlers;
   onClose: () => void;

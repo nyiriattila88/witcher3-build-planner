@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { SLOTS_PER_GROUP, type Build } from '../build/build';
+import { SLOTS_PER_GROUP, type BuildView } from '../build/build';
 import type { Mutagen } from '../catalog/catalog';
 import { mutagenColour, mutagenIconUrl } from './appearance';
 import {
@@ -20,7 +20,7 @@ export function GroupBracket({
   mutagen,
 }: {
   group: number;
-  build: Build;
+  build: BuildView;
   mutagen: Mutagen | undefined;
 }): JSX.Element {
   const side = isRightGroup(group) ? 1 : -1;
@@ -55,7 +55,7 @@ export function GroupBracket({
 }
 
 // The bar over a group, with its mutagen bonus as the game shows it.
-export function GroupHeader({ group, build }: { group: number; build: Build }): JSX.Element {
+export function GroupHeader({ group, build }: { group: number; build: BuildView }): JSX.Element {
   const right = isRightGroup(group);
   const box = groupHeaderBox(group);
   const bonus = build.mutagenBonus(group);

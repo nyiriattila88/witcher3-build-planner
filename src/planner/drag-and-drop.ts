@@ -1,5 +1,5 @@
 import type { DragEvent } from 'react';
-import { MUTAGEN_GROUPS, type Build } from '../build/build';
+import { MUTAGEN_GROUPS, type Build, type BuildView } from '../build/build';
 import type { Skill } from '../catalog/catalog';
 import type { MutagenId, MutationId } from '../data/mutations';
 import {
@@ -101,7 +101,7 @@ export function snapTarget(
 export const isFromBoard = (item: DragItem): boolean =>
   item.kind === 'mutation' ? item.fromBoard : item.from !== null;
 
-export function acceptsDrop(build: Build, item: DragItem, target: DropTarget): boolean {
+export function acceptsDrop(build: BuildView, item: DragItem, target: DropTarget): boolean {
   if (item.kind === 'skill' && target.kind === 'slot')
     return build.slotAccepts(target.index, item.skill);
   if (item.kind === 'mutagen' && target.kind === 'mutagen-slot') return true;

@@ -1,5 +1,5 @@
 import type { JSX, ReactNode } from 'react';
-import { MAX_RANK, SYNERGY, type Build } from '../build/build';
+import { MAX_RANK, SYNERGY, type BuildView } from '../build/build';
 import { SET_PIECES } from '../build/gear-loadout';
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
@@ -36,7 +36,7 @@ export type InfoTarget =
 
 type InfoPanelProps = {
   readonly target: InfoTarget;
-  readonly build: Build;
+  readonly build: BuildView;
   readonly catalog: Catalog;
 };
 
@@ -101,7 +101,7 @@ function InfoLayout({ icon, title, meta, children }: InfoLayoutProps): JSX.Eleme
 const names = (skills: readonly Skill[]): string | null =>
   skills.length > 0 ? skills.map((skill) => skill.name).join(', ') : null;
 
-function SkillInfo({ skill, build }: { skill: Skill; build: Build }): JSX.Element {
+function SkillInfo({ skill, build }: { skill: Skill; build: BuildView }): JSX.Element {
   const rank = build.rank(skill);
   const slotted = build.slotOf(skill) >= 0;
   const icon = (
@@ -136,7 +136,7 @@ function MutationInfo({
   catalog,
 }: {
   mutation: Mutation;
-  build: Build;
+  build: BuildView;
   catalog: Catalog;
 }): JSX.Element {
   const meta = (
@@ -181,7 +181,7 @@ function PotionInfo({
 }: {
   potion: PotionData;
   tier: number;
-  build: Build;
+  build: BuildView;
 }): JSX.Element {
   const icon = <img src={potionIconUrl(potion)} alt="" draggable={false} />;
   const shown = potion.tiers[tier - 1] ?? potion.tiers[0];
@@ -219,7 +219,7 @@ function GearInfo({
   catalog,
 }: {
   item: GearItemData;
-  build: Build;
+  build: BuildView;
   catalog: Catalog;
 }): JSX.Element {
   const set = catalog.setBonus(item.school);

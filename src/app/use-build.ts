@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Build } from '../build/build';
+import { Build, type BuildView } from '../build/build';
 import type { BuildCodec } from '../build/build-code';
 import type { Catalog } from '../catalog/catalog';
 import { buildCodeIn, type BuildAddress } from './build-address';
 
 export type BuildState = {
-  readonly build: Build;
+  readonly build: BuildView;
   readonly code: string;
   // The page address that opens this build.
   readonly link: string;

@@ -49,7 +49,9 @@ checks a new potion or decoction against the maximum the build gives it.
 
 `Build` is mutable inside, which keeps the commands simple. React never sees that: `useBuild` applies a
 change to a clone (`apply(draft => ...)`) and stores the clone, so every change is a new object for React
-and a new address in the browser.
+and a new address in the browser. The components get a `BuildView`, the build with its commands left
+out (`src/build/query-view.ts`): the model returns nothing from a command and something from a query, so
+the type tells them apart, and only a draft can be changed.
 
 ## The build code
 

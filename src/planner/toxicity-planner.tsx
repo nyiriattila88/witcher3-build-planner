@@ -1,18 +1,15 @@
-import { useRef, type JSX, type MouseEvent } from 'react';
-import { ACQUIRED_TOLERANCE, METABOLIC_CONTROL, type Build } from '../build/build';
+import { useRef, type JSX } from 'react';
+import type { Build } from '../build/build';
 import type { Catalog, Skill } from '../catalog/catalog';
-import {
-  ALCHEMY_RECIPES,
-  BASE_MAX_TOXICITY,
-  MANTICORE_ARMOR,
-  SAFE_TOXICITY_SHARE,
-  type DecoctionData,
-  type PotionData,
-} from '../data/alchemy';
-import { decoctionIconUrl, formatDuration, potionIconUrl, potionTierName } from './appearance';
+import type { DecoctionData, PotionData } from '../data/alchemy';
+import { formatDuration } from './appearance';
+import { DecoctionGrid } from './decoction-grid';
+import type { Elixir, ToxicityTips } from './elixir-tile';
 import { GameTooltip } from './game-tooltip';
 import { PANE_WIDTH } from './geometry';
+import { PotionGrid } from './potion-grid';
 import { SkillTooltip } from './skill-tooltip';
+import { ToxicitySummary } from './toxicity-summary';
 import { usePaneTooltip } from './use-pane-tooltip';
 
 type ToxicityPlannerProps = {
@@ -24,8 +21,6 @@ type ToxicityPlannerProps = {
   readonly onHoverSkill: (skill: Skill) => void;
 };
 
-type Elixir = PotionData['tiers'][number];
-
 type Tip =
   | {
       readonly kind: 'elixir';
@@ -35,12 +30,7 @@ type Tip =
     }
   | { readonly kind: 'skill'; readonly skill: Skill; readonly hint: string | undefined };
 
-const TIER_LABELS = ['I', 'II', 'III'];
-const TOO_TOXIC = 'Too toxic: it would take Toxicity above the maximum';
-
-const formatAmount = (value: number): string =>
-  Number.isInteger(value) ? `${value}` : value.toFixed(1);
-
+// The Toxicity tab: the meter and its sources, then the decoctions and potions to make active.
 export function ToxicityPlanner({
   catalog,
   build,
@@ -52,260 +42,38 @@ export function ToxicityPlanner({
   const pane = useRef<HTMLDivElement>(null);
   const tooltip = usePaneTooltip<Tip>(pane);
   const tip = tooltip.tip;
-  const max = build.maxToxicity();
-  const toxicity = build.toxicityPlan.toxicity();
-  const overdose = build.overdoseToxicity();
-  const over = toxicity > overdose;
-  const warning =
-    toxicity > max
-      ? 'Above the maximum: take something off'
-      : over
-        ? 'Overdose: Vitality drains'
-        : null;
-  const percent = Math.round((toxicity / max) * 100);
-  const share = (value: number): string => `${Math.min(100, (value / max) * 100)}%`;
-  // Skills that start to work at a share of the maximum are marked on the bar while slotted.
-  const marks = build.toxicityThresholds();
-
-  const showTip = (event: MouseEvent, title: string, elixir: Elixir, hint: string): void => {
-    tooltip.show(event.currentTarget.closest('.elixir'), { kind: 'elixir', title, elixir, hint });
-  };
-  const showSkillTip = (event: MouseEvent, skill: Skill, hint?: string): void => {
-    onHoverSkill(skill);
-    tooltip.show(event.currentTarget, { kind: 'skill', skill, hint });
-  };
-  const hideTip = tooltip.hide;
-
-  // A skill that adds to maximum Toxicity, which only counts while it sits in a slot.
-  const skillSource = (
-    source: { readonly tree: string; readonly name: string },
-    value: number,
-  ): JSX.Element => {
-    const skill = catalog.skill(source.tree, source.name);
-    const rank = skill === undefined ? 0 : build.slottedRank(skill);
-    return (
-      <div
-        className="skill"
-        onMouseEnter={(event) => {
-          if (skill !== undefined)
-            showSkillTip(
-              event,
-              skill,
-              rank > 0 ? undefined : 'Counts only while it sits in a slot',
-            );
-        }}
-        onMouseLeave={hideTip}
-      >
-        <dt>{source.name}</dt>
-        <dd>{rank > 0 ? `+${value} (rank ${rank})` : 'not slotted'}</dd>
-      </div>
-    );
+  const tips: ToxicityTips = {
+    showElixir: (event, title, elixir, hint) => {
+      tooltip.show(event.currentTarget.closest('.elixir'), { kind: 'elixir', title, elixir, hint });
+    },
+    showSkill: (event, skill, hint) => {
+      onHoverSkill(skill);
+      tooltip.show(event.currentTarget, { kind: 'skill', skill, hint });
+    },
+    hide: tooltip.hide,
   };
 
   return (
     <div ref={pane} className="pane-content toxicity" style={{ maxWidth: PANE_WIDTH }}>
-      <section className="toxicity-summary">
-        <div className="toxicity-meter">
-          <div
-            className="toxicity-bar"
-            role="meter"
-            aria-label="Active Toxicity"
-            aria-valuemin={0}
-            aria-valuemax={max}
-            aria-valuenow={toxicity}
-          >
-            <span
-              className={over ? 'toxicity-fill overdosed' : 'toxicity-fill'}
-              style={{ width: share(toxicity) }}
-            />
-            <span
-              className="toxicity-mark overdose"
-              style={{ left: share(overdose) }}
-              title={`Overdose above ${formatAmount(overdose)}`}
-            />
-            {marks.map((mark) => (
-              <span
-                key={mark.skill.name}
-                className="toxicity-mark skill"
-                style={{ left: share(mark.toxicity) }}
-                onMouseEnter={(event) => {
-                  showSkillTip(
-                    event,
-                    mark.skill,
-                    `Marked at ${formatAmount(mark.toxicity)} Toxicity`,
-                  );
-                }}
-                onMouseLeave={hideTip}
-              />
-            ))}
-          </div>
-          <span className={over ? 'toxicity-percent overdosed' : 'toxicity-percent'}>
-            {percent}%
-          </span>
-        </div>
-        <p className="toxicity-line">
-          Active <b>{toxicity}</b> of <b>{max}</b> Toxicity ({percent}%), overdose above{' '}
-          <b>{formatAmount(overdose)}</b> ({Math.round(SAFE_TOXICITY_SHARE * 100)}%)
-          {warning !== null && <span className="toxicity-warning"> {warning}</span>}
-        </p>
-        <dl className="toxicity-sources">
-          <div>
-            <dt>Base</dt>
-            <dd>{BASE_MAX_TOXICITY}</dd>
-          </div>
-          {skillSource(ACQUIRED_TOLERANCE, build.acquiredTolerance())}
-          {skillSource(METABOLIC_CONTROL, build.metabolicControl())}
-          <div>
-            <dt>Manticore armor</dt>
-            <dd>
-              +{build.manticorePieces * MANTICORE_ARMOR.toxicity} ({build.manticorePieces} of{' '}
-              {MANTICORE_ARMOR.pieces} pieces)
-            </dd>
-          </div>
-        </dl>
-        <div className="toxicity-controls">
-          <label>
-            Known recipes{' '}
-            <input
-              type="number"
-              min={0}
-              max={ALCHEMY_RECIPES}
-              value={build.toxicityPlan.knownRecipes}
-              onChange={(event) => {
-                const count = Number(event.target.value);
-                onChange((draft) => {
-                  draft.toxicityPlan.setKnownRecipes(count);
-                });
-              }}
-            />{' '}
-            of {ALCHEMY_RECIPES}
-          </label>
-          <span>Manticore armor pieces come from the Gear tab.</span>
-        </div>
-      </section>
+      <ToxicitySummary catalog={catalog} build={build} onChange={onChange} tips={tips} />
 
       <h3 className="elixir-heading">Decoctions</h3>
-      <div className="elixir-grid">
-        {catalog.decoctions.map((decoction) => {
-          const active = build.toxicityPlan.isDecoctionActive(decoction);
-          const allowed = build.toxicityPlan.canActivateDecoction(decoction, max);
-          const hint = active
-            ? 'Click to take it off'
-            : allowed
-              ? 'Click to make it active'
-              : TOO_TOXIC;
-          return (
-            <button
-              key={decoction.name}
-              type="button"
-              className={active ? 'elixir active' : allowed ? 'elixir' : 'elixir blocked'}
-              aria-pressed={active}
-              aria-disabled={!allowed}
-              onClick={(event) => {
-                if (!allowed) return;
-                onChange((draft) => {
-                  if (active) draft.toxicityPlan.deactivateDecoction(decoction);
-                  else draft.toxicityPlan.activateDecoction(decoction);
-                });
-                showTip(
-                  event,
-                  decoction.name,
-                  decoction,
-                  active ? 'Click to make it active' : 'Click to take it off',
-                );
-              }}
-              onMouseEnter={(event) => {
-                onHoverDecoction(decoction);
-                showTip(event, decoction.name, decoction, hint);
-              }}
-              onMouseLeave={hideTip}
-              onFocus={() => {
-                onHoverDecoction(decoction);
-              }}
-            >
-              <img src={decoctionIconUrl(decoction)} alt="" draggable={false} />
-              <span className="elixir-name">{decoction.name.replace(/ decoction$/, '')}</span>
-              <span className="elixir-meta">
-                {decoction.toxicity} · {formatDuration(decoction.duration)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <DecoctionGrid
+        catalog={catalog}
+        build={build}
+        onChange={onChange}
+        onHover={onHoverDecoction}
+        tips={tips}
+      />
 
       <h3 className="elixir-heading">Potions</h3>
-      <div className="elixir-grid">
-        {catalog.potions.map((potion) => {
-          const tier = build.toxicityPlan.potionTier(potion);
-          const shown = potion.tiers[Math.max(0, tier - 1)] ?? potion.tiers[0];
-          const shownTier = Math.max(1, tier);
-          const blocked =
-            tier === 0 &&
-            potion.tiers.every((_, i) => !build.toxicityPlan.canSetPotionTier(potion, i + 1, max));
-          const hint = blocked
-            ? TOO_TOXIC
-            : potion.tiers.length === 1
-              ? 'Click On to make it active'
-              : 'Pick I, II or III to make one active';
-          return (
-            <div
-              key={potion.name}
-              className={tier > 0 ? 'elixir active' : blocked ? 'elixir blocked' : 'elixir'}
-              onMouseEnter={(event) => {
-                onHoverPotion(potion, shownTier);
-                showTip(event, potionTierName(potion, shownTier), shown, hint);
-              }}
-              onMouseLeave={hideTip}
-            >
-              <img src={potionIconUrl(potion)} alt="" draggable={false} />
-              <span className="elixir-name">{potion.name}</span>
-              <span className="elixir-meta">
-                {shown.toxicity} · {formatDuration(shown.duration)}
-              </span>
-              <span className="tier-buttons">
-                {potion.tiers.map((each, i) => {
-                  const chosen = tier === i + 1;
-                  const allowed = build.toxicityPlan.canSetPotionTier(potion, i + 1, max);
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      className={chosen ? 'active' : allowed ? undefined : 'blocked'}
-                      aria-pressed={chosen}
-                      aria-disabled={!allowed}
-                      aria-label={potionTierName(potion, i + 1)}
-                      onClick={() => {
-                        if (!allowed) return;
-                        onChange((draft) => {
-                          draft.toxicityPlan.setPotionTier(potion, chosen ? 0 : i + 1);
-                        });
-                      }}
-                      onMouseEnter={(event) => {
-                        onHoverPotion(potion, i + 1);
-                        showTip(
-                          event,
-                          potionTierName(potion, i + 1),
-                          each,
-                          chosen
-                            ? 'Click to take it off'
-                            : allowed
-                              ? 'Click to make this one active'
-                              : TOO_TOXIC,
-                        );
-                      }}
-                      onFocus={() => {
-                        onHoverPotion(potion, i + 1);
-                      }}
-                    >
-                      {potion.tiers.length === 1 ? 'On' : TIER_LABELS[i]}
-                    </button>
-                  );
-                })}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+      <PotionGrid
+        catalog={catalog}
+        build={build}
+        onChange={onChange}
+        onHover={onHoverPotion}
+        tips={tips}
+      />
 
       {tip?.content.kind === 'skill' && (
         <SkillTooltip

@@ -62,11 +62,11 @@ function gearLines(build: Build, catalog: Catalog): string[] {
     const extras = word === null ? inset.flatMap((each) => each?.name ?? []) : [word.name];
     return [extras.length > 0 ? `${item.name} (${extras.join(', ')})` : item.name];
   });
-  const sets = catalog.setBonuses.flatMap(({ school, three }) => {
+  const sets = catalog.setBonuses.flatMap(({ school, bonuses }) => {
     const pieces = build.gear.setPieces(school);
-    if (pieces < SET_PIECES.first || three === null) return [];
-    const bonuses = pieces >= SET_PIECES.full ? '3 and 6 piece bonuses' : '3 piece bonus';
-    return [`${school} set, ${pieces} pieces: ${bonuses}`];
+    if (pieces < SET_PIECES.first || bonuses === null) return [];
+    const reached = pieces >= SET_PIECES.full ? '3 and 6 piece bonuses' : '3 piece bonus';
+    return [`${school} set, ${pieces} pieces: ${reached}`];
   });
   return [...items, ...sets];
 }

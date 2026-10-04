@@ -241,17 +241,17 @@ function GearInfo({
           {statBonusText(bonus)}
         </p>
       ))}
-      {set.three === null || set.six === null ? (
+      {set.bonuses === null ? (
         <p className="info-text">{item.school} gear has no set bonuses.</p>
       ) : (
         <>
           <p className={pieces >= SET_PIECES.first ? 'info-rank reached' : 'info-rank'}>
             <b>{SET_PIECES.first} pieces</b>
-            <span>{set.three}</span>
+            <span>{set.bonuses.three}</span>
           </p>
           <p className={pieces >= SET_PIECES.full ? 'info-rank reached' : 'info-rank'}>
             <b>{SET_PIECES.full} pieces</b>
-            <span>{set.six}</span>
+            <span>{set.bonuses.six}</span>
           </p>
         </>
       )}

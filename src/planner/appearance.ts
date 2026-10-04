@@ -1,6 +1,12 @@
 import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
-import type { GearItemData, GearSlot, SetBonusData, StatBonus } from '../data/gear';
+import {
+  isSword,
+  type GearItemData,
+  type GearSlot,
+  type SetBonusData,
+  type StatBonus,
+} from '../data/gear';
 import type { TreeName } from '../data/skills';
 import type { EnchantmentData } from '../data/upgrades';
 
@@ -94,9 +100,9 @@ export const statBonusText = ([stat, value, unit]: StatBonus): string => `+${val
 
 // The damage of a sword or the armor of a piece of armor, as the number alone.
 export const gearValue = (item: GearItemData): string =>
-  item.damage === null ? `${item.armor ?? 0}` : `${item.damage[0]}-${item.damage[1]}`;
+  isSword(item) ? `${item.damage[0]}-${item.damage[1]}` : `${item.armor}`;
 
-const gearUnit = (item: GearItemData): string => (item.damage === null ? 'armor' : 'damage');
+const gearUnit = (item: GearItemData): string => (isSword(item) ? 'damage' : 'armor');
 
 export const gearStatText = (item: GearItemData): string => `${gearValue(item)} ${gearUnit(item)}`;
 
@@ -107,9 +113,9 @@ export const gearTileLines = (
   weight: SetBonusData['weight'],
 ): readonly [string, string] => [
   gearValue(item),
-  item.damage === null ? `${weight} ${gearUnit(item)}` : gearUnit(item),
+  isSword(item) ? gearUnit(item) : `${weight} ${gearUnit(item)}`,
 ];
 
 // What an item is, the way the game names it: Medium armor, or the kind of sword.
 export const gearKindText = (item: GearItemData, weight: SetBonusData['weight']): string =>
-  item.damage === null ? `${weight} armor` : GEAR_SLOT_NAMES[item.slot];
+  isSword(item) ? GEAR_SLOT_NAMES[item.slot] : `${weight} armor`;

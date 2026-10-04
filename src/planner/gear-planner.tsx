@@ -123,21 +123,22 @@ function GearTooltip({ item, hint, weight, placement }: GearTooltipProps): JSX.E
 }
 
 function SetStatus({ set, pieces }: { set: SetBonusData; pieces: number }): JSX.Element {
+  const { bonuses } = set;
   return (
     <div className="gear-set">
       <b>{set.school} set</b> · {pieces} of {SET_PIECES.full} pieces
-      {set.three === null || set.six === null ? (
+      {bonuses === null ? (
         <p>No set bonuses.</p>
       ) : (
         <>
           <p className={pieces >= SET_PIECES.first ? 'active' : undefined}>
-            <span>{SET_PIECES.first} pieces:</span> {set.three}
-            {set.perPiece !== null &&
+            <span>{SET_PIECES.first} pieces:</span> {bonuses.three}
+            {bonuses.perPiece !== null &&
               pieces >= SET_PIECES.first &&
-              ` Now ${set.perPiece * pieces}%.`}
+              ` Now ${bonuses.perPiece * pieces}%.`}
           </p>
           <p className={pieces >= SET_PIECES.full ? 'active' : undefined}>
-            <span>{SET_PIECES.full} pieces:</span> {set.six}
+            <span>{SET_PIECES.full} pieces:</span> {bonuses.six}
           </p>
         </>
       )}

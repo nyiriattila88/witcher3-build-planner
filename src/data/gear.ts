@@ -3,36 +3,55 @@
 // carries its tier in front, where the game puts it behind for the base game swords. Build codes
 // address items by their position in this list: append new items, never reorder them.
 
-export type GearSlot = 'steel' | 'silver' | 'armor' | 'gloves' | 'trousers' | 'boots';
+type SwordSlot = 'steel' | 'silver';
+type ArmorSlot = 'armor' | 'gloves' | 'trousers' | 'boots';
+export type GearSlot = SwordSlot | ArmorSlot;
 export type GearTier = 'Basic' | 'Enhanced' | 'Superior' | 'Mastercrafted' | 'Grandmaster';
 export type GearSchool =
   'Bear' | 'Cat' | 'Griffin' | 'Wolf' | 'Forgotten Wolf' | 'Manticore' | 'Viper';
 export type StatBonus = readonly [stat: string, value: number, unit: '%' | ''];
 
-export type GearItemData = {
+type GearItemFields = {
   readonly name: string;
   readonly school: GearSchool;
-  readonly slot: GearSlot;
   // The step of the school's upgrade line. Manticore and Viper gear has none, its tier follows the
   // craftsman who makes it: a grandmaster for Manticore, a master for the Viper armor and venomous swords.
   readonly tier: GearTier;
   readonly level: number;
   // Runes for a sword, glyphs for an armor piece.
   readonly sockets: number;
-  readonly armor: number | null;
-  readonly damage: readonly [min: number, max: number] | null;
   readonly bonuses: readonly StatBonus[];
 };
 
-// The bonuses for wearing 3 and 6 final pieces of one school, null for a school without them.
+export type SwordData = GearItemFields & {
+  readonly slot: SwordSlot;
+  readonly damage: readonly [min: number, max: number];
+};
+
+type ArmorPieceData = GearItemFields & {
+  readonly slot: ArmorSlot;
+  readonly armor: number;
+};
+
+// A sword deals damage, an armor piece adds armor, and no item does both.
+export type GearItemData = SwordData | ArmorPieceData;
+
+export const isSword = (item: GearItemData): item is SwordData => 'damage' in item;
+
+// The bonuses for wearing 3 and 6 final pieces of one school.
+type SetBonuses = {
+  readonly three: string;
+  // The percentage the 3-piece bonus grows by with every piece worn, where it grows.
+  readonly perPiece: number | null;
+  readonly six: string;
+};
+
 export type SetBonusData = {
   readonly school: GearSchool;
   // The armor weight class of the school's armor pieces.
   readonly weight: 'Light' | 'Medium' | 'Heavy';
-  readonly three: string | null;
-  // The percentage the 3-piece bonus grows by with every piece worn.
-  readonly perPiece: number | null;
-  readonly six: string | null;
+  // Null for a school without set bonuses, such as Viper.
+  readonly bonuses: SetBonuses | null;
 };
 
 export const GEAR_SLOTS: readonly GearSlot[] = [
@@ -60,7 +79,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 20,
     sockets: 1,
-    armor: null,
     damage: [184, 224],
     bonuses: [
       ['Adrenaline Point gain', 5, '%'],
@@ -75,7 +93,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Enhanced',
     level: 25,
     sockets: 2,
-    armor: null,
     damage: [220, 268],
     bonuses: [
       ['Adrenaline Point gain', 10, '%'],
@@ -90,7 +107,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Superior',
     level: 30,
     sockets: 3,
-    armor: null,
     damage: [256, 312],
     bonuses: [
       ['Adrenaline Point gain', 15, '%'],
@@ -105,7 +121,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [284, 348],
     bonuses: [
       ['Adrenaline Point gain', 20, '%'],
@@ -120,7 +135,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [335, 409],
     bonuses: [
       ['Adrenaline Point gain', 21, '%'],
@@ -137,7 +151,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 17,
     sockets: 1,
-    armor: null,
     damage: [162, 198],
     bonuses: [
       ['Chance to cause bleeding', 5, '%'],
@@ -151,7 +164,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Enhanced',
     level: 23,
     sockets: 2,
-    armor: null,
     damage: [205, 251],
     bonuses: [
       ['Chance to cause bleeding', 10, '%'],
@@ -165,7 +177,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Superior',
     level: 29,
     sockets: 3,
-    armor: null,
     damage: [248, 304],
     bonuses: [
       ['Critical hit chance', 5, '%'],
@@ -180,7 +191,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [284, 348],
     bonuses: [
       ['Critical hit chance', 10, '%'],
@@ -195,7 +205,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [335, 409],
     bonuses: [
       ['Aard Sign intensity', 15, '%'],
@@ -212,7 +221,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 11,
     sockets: 1,
-    armor: null,
     damage: [119, 145],
     bonuses: [
       ['Sign intensity', 5, '%'],
@@ -226,7 +234,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Enhanced',
     level: 18,
     sockets: 2,
-    armor: null,
     damage: [169, 207],
     bonuses: [
       ['Sign intensity', 10, '%'],
@@ -240,7 +247,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Superior',
     level: 26,
     sockets: 3,
-    armor: null,
     damage: [227, 277],
     bonuses: [
       ['Sign intensity', 15, '%'],
@@ -255,7 +261,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [284, 348],
     bonuses: [
       ['Sign intensity', 20, '%'],
@@ -271,7 +276,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [335, 409],
     bonuses: [
       ['Sign intensity', 21, '%'],
@@ -288,7 +292,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 14,
     sockets: 1,
-    armor: null,
     damage: [140, 172],
     bonuses: [
       ['Sign intensity', 5, '%'],
@@ -304,7 +307,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Enhanced',
     level: 21,
     sockets: 2,
-    armor: null,
     damage: [191, 233],
     bonuses: [
       ['Sign intensity', 6, '%'],
@@ -320,7 +322,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Superior',
     level: 29,
     sockets: 3,
-    armor: null,
     damage: [248, 304],
     bonuses: [
       ['Sign intensity', 7, '%'],
@@ -337,7 +338,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [284, 348],
     bonuses: [
       ['Sign intensity', 10, '%'],
@@ -354,7 +354,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [335, 409],
     bonuses: [
       ['Sign intensity', 11, '%'],
@@ -371,7 +370,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 20,
     sockets: 2,
-    armor: null,
     damage: [181, 221],
     bonuses: [
       ['Sign intensity', 5, '%'],
@@ -389,7 +387,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [286, 350],
     bonuses: [
       ['Sign intensity', 6, '%'],
@@ -407,7 +404,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [335, 409],
     bonuses: [
       ['Sign intensity', 7, '%'],
@@ -425,7 +421,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [335, 409],
     bonuses: [
       ['Armor piercing', 250, ''],
@@ -442,7 +437,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 2,
     sockets: 1,
-    armor: null,
     damage: [49, 61],
     bonuses: [
       ['Chance to poison', 15, '%'],
@@ -456,7 +450,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 39,
     sockets: 3,
-    armor: null,
     damage: [328, 400],
     bonuses: [
       ['Aard Sign intensity', 25, '%'],
@@ -473,7 +466,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 20,
     sockets: 1,
-    armor: null,
     damage: [283, 345],
     bonuses: [
       ['Adrenaline Point gain', 5, '%'],
@@ -489,7 +481,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Enhanced',
     level: 25,
     sockets: 2,
-    armor: null,
     damage: [328, 400],
     bonuses: [
       ['Adrenaline Point gain', 10, '%'],
@@ -506,7 +497,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Superior',
     level: 30,
     sockets: 3,
-    armor: null,
     damage: [373, 455],
     bonuses: [
       ['Adrenaline Point gain', 15, '%'],
@@ -523,7 +513,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [409, 499],
     bonuses: [
       ['Adrenaline Point gain', 20, '%'],
@@ -540,7 +529,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [472, 576],
     bonuses: [
       ['Adrenaline Point gain', 21, '%'],
@@ -557,7 +545,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 17,
     sockets: 1,
-    armor: null,
     damage: [256, 312],
     bonuses: [
       ['Aard Sign intensity', 12, '%'],
@@ -572,7 +559,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Enhanced',
     level: 23,
     sockets: 2,
-    armor: null,
     damage: [310, 378],
     bonuses: [
       ['Aard Sign intensity', 14, '%'],
@@ -587,7 +573,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Superior',
     level: 29,
     sockets: 3,
-    armor: null,
     damage: [364, 444],
     bonuses: [
       ['Aard Sign intensity', 14, '%'],
@@ -604,7 +589,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [409, 499],
     bonuses: [
       ['Aard Sign intensity', 15, '%'],
@@ -621,7 +605,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [472, 576],
     bonuses: [
       ['Aard Sign intensity', 15, '%'],
@@ -638,7 +621,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 11,
     sockets: 1,
-    armor: null,
     damage: [202, 246],
     bonuses: [
       ['Sign intensity', 5, '%'],
@@ -652,7 +634,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Enhanced',
     level: 18,
     sockets: 2,
-    armor: null,
     damage: [265, 323],
     bonuses: [
       ['Sign intensity', 10, '%'],
@@ -666,7 +647,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Superior',
     level: 26,
     sockets: 3,
-    armor: null,
     damage: [337, 411],
     bonuses: [
       ['Sign intensity', 15, '%'],
@@ -682,7 +662,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [409, 499],
     bonuses: [
       ['Sign intensity', 20, '%'],
@@ -699,7 +678,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [472, 576],
     bonuses: [
       ['Sign intensity', 21, '%'],
@@ -716,7 +694,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 14,
     sockets: 1,
-    armor: null,
     damage: [229, 279],
     bonuses: [
       ['Sign intensity', 5, '%'],
@@ -732,7 +709,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Enhanced',
     level: 21,
     sockets: 2,
-    armor: null,
     damage: [292, 356],
     bonuses: [
       ['Sign intensity', 6, '%'],
@@ -748,7 +724,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Superior',
     level: 29,
     sockets: 3,
-    armor: null,
     damage: [364, 444],
     bonuses: [
       ['Sign intensity', 7, '%'],
@@ -765,7 +740,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [409, 499],
     bonuses: [
       ['Sign intensity', 10, '%'],
@@ -782,7 +756,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [472, 576],
     bonuses: [
       ['Sign intensity', 11, '%'],
@@ -799,7 +772,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 20,
     sockets: 1,
-    armor: null,
     damage: [283, 345],
     bonuses: [
       ['Sign intensity', 5, '%'],
@@ -817,7 +789,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 34,
     sockets: 3,
-    armor: null,
     damage: [404, 494],
     bonuses: [
       ['Sign intensity', 9, '%'],
@@ -835,7 +806,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [472, 576],
     bonuses: [
       ['Sign intensity', 10, '%'],
@@ -853,7 +823,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Grandmaster',
     level: 40,
     sockets: 3,
-    armor: null,
     damage: [472, 576],
     bonuses: [
       ['Armor piercing', 250, ''],
@@ -870,7 +839,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Basic',
     level: 1,
     sockets: 1,
-    armor: null,
     damage: [112, 138],
     bonuses: [
       ['Aard Sign intensity', 10, '%'],
@@ -885,7 +853,6 @@ export const GEAR: readonly GearItemData[] = [
     tier: 'Mastercrafted',
     level: 39,
     sockets: 3,
-    armor: null,
     damage: [463, 565],
     bonuses: [
       ['Aard Sign intensity', 25, '%'],
@@ -903,7 +870,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 20,
     sockets: 1,
     armor: 135,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 5, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -920,7 +886,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 25,
     sockets: 2,
     armor: 160,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 10, '%'],
       ['Resistance to piercing damage', 10, '%'],
@@ -937,7 +902,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 30,
     sockets: 3,
     armor: 185,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 15, '%'],
       ['Resistance to piercing damage', 15, '%'],
@@ -954,7 +918,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 3,
     armor: 205,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 20, '%'],
       ['Resistance to piercing damage', 25, '%'],
@@ -971,7 +934,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 3,
     armor: 240,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 22, '%'],
       ['Resistance to piercing damage', 26, '%'],
@@ -988,7 +950,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 17,
     sockets: 1,
     armor: 120,
-    damage: null,
     bonuses: [
       ['Attack Power', 5, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1005,7 +966,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 23,
     sockets: 2,
     armor: 150,
-    damage: null,
     bonuses: [
       ['Attack Power', 10, '%'],
       ['Resistance to piercing damage', 6, '%'],
@@ -1022,7 +982,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 29,
     sockets: 3,
     armor: 180,
-    damage: null,
     bonuses: [
       ['Attack Power', 15, '%'],
       ['Resistance to piercing damage', 8, '%'],
@@ -1039,7 +998,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 3,
     armor: 205,
-    damage: null,
     bonuses: [
       ['Attack Power', 20, '%'],
       ['Resistance to piercing damage', 10, '%'],
@@ -1056,7 +1014,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 3,
     armor: 240,
-    damage: null,
     bonuses: [
       ['Attack Power', 22, '%'],
       ['Resistance to piercing damage', 12, '%'],
@@ -1073,7 +1030,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 11,
     sockets: 1,
     armor: 90,
-    damage: null,
     bonuses: [
       ['Sign intensity', 5, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1090,7 +1046,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 18,
     sockets: 2,
     armor: 125,
-    damage: null,
     bonuses: [
       ['Sign intensity', 10, '%'],
       ['Resistance to piercing damage', 8, '%'],
@@ -1107,7 +1062,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 26,
     sockets: 3,
     armor: 165,
-    damage: null,
     bonuses: [
       ['Sign intensity', 15, '%'],
       ['Resistance to piercing damage', 12, '%'],
@@ -1124,7 +1078,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 3,
     armor: 205,
-    damage: null,
     bonuses: [
       ['Sign intensity', 20, '%'],
       ['Resistance to piercing damage', 17, '%'],
@@ -1141,7 +1094,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 3,
     armor: 240,
-    damage: null,
     bonuses: [
       ['Sign intensity', 22, '%'],
       ['Resistance to piercing damage', 19, '%'],
@@ -1158,7 +1110,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 14,
     sockets: 1,
     armor: 105,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 5, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1175,7 +1126,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 21,
     sockets: 2,
     armor: 140,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 10, '%'],
       ['Resistance to piercing damage', 8, '%'],
@@ -1192,7 +1142,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 29,
     sockets: 3,
     armor: 180,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 15, '%'],
       ['Resistance to piercing damage', 12, '%'],
@@ -1209,7 +1158,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 3,
     armor: 205,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 20, '%'],
       ['Resistance to piercing damage', 17, '%'],
@@ -1226,7 +1174,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 3,
     armor: 240,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 22, '%'],
       ['Resistance to piercing damage', 19, '%'],
@@ -1243,7 +1190,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 20,
     sockets: 1,
     armor: 139,
-    damage: null,
     bonuses: [
       ['Attack Power', 8, '%'],
       ['Adrenaline Point gain', 8, '%'],
@@ -1261,7 +1207,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 3,
     armor: 208,
-    damage: null,
     bonuses: [
       ['Attack Power', 18, '%'],
       ['Adrenaline Point gain', 18, '%'],
@@ -1279,7 +1224,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 3,
     armor: 243,
-    damage: null,
     bonuses: [
       ['Attack Power', 20, '%'],
       ['Adrenaline Point gain', 20, '%'],
@@ -1297,7 +1241,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 3,
     armor: 240,
-    damage: null,
     bonuses: [
       ['Maximum Toxicity', 5, ''],
       ['Resistance to piercing damage', 19, '%'],
@@ -1314,7 +1257,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 39,
     sockets: 3,
     armor: 235,
-    damage: null,
     bonuses: [
       ['Resistance to piercing damage', 30, '%'],
       ['Resistance to poisoning', 50, '%'],
@@ -1331,7 +1273,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 20,
     sockets: 0,
     armor: 45,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 5, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -1348,7 +1289,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 25,
     sockets: 0,
     armor: 55,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 6, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -1365,7 +1305,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 30,
     sockets: 1,
     armor: 65,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 8, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -1382,7 +1321,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 73,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 10, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1399,7 +1337,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 87,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 11, '%'],
       ['Resistance to piercing damage', 6, '%'],
@@ -1416,7 +1353,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 17,
     sockets: 0,
     armor: 39,
-    damage: null,
     bonuses: [
       ['Attack Power', 5, '%'],
       ['Resistance to piercing damage', 1, '%'],
@@ -1433,7 +1369,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 23,
     sockets: 0,
     armor: 51,
-    damage: null,
     bonuses: [
       ['Attack Power', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -1450,7 +1385,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 29,
     sockets: 1,
     armor: 63,
-    damage: null,
     bonuses: [
       ['Attack Power', 8, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -1467,7 +1401,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 73,
-    damage: null,
     bonuses: [
       ['Attack Power', 10, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -1484,7 +1417,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 87,
-    damage: null,
     bonuses: [
       ['Attack Power', 11, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1501,7 +1433,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 11,
     sockets: 0,
     armor: 27,
-    damage: null,
     bonuses: [
       ['Sign intensity', 5, '%'],
       ['Resistance to piercing damage', 1, '%'],
@@ -1518,7 +1449,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 18,
     sockets: 0,
     armor: 41,
-    damage: null,
     bonuses: [
       ['Sign intensity', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -1535,7 +1465,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 26,
     sockets: 1,
     armor: 57,
-    damage: null,
     bonuses: [
       ['Sign intensity', 8, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -1552,7 +1481,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 73,
-    damage: null,
     bonuses: [
       ['Sign intensity', 10, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -1569,7 +1497,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 87,
-    damage: null,
     bonuses: [
       ['Sign intensity', 11, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1586,7 +1513,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 14,
     sockets: 0,
     armor: 33,
-    damage: null,
     bonuses: [
       ['Sign intensity', 5, '%'],
       ['Resistance to piercing damage', 1, '%'],
@@ -1603,7 +1529,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 21,
     sockets: 0,
     armor: 51,
-    damage: null,
     bonuses: [
       ['Sign intensity', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -1620,7 +1545,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 29,
     sockets: 1,
     armor: 63,
-    damage: null,
     bonuses: [
       ['Sign intensity', 8, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -1637,7 +1561,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 73,
-    damage: null,
     bonuses: [
       ['Sign intensity', 10, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -1654,7 +1577,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 87,
-    damage: null,
     bonuses: [
       ['Sign intensity', 11, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1671,7 +1593,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 20,
     sockets: 0,
     armor: 46,
-    damage: null,
     bonuses: [
       ['Aard Sign intensity', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -1688,7 +1609,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 74,
-    damage: null,
     bonuses: [
       ['Aard Sign intensity', 10, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -1705,7 +1625,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 87,
-    damage: null,
     bonuses: [
       ['Aard Sign intensity', 12, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -1722,7 +1641,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 87,
-    damage: null,
     bonuses: [
       ['Maximum Toxicity', 5, ''],
       ['Resistance to piercing damage', 5, '%'],
@@ -1739,7 +1657,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 39,
     sockets: 2,
     armor: 85,
-    damage: null,
     bonuses: [
       ['Resistance to piercing damage', 5, '%'],
       ['Resistance to poisoning', 10, '%'],
@@ -1756,7 +1673,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 20,
     sockets: 0,
     armor: 49,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 5, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -1773,7 +1689,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 25,
     sockets: 1,
     armor: 59,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 6, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -1790,7 +1705,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 30,
     sockets: 2,
     armor: 69,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 8, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -1807,7 +1721,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 2,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 10, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1824,7 +1737,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 11, '%'],
       ['Resistance to piercing damage', 6, '%'],
@@ -1841,7 +1753,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 17,
     sockets: 0,
     armor: 43,
-    damage: null,
     bonuses: [
       ['Attack Power', 5, '%'],
       ['Resistance to piercing damage', 1, '%'],
@@ -1858,7 +1769,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 23,
     sockets: 1,
     armor: 55,
-    damage: null,
     bonuses: [
       ['Attack Power', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -1875,7 +1785,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 29,
     sockets: 2,
     armor: 67,
-    damage: null,
     bonuses: [
       ['Attack Power', 8, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -1892,7 +1801,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 2,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Attack Power', 10, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -1909,7 +1817,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Attack Power', 11, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1926,7 +1833,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 11,
     sockets: 0,
     armor: 31,
-    damage: null,
     bonuses: [
       ['Sign intensity', 5, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -1943,7 +1849,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 18,
     sockets: 1,
     armor: 45,
-    damage: null,
     bonuses: [
       ['Sign intensity', 6, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -1960,7 +1865,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 26,
     sockets: 2,
     armor: 61,
-    damage: null,
     bonuses: [
       ['Sign intensity', 8, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -1977,7 +1881,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 2,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Sign intensity', 10, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -1994,7 +1897,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Sign intensity', 11, '%'],
       ['Resistance to piercing damage', 6, '%'],
@@ -2011,7 +1913,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 14,
     sockets: 0,
     armor: 37,
-    damage: null,
     bonuses: [
       ['Attack Power', 5, '%'],
       ['Sign intensity', 5, '%'],
@@ -2028,7 +1929,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 21,
     sockets: 1,
     armor: 51,
-    damage: null,
     bonuses: [
       ['Attack Power', 6, '%'],
       ['Sign intensity', 6, '%'],
@@ -2045,7 +1945,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 29,
     sockets: 2,
     armor: 67,
-    damage: null,
     bonuses: [
       ['Attack Power', 8, '%'],
       ['Sign intensity', 8, '%'],
@@ -2062,7 +1961,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 2,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Attack Power', 10, '%'],
       ['Sign intensity', 10, '%'],
@@ -2079,7 +1977,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Attack Power', 11, '%'],
       ['Sign intensity', 11, '%'],
@@ -2096,7 +1993,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 20,
     sockets: 0,
     armor: 49,
-    damage: null,
     bonuses: [
       ['Sign intensity', 5, '%'],
       ['Resistance to slashing damage', 6, '%'],
@@ -2112,7 +2008,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 78,
-    damage: null,
     bonuses: [
       ['Sign intensity', 10, '%'],
       ['Resistance to slashing damage', 8, '%'],
@@ -2128,7 +2023,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 92,
-    damage: null,
     bonuses: [
       ['Sign intensity', 12, '%'],
       ['Resistance to slashing damage', 8, '%'],
@@ -2144,7 +2038,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Maximum Toxicity', 5, ''],
       ['Resistance to slashing damage', 9, '%'],
@@ -2161,7 +2054,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 39,
     sockets: 2,
     armor: 89,
-    damage: null,
     bonuses: [
       ['Resistance to piercing damage', 10, '%'],
       ['Resistance to poisoning', 30, '%'],
@@ -2178,7 +2070,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 20,
     sockets: 0,
     armor: 49,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 5, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -2195,7 +2086,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 25,
     sockets: 0,
     armor: 59,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 6, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -2212,7 +2102,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 30,
     sockets: 1,
     armor: 69,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 8, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -2229,7 +2118,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 10, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -2246,7 +2134,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Adrenaline Point gain', 11, '%'],
       ['Resistance to piercing damage', 6, '%'],
@@ -2263,7 +2150,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 17,
     sockets: 0,
     armor: 43,
-    damage: null,
     bonuses: [
       ['Attack Power', 5, '%'],
       ['Resistance to piercing damage', 1, '%'],
@@ -2280,7 +2166,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 23,
     sockets: 0,
     armor: 55,
-    damage: null,
     bonuses: [
       ['Attack Power', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -2297,7 +2182,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 29,
     sockets: 1,
     armor: 67,
-    damage: null,
     bonuses: [
       ['Attack Power', 8, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -2314,7 +2198,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Attack Power', 10, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -2331,7 +2214,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Attack Power', 11, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -2348,7 +2230,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 11,
     sockets: 0,
     armor: 31,
-    damage: null,
     bonuses: [
       ['Sign intensity', 5, '%'],
       ['Resistance to piercing damage', 1, '%'],
@@ -2365,7 +2246,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 18,
     sockets: 0,
     armor: 45,
-    damage: null,
     bonuses: [
       ['Sign intensity', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -2382,7 +2262,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 26,
     sockets: 1,
     armor: 61,
-    damage: null,
     bonuses: [
       ['Sign intensity', 8, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -2399,7 +2278,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Sign intensity', 10, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -2416,7 +2294,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Sign intensity', 11, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -2433,7 +2310,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 14,
     sockets: 0,
     armor: 37,
-    damage: null,
     bonuses: [
       ['Attack Power', 5, '%'],
       ['Resistance to piercing damage', 1, '%'],
@@ -2450,7 +2326,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 21,
     sockets: 0,
     armor: 51,
-    damage: null,
     bonuses: [
       ['Attack Power', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -2467,7 +2342,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 29,
     sockets: 1,
     armor: 67,
-    damage: null,
     bonuses: [
       ['Attack Power', 8, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -2484,7 +2358,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Attack Power', 10, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -2501,7 +2374,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Attack Power', 11, '%'],
       ['Resistance to piercing damage', 5, '%'],
@@ -2518,7 +2390,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 20,
     sockets: 0,
     armor: 50,
-    damage: null,
     bonuses: [
       ['Yrden Sign intensity', 6, '%'],
       ['Resistance to piercing damage', 2, '%'],
@@ -2535,7 +2406,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 34,
     sockets: 1,
     armor: 77,
-    damage: null,
     bonuses: [
       ['Yrden Sign intensity', 10, '%'],
       ['Resistance to piercing damage', 3, '%'],
@@ -2552,7 +2422,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Yrden Sign intensity', 12, '%'],
       ['Resistance to piercing damage', 4, '%'],
@@ -2569,7 +2438,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 40,
     sockets: 2,
     armor: 91,
-    damage: null,
     bonuses: [
       ['Maximum Toxicity', 5, ''],
       ['Resistance to piercing damage', 5, '%'],
@@ -2586,7 +2454,6 @@ export const GEAR: readonly GearItemData[] = [
     level: 39,
     sockets: 2,
     armor: 89,
-    damage: null,
     bonuses: [
       ['Resistance to piercing damage', 5, '%'],
       ['Resistance to poisoning', 10, '%'],
@@ -2601,49 +2468,61 @@ export const SET_BONUSES: readonly SetBonusData[] = [
   {
     school: 'Bear',
     weight: 'Heavy',
-    three:
-      'When a Quen shield shatters, there is a chance a new one will be cast at no Stamina cost: 5% for each piece of the set.',
-    perPiece: 5,
-    six: 'Damage dealt by Abilities involving the Quen Sign is increased by 200%.',
+    bonuses: {
+      three:
+        'When a Quen shield shatters, there is a chance a new one will be cast at no Stamina cost: 5% for each piece of the set.',
+      perPiece: 5,
+      six: 'Damage dealt by Abilities involving the Quen Sign is increased by 200%.',
+    },
   },
   {
     school: 'Cat',
     weight: 'Light',
-    three:
-      'Strong attacks increase Fast Attack damage for 5 seconds by 10% for each piece of the set.',
-    perPiece: 10,
-    six: 'Rear attacks deal 50% more damage and stun the opponent at the cost of 1 Adrenaline Point.',
+    bonuses: {
+      three:
+        'Strong attacks increase Fast Attack damage for 5 seconds by 10% for each piece of the set.',
+      perPiece: 10,
+      six: 'Rear attacks deal 50% more damage and stun the opponent at the cost of 1 Adrenaline Point.',
+    },
   },
   {
     school: 'Griffin',
     weight: 'Medium',
-    three:
-      'After using Stamina to cast a Sign in its standard mode, the next Sign cast within 3 seconds is cast in standard mode without using Stamina.',
-    perPiece: null,
-    six: 'Yrden traps are 40% larger. Within an Yrden trap, Stamina regeneration is increased by 5/s and Sign intensity by 100%, and damage taken is reduced by 20%.',
+    bonuses: {
+      three:
+        'After using Stamina to cast a Sign in its standard mode, the next Sign cast within 3 seconds is cast in standard mode without using Stamina.',
+      perPiece: null,
+      six: 'Yrden traps are 40% larger. Within an Yrden trap, Stamina regeneration is increased by 5/s and Sign intensity by 100%, and damage taken is reduced by 20%.',
+    },
   },
   {
     school: 'Wolf',
     weight: 'Medium',
-    three:
-      'Each instance of Bleeding applied to enemies increases sword damage by 1% for each piece of the set.',
-    perPiece: 1,
-    six: 'Each Adrenaline Point increases the possible number of Bleeding effects that can be applied to a single enemy.',
+    bonuses: {
+      three:
+        'Each instance of Bleeding applied to enemies increases sword damage by 1% for each piece of the set.',
+      perPiece: 1,
+      six: 'Each Adrenaline Point increases the possible number of Bleeding effects that can be applied to a single enemy.',
+    },
   },
   {
     school: 'Forgotten Wolf',
     weight: 'Medium',
-    three: 'Increases the duration of potions by 7% for each piece of the set.',
-    perPiece: 7,
-    six: 'Aard deals additional damage to enemies affected by Yrden.',
+    bonuses: {
+      three: 'Increases the duration of potions by 7% for each piece of the set.',
+      perPiece: 7,
+      six: 'Aard deals additional damage to enemies affected by Yrden.',
+    },
   },
   {
     school: 'Manticore',
     weight: 'Medium',
-    three:
-      'Critical hit chance and critical hit damage also apply to bombs, and bombs are thrown without any delay.',
-    perPiece: null,
-    six: 'The maximum number of charges for each alchemy item is increased by 1.',
+    bonuses: {
+      three:
+        'Critical hit chance and critical hit damage also apply to bombs, and bombs are thrown without any delay.',
+      perPiece: null,
+      six: 'The maximum number of charges for each alchemy item is increased by 1.',
+    },
   },
-  { school: 'Viper', weight: 'Medium', three: null, perPiece: null, six: null },
+  { school: 'Viper', weight: 'Medium', bonuses: null },
 ];

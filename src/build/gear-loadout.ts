@@ -1,5 +1,11 @@
 import type { Catalog } from '../catalog/catalog';
-import type { GearItemData, GearSchool, GearSlot, StatBonus } from '../data/gear';
+import {
+  isSword,
+  type GearItemData,
+  type GearSchool,
+  type GearSlot,
+  type StatBonus,
+} from '../data/gear';
 import { ENCHANTMENT_SOCKETS, type EnchantmentData, type UpgradeData } from '../data/upgrades';
 
 const SWORD_SLOTS: readonly GearSlot[] = ['steel', 'silver'];
@@ -129,7 +135,10 @@ export class GearLoadout {
   }
 
   armorValue(): number {
-    return [...this.#items.values()].reduce((sum, item) => sum + (item.armor ?? 0), 0);
+    return [...this.#items.values()].reduce(
+      (sum, item) => sum + (isSword(item) ? 0 : item.armor),
+      0,
+    );
   }
 
   // The Manticore pieces among the armor worn, or null while no armor is worn at all.

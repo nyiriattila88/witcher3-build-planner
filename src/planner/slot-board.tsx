@@ -1,7 +1,7 @@
 import { useState, type JSX, type RefObject } from 'react';
 import { MUTAGEN_GROUPS, type BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
-import { helixUrl } from './appearance';
+import { helixUrl } from './asset-urls';
 import { REMOVE_TIP, type BoardHandlers } from './board-item';
 import { dropTargetKey, type DropTarget } from './drag-and-drop';
 import { FitToWidth } from './fit-to-width';

@@ -1,7 +1,8 @@
 import { useState, type DragEvent, type JSX } from 'react';
 import type { BuildView } from '../build/build';
 import type { Catalog, Mutation } from '../catalog/catalog';
-import { backgroundUrl, mutationColour } from './appearance';
+import { backgroundUrl } from './asset-urls';
+import { mutationColour } from './colours';
 import type { DragItem } from './drag-and-drop';
 import { FitToWidth } from './fit-to-width';
 import { MUTATION_GRID, PANE_WIDTH, mutationCentre, tooltipPlacement } from './geometry';

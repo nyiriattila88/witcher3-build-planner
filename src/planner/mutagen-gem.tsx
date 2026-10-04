@@ -1,6 +1,8 @@
 import type { JSX } from 'react';
 import type { Mutagen } from '../catalog/catalog';
-import { mutagenColour, mutagenIconUrl, mutagenLabel } from './appearance';
+import { mutagenIconUrl } from './asset-urls';
+import { mutagenColour } from './colours';
+import { mutagenLabel } from './game-text';
 
 // The inside of a mutagen diamond: the in-game orb and the name under it.
 export function MutagenGem({ mutagen }: { mutagen: Mutagen }): JSX.Element {

@@ -1,7 +1,8 @@
 import { BASE_SLOTS, MAX_RANK, slotGroup, type BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
-import { GROUP_NAMES, mutagenColour, mutationColour, treeColour } from './appearance';
+import { mutagenColour, mutationColour, treeColour } from './colours';
 import { acceptsDrop, type DragItem, type DropTarget } from './drag-and-drop';
+import { GROUP_NAMES } from './game-text';
 
 type SlotChoice = {
   readonly key: string;

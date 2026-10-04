@@ -10,6 +10,8 @@ import {
   type SetBonusData,
 } from '../data/gear';
 import { ENCHANTMENT_SOCKETS, type EnchantmentData } from '../data/upgrades';
+import { ChoiceMenu } from './choice-menu';
+import { GameTooltip } from './game-tooltip';
 import {
   ENCHANTMENT_NAMES,
   GEAR_SLOT_NAMES,
@@ -18,9 +20,7 @@ import {
   gearTileLines,
   gearValue,
   statBonusText,
-} from './appearance';
-import { ChoiceMenu } from './choice-menu';
-import { GameTooltip } from './game-tooltip';
+} from './gear-text';
 import { PANE_WIDTH } from './geometry';
 import type { InfoTarget } from './info-panel';
 import { usePaneTooltip } from './use-pane-tooltip';

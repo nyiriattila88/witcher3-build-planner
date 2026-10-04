@@ -1,6 +1,6 @@
 import type { Catalog } from '../catalog/catalog';
 import type { TreeName } from '../data/skills';
-import { treeColour } from './appearance';
+import { treeColour } from './colours';
 
 export type PlannerTab =
   | { readonly kind: 'tree'; readonly tree: TreeName }

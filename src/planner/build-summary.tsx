@@ -3,13 +3,8 @@ import { MAX_RANK, MUTAGEN_GROUPS, type BuildView, type MutagenBonus } from '../
 import { SET_PIECES } from '../build/gear-loadout';
 import type { Catalog } from '../catalog/catalog';
 import { GEAR_SLOTS } from '../data/gear';
-import {
-  GROUP_NAMES,
-  mutagenColour,
-  mutagenEffect,
-  potionTierName,
-  treeColour,
-} from './appearance';
+import { mutagenColour, treeColour } from './colours';
+import { GROUP_NAMES, mutagenEffect, potionTierName } from './game-text';
 
 type BuildSummaryProps = { readonly build: BuildView; readonly catalog: Catalog };
 

@@ -62,7 +62,7 @@ ESLint checks both, so a wrong import fails `pnpm check`.
   panel keeps. The `bonus` of each tree in `src/data/skills.ts` states the same value as a number for
   the summary's totals, and `src/catalog/catalog.test.ts` checks that the two agree.
 - **Assets are served under the base path.** `public/images/` is referenced at runtime through
-  `import.meta.env.BASE_URL` in `src/planner/appearance.ts`, because GitHub Pages serves the site under
+  `import.meta.env.BASE_URL` in `src/planner/asset-urls.ts`, because GitHub Pages serves the site under
   `/witcher3-build-planner/`. The base itself is set once, in `vite.config.ts`. Mutation and mutagen
   icons are named after their ids in `src/data/mutations.ts`, so renaming an id loses its icon.
 - **The game version is a claim about the data.** `GAME_VERSION` in `src/data/game-version.ts` names the

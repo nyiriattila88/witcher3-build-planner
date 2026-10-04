@@ -1,7 +1,8 @@
 import type { JSX } from 'react';
 import { SLOTS_PER_GROUP, type BuildView } from '../build/build';
 import type { Mutagen } from '../catalog/catalog';
-import { mutagenColour, mutagenIconUrl } from './appearance';
+import { mutagenIconUrl } from './asset-urls';
+import { mutagenColour } from './colours';
 import {
   MUTAGEN_SLOT_SIZE,
   SLOT_SIZE,

@@ -1,7 +1,8 @@
 import { useState, type DragEvent, type JSX } from 'react';
 import { MAX_RANK, type BuildView } from '../build/build';
 import type { Skill, SkillTree } from '../catalog/catalog';
-import { backgroundUrl, iconUrl, treeColour } from './appearance';
+import { backgroundUrl, iconUrl } from './asset-urls';
+import { treeColour } from './colours';
 import type { DragItem } from './drag-and-drop';
 import { FitToWidth } from './fit-to-width';
 import {

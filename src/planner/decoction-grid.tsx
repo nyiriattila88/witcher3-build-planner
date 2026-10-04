@@ -2,8 +2,9 @@ import type { JSX } from 'react';
 import type { Build, BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import type { DecoctionData } from '../data/alchemy';
-import { decoctionIconUrl, formatDuration } from './appearance';
+import { decoctionIconUrl } from './asset-urls';
 import { TOO_TOXIC, elixirState, type ElixirState, type ToxicityTips } from './elixir-tile';
+import { formatDuration } from './game-text';
 
 type DecoctionGridProps = {
   readonly catalog: Catalog;

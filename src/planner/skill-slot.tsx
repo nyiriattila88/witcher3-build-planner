@@ -1,8 +1,9 @@
 import type { JSX } from 'react';
 import { BASE_SLOTS, slotGroup, type BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
-import { iconUrl, mutagenColour, treeColour } from './appearance';
+import { iconUrl } from './asset-urls';
 import { boardItemProps, type SlotProps } from './board-item';
+import { mutagenColour, treeColour } from './colours';
 import { dropTargetKey, type DropTarget } from './drag-and-drop';
 import { SLOT_SIZE, slotCentre } from './geometry';
 import { RankPips } from './rank-pips';

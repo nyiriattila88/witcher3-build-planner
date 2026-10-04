@@ -1,7 +1,9 @@
 import type { DragEvent, JSX } from 'react';
 import type { Mutagen } from '../catalog/catalog';
-import { backgroundUrl, mutagenColour, mutagenEffect } from './appearance';
+import { backgroundUrl } from './asset-urls';
+import { mutagenColour } from './colours';
 import type { DragItem } from './drag-and-drop';
+import { mutagenEffect } from './game-text';
 import { PANE_WIDTH } from './geometry';
 import { MutagenGem } from './mutagen-gem';
 

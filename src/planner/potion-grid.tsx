@@ -2,8 +2,9 @@ import type { JSX } from 'react';
 import type { Build, BuildView } from '../build/build';
 import type { Catalog } from '../catalog/catalog';
 import type { PotionData } from '../data/alchemy';
-import { formatDuration, potionIconUrl, potionTierName } from './appearance';
+import { potionIconUrl } from './asset-urls';
 import { TOO_TOXIC, elixirState, type ElixirState, type ToxicityTips } from './elixir-tile';
+import { formatDuration, potionTierName } from './game-text';
 
 type PotionGridProps = {
   readonly catalog: Catalog;

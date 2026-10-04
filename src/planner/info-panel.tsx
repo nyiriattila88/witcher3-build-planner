@@ -5,20 +5,10 @@ import type { Catalog, Mutagen, Mutation, Skill } from '../catalog/catalog';
 import type { DecoctionData, PotionData } from '../data/alchemy';
 import type { GearItemData } from '../data/gear';
 import { ENCHANTMENT_SOCKETS, type EnchantmentData, type UpgradeData } from '../data/upgrades';
-import {
-  decoctionIconUrl,
-  formatDuration,
-  gearKindText,
-  gearStatText,
-  iconUrl,
-  mutagenEffect,
-  mutagenIconUrl,
-  mutationMetaText,
-  potionIconUrl,
-  potionTierName,
-  statBonusText,
-  treeColour,
-} from './appearance';
+import { decoctionIconUrl, iconUrl, mutagenIconUrl, potionIconUrl } from './asset-urls';
+import { treeColour } from './colours';
+import { formatDuration, mutagenEffect, mutationMetaText, potionTierName } from './game-text';
+import { gearKindText, gearStatText, statBonusText } from './gear-text';
 import { MutationDisc } from './mutation-disc';
 import { tabName, tabTip, type PlannerTab } from './planner-tab';
 

@@ -1,6 +1,6 @@
 import type { CSSProperties, JSX } from 'react';
 import type { Catalog, Mutation } from '../catalog/catalog';
-import { mutationMetaText } from './appearance';
+import { mutationMetaText } from './game-text';
 import { GameTooltip } from './game-tooltip';
 
 type MutationTooltipProps = {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.11.1 - 2026-10-04
+
+- Nothing changes in how the planner works: this release tidies the code behind it. The gear and the
+  toxicity plan have parts of their own, and the slot board is split into its pieces, with new tests.
+- The board ignores a slot or mutagen position it does not have, instead of growing extra empty slots.
+
 ## 2.11.0 - 2026-10-03
 
 - The board works from the keyboard: Tab reaches every open slot, Enter or Space opens the list of what

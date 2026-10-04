@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.12.1 - 2026-10-04
+
+- Nothing changes in how the planner works: this release tidies the code behind it. The game data is
+  checked more strictly when the page opens, the stylesheet and the code that draws the page are split
+  into smaller parts, and new tests click and type through the page the way a visitor does.
+
 ## 2.12.0 - 2026-10-04
 
 - The rune, glyph, runeword and glyphword lists of the Gear tab show each option in the info panel

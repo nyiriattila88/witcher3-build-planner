@@ -19,6 +19,7 @@ import {
   gearValue,
   statBonusText,
 } from './appearance';
+import { ChoiceMenu } from './choice-menu';
 import { GameTooltip } from './game-tooltip';
 import { PANE_WIDTH } from './geometry';
 import type { InfoTarget } from './info-panel';
@@ -302,7 +303,7 @@ function Sockets({
       );
     }
     return (
-      <Choice
+      <ChoiceMenu
         key={socket}
         label={`Socket ${socket + 1}`}
         options={upgrades}
@@ -334,7 +335,7 @@ function Sockets({
       {wordKind !== null && (words.length > 0 || word !== null) && (
         <div className="gear-column">
           {words.length > 0 ? (
-            <Choice
+            <ChoiceMenu
               label={ENCHANTMENT_NAMES[wordKind]}
               options={words}
               held={word}
@@ -382,49 +383,5 @@ function Idle({
         {text}, idle: {reason}
       </span>
     </div>
-  );
-}
-
-type ChoiceProps<T extends { readonly name: string }> = {
-  readonly label: string;
-  readonly options: readonly T[];
-  readonly held: T | null;
-  readonly empty: string;
-  readonly describe: (option: T) => string;
-  readonly onPick: (option: T | null) => void;
-  readonly onHover: (option: T) => void;
-};
-
-function Choice<T extends { readonly name: string }>({
-  label,
-  options,
-  held,
-  empty,
-  describe,
-  onPick,
-  onHover,
-}: ChoiceProps<T>): JSX.Element {
-  return (
-    <label className="gear-socket">
-      <span>{label}</span>
-      <select
-        value={held?.name ?? ''}
-        onChange={(event) => {
-          const chosen = options.find((option) => option.name === event.target.value) ?? null;
-          onPick(chosen);
-          if (chosen !== null) onHover(chosen);
-        }}
-        onMouseEnter={() => {
-          if (held !== null) onHover(held);
-        }}
-      >
-        <option value="">{empty}</option>
-        {options.map((option) => (
-          <option key={option.name} value={option.name}>
-            {describe(option)}
-          </option>
-        ))}
-      </select>
-    </label>
   );
 }

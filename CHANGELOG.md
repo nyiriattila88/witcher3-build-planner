@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.12.0 - 2026-10-04
+
+- The rune, glyph, runeword and glyphword lists of the Gear tab show each option in the info panel
+  while you browse them with the mouse or the arrow keys, the way a skill shows itself when pointed at.
+- The code of the Toxicity tab is split into its meter, its decoctions and its potions, with nothing
+  changing in how the tab works.
+
 ## 2.11.1 - 2026-10-04
 
 - Nothing changes in how the planner works: this release tidies the code behind it. The gear and the

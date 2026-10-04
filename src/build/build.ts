@@ -32,6 +32,9 @@ const TOXICITY_THRESHOLD_SKILLS = [
 
 export const slotGroup = (slotIndex: number): number => Math.floor(slotIndex / SLOTS_PER_GROUP);
 
+const isMutagenGroup = (group: number): boolean =>
+  Number.isInteger(group) && group >= 0 && group < MUTAGEN_GROUPS;
+
 // The Toxicity at which a slotted skill starts to work.
 export type ToxicityThreshold = { readonly skill: Skill; readonly toxicity: number };
 
@@ -188,6 +191,7 @@ export class Build {
   }
 
   isSlotUnlocked(index: number): boolean {
+    if (!this.#isSlotIndex(index)) return false;
     if (index < BASE_SLOTS) return true;
     const needed = this.#catalog.extraSlotUnlocks[index - BASE_SLOTS];
     return needed !== undefined && this.researchedCount >= needed;
@@ -227,7 +231,7 @@ export class Build {
   }
 
   unslot(index: number): void {
-    this.#slots[index] = null;
+    if (this.#isSlotIndex(index)) this.#slots[index] = null;
   }
 
   // Every slotted skill adds its tree's bonus once per rank, and these stack across all slots.
@@ -248,17 +252,18 @@ export class Build {
   }
 
   placeMutagen(id: MutagenId, group: number): void {
-    if (group >= 0 && group < MUTAGEN_GROUPS) this.#mutagens[group] = id;
+    if (isMutagenGroup(group)) this.#mutagens[group] = id;
   }
 
   moveMutagen(fromGroup: number, toGroup: number): void {
+    if (!isMutagenGroup(fromGroup) || !isMutagenGroup(toGroup)) return;
     const moving = this.mutagenAt(fromGroup);
     this.#mutagens[fromGroup] = this.mutagenAt(toGroup);
     this.#mutagens[toGroup] = moving;
   }
 
   removeMutagen(group: number): void {
-    this.#mutagens[group] = null;
+    if (isMutagenGroup(group)) this.#mutagens[group] = null;
   }
 
   resetMutagens(): void {
@@ -382,6 +387,11 @@ export class Build {
         ? []
         : [{ skill, toxicity: this.maxToxicity() * share }];
     });
+  }
+
+  // Only an index the board has, so a stray one cannot grow the slot list.
+  #isSlotIndex(index: number): boolean {
+    return Number.isInteger(index) && index >= 0 && index < this.#slots.length;
   }
 
   #slottedRankOf({ tree, name }: { readonly tree: string; readonly name: string }): number {

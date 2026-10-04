@@ -105,6 +105,21 @@ describe('Build skill slots', () => {
     expect(build.slotAt(0)).toBeNull();
   });
 
+  it('ignores a slot index the board does not have', () => {
+    const muscleMemory = skill('Combat', 'Muscle Memory');
+    const build = withPoints(muscleMemory);
+    const slots = build.slotCount;
+
+    build.unslot(99);
+    build.placeSkill(muscleMemory, -1);
+
+    expect([build.slotCount, build.isSlotUnlocked(-1), build.slotOf(muscleMemory)]).toEqual([
+      slots,
+      false,
+      -1,
+    ]);
+  });
+
   it('counts the rank of a skill only while it sits in a slot', () => {
     const muscleMemory = skill('Combat', 'Muscle Memory');
     const build = withPoints(muscleMemory, muscleMemory);
@@ -228,6 +243,16 @@ describe('Build mutations', () => {
 });
 
 describe('Build mutagens', () => {
+  it('ignores a mutagen group the board does not have', () => {
+    const build = new Build(catalog);
+    build.placeMutagen('green', 0);
+
+    build.moveMutagen(0, 9);
+    build.removeMutagen(7);
+
+    expect([build.mutagenAt(0), build.mutagenCount]).toEqual(['green', 1]);
+  });
+
   it('adds the base bonus once more per matching skill and 10% per Synergy rank', () => {
     const snapshot = aSnapshot({
       points: {

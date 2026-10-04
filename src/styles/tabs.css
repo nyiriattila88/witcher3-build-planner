@@ -1,0 +1,119 @@
+/* Tabs, totals and the branch header, styled after the in-game tree tabs */
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tab {
+  position: relative;
+  min-width: 96px;
+  padding: 6px 12px 12px;
+  border: 1px solid #2a2d31;
+  background: rgba(255, 255, 255, 0.025);
+  text-align: center;
+  opacity: 0.72;
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  bottom: 5px;
+  left: 10px;
+  height: 4px;
+  background: currentColor;
+}
+
+.tab-name {
+  display: block;
+  color: #cfc8ba;
+  font-size: 14px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.tab-count {
+  display: block;
+  color: var(--bright);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.tab:hover {
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab.active {
+  opacity: 1;
+  border-color: #9a9a9a;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.08);
+}
+
+.tab.active .tab-name {
+  color: var(--bright);
+}
+
+.totals {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 2px 10px;
+  color: #cfc8ba;
+  font-size: 16px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.branch {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 9px 16px;
+  border: 1px solid color-mix(in srgb, currentColor 65%, #000);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, currentColor 55%, transparent),
+    color-mix(in srgb, currentColor 12%, transparent)
+  );
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.branch span {
+  color: var(--bright);
+  text-shadow: 0 1px 2px #000;
+}
+
+.pane {
+  min-width: 760px;
+  min-height: 400px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--frame);
+}
+
+.pane-content {
+  position: relative;
+  margin: 0 auto;
+  background-repeat: no-repeat;
+}
+
+.pane-content svg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}

@@ -1,0 +1,66 @@
+/* Skill tiles and rank pips, shared by the trees, the board and the info panel. */
+
+.tile {
+  position: relative;
+  display: block;
+  border: 2px solid color-mix(in srgb, currentColor 50%, #fff);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, currentColor 90%, #fff) 0%,
+    currentColor 50%,
+    color-mix(in srgb, currentColor 72%, #000) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
+    inset 0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+.tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+.pips {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  height: 6px;
+  margin-top: 4px;
+}
+
+.pips i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1d2126;
+  box-shadow: inset 0 0 0 1px #50565e;
+}
+
+.pips i.lit {
+  background: #f6f2ea;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.85);
+}
+
+/* The in-game selection: white corner brackets around the tile. */
+.node:hover .tile::before,
+.node:focus-visible .tile::before,
+.slot.filled:hover .tile::before,
+.slot.filled:focus-visible .tile::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  background:
+    linear-gradient(#fff 0 0) top left / 12px 2px,
+    linear-gradient(#fff 0 0) top left / 2px 12px,
+    linear-gradient(#fff 0 0) top right / 12px 2px,
+    linear-gradient(#fff 0 0) top right / 2px 12px,
+    linear-gradient(#fff 0 0) bottom left / 12px 2px,
+    linear-gradient(#fff 0 0) bottom left / 2px 12px,
+    linear-gradient(#fff 0 0) bottom right / 12px 2px,
+    linear-gradient(#fff 0 0) bottom right / 2px 12px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}

@@ -1,0 +1,240 @@
+/* Toxicity planner: the bar with its thresholds, what makes up the maximum, then the elixirs */
+
+.toxicity {
+  padding: 16px 18px 20px;
+}
+
+.toxicity-summary {
+  padding: 14px 16px;
+  border: 1px solid #2f3a2a;
+  background: rgba(20, 30, 16, 0.55);
+}
+
+.toxicity-meter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.toxicity-bar {
+  position: relative;
+  flex: 1;
+  height: 22px;
+  border: 1px solid #4a5a3e;
+  background: #0d120b;
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+.toxicity-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, #3f7f25, var(--toxic));
+  box-shadow: 0 0 10px rgba(142, 208, 79, 0.45);
+}
+
+.toxicity-fill.overdosed {
+  background: linear-gradient(90deg, #7f2525, #d04f4f);
+  box-shadow: 0 0 10px rgba(208, 79, 79, 0.5);
+}
+
+.toxicity-mark {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--bright);
+}
+
+.toxicity-mark.skill {
+  background: var(--gold);
+  cursor: help;
+}
+
+/* The line is only 2 px wide, so a wider strip around it takes the pointer. */
+.toxicity-mark.skill::before {
+  content: '';
+  position: absolute;
+  inset: 0 -5px;
+}
+
+/* Beside the bar rather than on it, where the threshold marks would cross it. */
+.toxicity-percent {
+  min-width: 4ch;
+  color: var(--toxic);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: right;
+}
+
+.toxicity-percent.overdosed {
+  color: #ff7a6b;
+}
+
+.toxicity-line {
+  margin: 10px 0 8px;
+  font-size: 16px;
+}
+
+.toxicity-line b {
+  color: var(--bright);
+  font-weight: 600;
+}
+
+.toxicity-warning {
+  margin-left: 8px;
+  color: #ff7a6b;
+  font-weight: 600;
+}
+
+.toxicity-sources {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.toxicity-sources div {
+  padding: 6px 8px;
+  border: 1px solid #2e3237;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.toxicity-sources .skill {
+  cursor: help;
+}
+
+.toxicity-sources .skill:hover {
+  border-color: #5a6068;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.toxicity-sources dt {
+  color: var(--muted);
+  font-size: 12.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.toxicity-sources dd {
+  margin: 2px 0 0;
+  color: var(--bright);
+  font-size: 16px;
+}
+
+.toxicity-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.toxicity-controls input {
+  width: 72px;
+  padding: 4px 6px;
+  border: 1px solid #555;
+  background: #0b0c0e;
+  color: var(--bright);
+  font: inherit;
+}
+
+.tier-buttons button.active {
+  border-color: var(--toxic);
+  background: rgba(142, 208, 79, 0.2);
+  color: var(--bright);
+}
+
+.elixir-heading {
+  margin: 18px 0 8px;
+  color: var(--bright);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.elixir-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 8px;
+}
+
+.elixir {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid #2e3237;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+button.elixir {
+  cursor: pointer;
+}
+
+.elixir:hover {
+  border-color: #5a6068;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.elixir img {
+  grid-row: 1 / span 2;
+  width: 40px;
+  height: 40px;
+}
+
+.elixir-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.elixir-meta {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.tier-buttons {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.tier-buttons button {
+  flex: 1;
+  padding: 2px 0;
+  font-size: 13px;
+}
+
+/* A tier the item does not come in keeps its place, so every numeral stays in the same column. */
+.tier-buttons button:disabled {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.elixir.active {
+  border-color: var(--tab-toxicity);
+  background: rgba(106, 168, 58, 0.14);
+  box-shadow: 0 0 10px rgba(106, 168, 58, 0.25);
+}
+
+/* Too toxic to make active, the total would go above the maximum. */
+.elixir.blocked {
+  opacity: 0.45;
+}
+
+.elixir.blocked,
+.elixir .blocked {
+  cursor: not-allowed;
+}

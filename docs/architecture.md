@@ -81,6 +81,11 @@ pixel layout on every screen. On a narrow one `FitToWidth` scales them down inst
 again, and anything measured on the screen, such as where a drag is over the board, is divided by that
 scale before it meets the layout.
 
+The stylesheet is split by part of the page in `src/styles/`, and `src/styles.css` imports the parts in
+cascade order: where two rules tie on specificity, the later file wins, and the phone and touch layouts
+in `responsive.css` come last. The colours of the trees, mutations and mutagens are custom properties in
+`tokens.css`, which the components reach through `src/planner/colours.ts`.
+
 ## Mouse and touch
 
 A mouse adds a rank with a click and takes it back with a right-click. A touch screen has no right-click,

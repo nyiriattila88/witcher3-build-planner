@@ -1,0 +1,147 @@
+/* Gear: what is worn and the set bonuses on top, then the schools side by side for every slot */
+
+.gear {
+  padding: 16px 18px 20px;
+}
+
+.gear-summary {
+  padding: 14px 16px;
+  border: 1px solid #343a42;
+  background: rgba(22, 27, 33, 0.6);
+}
+
+.gear-totals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.gear-totals div {
+  padding: 6px 8px;
+  border: 1px solid #2e3237;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.gear-totals dt {
+  color: var(--muted);
+  font-size: 12.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.gear-totals dd {
+  margin: 2px 0 0;
+  color: var(--bright);
+  font-size: 16px;
+}
+
+.gear-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.gear-set {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.gear-set b {
+  color: var(--bright);
+  font-weight: 600;
+}
+
+.gear-set p {
+  margin: 3px 0 0;
+}
+
+/* A set bonus only lights up once enough pieces are worn. */
+.gear-set p.active {
+  color: #ddd6ca;
+}
+
+.gear-set p span {
+  color: var(--gold);
+}
+
+/* Four equal columns leave room for the five version buttons under every school. */
+.gear-schools {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.gear-school {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 1px solid #2e3237;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.gear-school:hover {
+  border-color: #5a6068;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.gear-school .tier-buttons {
+  align-self: stretch;
+}
+
+.gear-school.active,
+.gear-school .tier-buttons button.active {
+  border-color: var(--tab-gear);
+  background: rgba(143, 163, 184, 0.16);
+  box-shadow: 0 0 10px rgba(143, 163, 184, 0.25);
+}
+
+.gear-school-name {
+  color: var(--bright);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gear-school-stat {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.gear-sockets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 18px;
+  margin-top: 8px;
+}
+
+.gear-column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gear-socket {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.gear-enchantment {
+  margin: 0;
+  color: #ddd6ca;
+  font-size: 15px;
+}
+
+/* Planned for the slot, but the item worn has no room for it, so it does not count. */
+.gear-idle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  opacity: 0.6;
+}

@@ -1,0 +1,42 @@
+.share {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid #3a3e44;
+  background: #111316;
+}
+
+.share label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.share-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.share input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid #555;
+  background: #0b0c0e;
+  color: var(--gold);
+  font:
+    13px Consolas,
+    monospace;
+}
+
+.share button {
+  padding: 6px 14px;
+  font-size: 14px;
+}
+
+.share-message {
+  min-height: 16px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}

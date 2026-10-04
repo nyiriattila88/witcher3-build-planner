@@ -1,0 +1,56 @@
+/* The in-game skill tooltip: name and rank, then the current and the next level. */
+.game-tooltip {
+  position: absolute;
+  z-index: 10;
+  width: 300px;
+  padding-bottom: 10px;
+  border: 1px solid #575b61;
+  background: rgba(30, 32, 35, 0.97);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
+  color: #ebe6dc;
+  font-size: 15px;
+  line-height: 1.3;
+  text-align: left;
+  pointer-events: none;
+}
+
+.game-tooltip-head {
+  margin-bottom: 2px;
+  padding: 7px 12px;
+  border-bottom: 1px solid #45494f;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.game-tooltip-head b {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.game-tooltip-head span {
+  color: #b9b3a7;
+}
+
+.game-tooltip p {
+  margin: 0;
+  padding: 0 12px;
+  white-space: pre-line;
+}
+
+.game-tooltip .game-tooltip-label {
+  padding-top: 7px;
+}
+
+.game-tooltip .next {
+  color: #9b968c;
+}
+
+.game-tooltip .game-tooltip-hint {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #3c4046;
+  color: var(--gold);
+  font-size: 14px;
+}

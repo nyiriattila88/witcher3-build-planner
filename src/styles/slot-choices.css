@@ -1,0 +1,62 @@
+/* The board and, under it, the list of what a slot can take */
+
+.board-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slot-choices {
+  padding: 10px 12px;
+  border: 1px solid #3b3f45;
+  background: rgba(20, 22, 25, 0.95);
+}
+
+.slot-choices-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.slot-choices-head b {
+  color: var(--bright);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.slot-choices-head span {
+  display: flex;
+  gap: 6px;
+}
+
+.slot-choices button {
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
+.slot-choices-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+/* The left edge carries the colour of the tree, mutagen or mutation. */
+.slot-choices-list button {
+  border-left-width: 4px;
+}
+
+.slot-choices-list button.active {
+  color: var(--bright);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.slot-choices-none {
+  margin: 0;
+  color: var(--muted);
+}

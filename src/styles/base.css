@@ -1,0 +1,44 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 70% 0%, rgba(70, 82, 96, 0.22), transparent 60%),
+    radial-gradient(ellipse at top, #16181b, #060708 75%);
+  color: var(--text);
+  font:
+    15px/1.35 'Barlow Semi Condensed',
+    'Segoe UI',
+    Roboto,
+    Arial,
+    sans-serif;
+}
+
+button {
+  padding: 8px 18px;
+  border: 1px solid #5a6068;
+  background: linear-gradient(#2c3035, #1a1d21);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: #9aa1a9;
+  background: linear-gradient(#363b41, #22262b);
+  color: var(--bright);
+}
+
+.mutation:focus-visible,
+.slot:focus-visible,
+.mutagen-slot:focus-visible,
+.mutation-slot:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}

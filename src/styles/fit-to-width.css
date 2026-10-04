@@ -1,0 +1,11 @@
+/* Canvases laid out in pixels, scaled down to the width there is */
+
+.fit-to-width {
+  width: 100%;
+  overflow-x: clip;
+}
+
+.fit-to-width-content {
+  margin: 0 auto;
+  transform-origin: top left;
+}

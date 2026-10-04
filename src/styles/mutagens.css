@@ -1,0 +1,72 @@
+/* Mutagens: the in-game orb in a silver diamond, the name across it */
+
+.mutagen,
+.mutagen-slot {
+  border: 2px solid #8f969d;
+  background: radial-gradient(circle, #1c2025, #0a0c0f 75%);
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 0 0 3px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 4px rgba(255, 255, 255, 0.07);
+  transform: rotate(45deg);
+}
+
+.gem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-45deg);
+}
+
+.gem img {
+  width: 76%;
+  height: 76%;
+  filter: drop-shadow(0 0 8px currentColor);
+  pointer-events: none;
+}
+
+.gem-name {
+  position: absolute;
+  top: 50%;
+  right: -22%;
+  left: -22%;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-align: center;
+  text-shadow:
+    0 0 3px #000,
+    0 1px 2px #000,
+    0 0 7px #000;
+  transform: translateY(-50%);
+}
+
+.mutagen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 160px);
+  justify-content: center;
+  gap: 44px 34px;
+  padding: 50px 0;
+}
+
+.mutagen {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto;
+  cursor: grab;
+}
+
+.mutagen .gem-name {
+  font-size: 15px;
+}
+
+.mutagen-effect {
+  margin-top: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}

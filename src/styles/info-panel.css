@@ -1,0 +1,89 @@
+/* Info panel: fixed height, so the board below stays put while the pointer moves.
+   360px fits the longest text at full width (353px, measured), a narrower window scrolls inside. */
+
+.info {
+  height: 360px;
+  overflow-y: auto;
+  padding: 14px 18px;
+  border: 1px solid #3b3f45;
+  background: linear-gradient(#17191c, #0f1114);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.info-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.info-icon {
+  position: relative;
+  display: flex;
+  flex: none;
+  width: 56px;
+  height: 56px;
+}
+
+.info-icon > * {
+  width: 100%;
+  height: 100%;
+}
+
+.info h2 {
+  margin: 0 0 3px;
+  color: var(--bright);
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.1;
+}
+
+.info-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.info-text {
+  margin: 0;
+  color: #ddd6ca;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+/* A rank text keeps its line break: the tree bonus sits on its own line, as in the game. */
+.info-rank {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 10px;
+  margin: 0 0 6px;
+  padding: 5px 10px;
+  border-left: 3px solid #3a3d42;
+  background: rgba(255, 255, 255, 0.03);
+  color: #a9a397;
+  font-size: 15.5px;
+  line-height: 1.3;
+  white-space: pre-line;
+}
+
+.info-rank b {
+  padding-top: 2px;
+  color: #8e887c;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.info-rank.reached {
+  border-left-color: var(--gold);
+  background: rgba(217, 183, 104, 0.08);
+  color: #ece6da;
+}
+
+.info-rank.reached b {
+  color: var(--gold);
+}

@@ -1,0 +1,93 @@
+.node {
+  position: absolute;
+  width: 108px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text);
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  /* A double tap takes a rank or a research back instead of zooming the page. */
+  touch-action: manipulation;
+}
+
+.node:focus-visible,
+.slot.filled:focus-visible {
+  outline: none;
+}
+
+.node-icon {
+  width: 62px;
+  height: 62px;
+  flex: none;
+}
+
+.node-name {
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 4px #000;
+}
+
+.node.locked {
+  cursor: not-allowed;
+}
+
+/* As in the game, a skill without points is a grey tile. Its icon stays white while the skill can take
+   a point, and only dims once it cannot, so every icon keeps its contrast. */
+.node .node-icon {
+  color: #4f545b;
+}
+
+.node.locked .node-icon {
+  border-color: #474c52;
+  color: #25292d;
+}
+
+.node.locked .node-icon img {
+  opacity: 0.5;
+}
+
+.node.locked .node-name {
+  color: #78736a;
+}
+
+.node.learned {
+  cursor: grab;
+}
+
+.node.learned .node-icon {
+  border-color: #fff4dc;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 0 12px color-mix(in srgb, currentColor 75%, transparent);
+}
+
+.node.slotted .node-icon::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  box-shadow: 0 0 3px #000;
+  transform: rotate(45deg);
+}
+
+.link {
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0.4;
+}
+
+.link.active {
+  stroke: color-mix(in srgb, currentColor 60%, #fff);
+  stroke-width: 2.5;
+  opacity: 0.95;
+}

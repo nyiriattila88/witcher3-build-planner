@@ -1,0 +1,89 @@
+/* Mutation tree: the in-game emblem on a disc of the mutation's colours, the name below */
+
+.mutation {
+  position: absolute;
+  width: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  /* A double tap takes a rank or a research back instead of zooming the page. */
+  touch-action: manipulation;
+}
+
+.mutation-ring {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+}
+
+/* Below the emblem badge, which hangs under the disc. */
+.mutation-name {
+  margin-top: 15px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-shadow:
+    0 1px 2px #000,
+    0 0 4px #000;
+}
+
+.mutation.locked {
+  cursor: not-allowed;
+}
+
+.mutation.locked .mutation-ring {
+  filter: grayscale(1) brightness(0.55);
+}
+
+.mutation.locked .mutation-name {
+  color: #78736a;
+}
+
+.mutation.available .mutation-ring {
+  filter: saturate(0.45) brightness(0.8);
+}
+
+.mutation.researched {
+  cursor: grab;
+}
+
+.mutation.researched .mutation-ring {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+.mutation.slotted .mutation-ring::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: 4px;
+  width: 9px;
+  height: 9px;
+  background: var(--gold);
+  box-shadow: 0 0 3px #000;
+  transform: rotate(45deg);
+}
+
+.mutation-link {
+  stroke: #555;
+  stroke-width: 3;
+}
+
+.mutation-link.active {
+  stroke-width: 5;
+}
+
+/* The in-game node: its disc fills three quarters of the image and the emblem badge hangs below, so
+   the image is a third wider than the circle it stands for and is centred on it. */
+img.disc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 132%;
+  height: 132%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}

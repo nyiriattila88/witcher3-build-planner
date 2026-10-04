@@ -1,0 +1,24 @@
+:root {
+  --text: #e8e2d6;
+  --bright: #f4efe5;
+  --muted: #8f897d;
+  --gold: #d9b768;
+  --frame: #2e3136;
+  --tree-combat: #c62f2f;
+  --tree-signs: #2a5bc8;
+  --tree-alchemy: #3a8a31;
+  --tree-general: #b97c2a;
+  --tab-mutagens: #7a63c9;
+  --tab-mutations: #a8a66a;
+  --tab-toxicity: #6aa83a;
+  --tab-gear: #8fa3b8;
+  --toxic: #8ed04f;
+  /* Mutation and mutagen colours, named after the trees they stand for. */
+  --mut-combat: #e0262c;
+  --mut-signs: #3d55e0;
+  --mut-alchemy: #2c9a2c;
+  /* The game draws every mutation of more than one colour in gold. */
+  --mut-combat-signs: #d29a2e;
+  --mut-combat-alchemy: #d29a2e;
+  --mut-combat-signs-alchemy: #d29a2e;
+}

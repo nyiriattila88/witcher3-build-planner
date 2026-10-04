@@ -76,7 +76,7 @@
 
 .group-header.empty {
   justify-content: center;
-  border-color: #2e3237;
+  border-color: var(--card-border);
   background: rgba(255, 255, 255, 0.02);
   box-shadow: none;
   color: #5d5a54;

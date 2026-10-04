@@ -2,8 +2,17 @@
   --text: #e8e2d6;
   --bright: #f4efe5;
   --muted: #8f897d;
+  --label: #cfc8ba;
+  --description: #ddd6ca;
+  --locked: #78736a;
   --gold: #d9b768;
   --frame: #2e3136;
+  --warning: #ff7a6b;
+  --panel-border: #3b3f45;
+  --card-border: #2e3237;
+  --button-border: #5a6068;
+  --field: #0b0c0e;
+  --field-border: #555;
   --tree-combat: #c62f2f;
   --tree-signs: #2a5bc8;
   --tree-alchemy: #3a8a31;

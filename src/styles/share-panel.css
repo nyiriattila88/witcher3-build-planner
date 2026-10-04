@@ -1,7 +1,7 @@
 .share {
   margin-top: 14px;
   padding: 10px 12px;
-  border: 1px solid #3a3e44;
+  border: 1px solid var(--panel-border);
   background: #111316;
 }
 
@@ -21,8 +21,8 @@
   flex: 1;
   min-width: 0;
   padding: 7px 8px;
-  border: 1px solid #555;
-  background: #0b0c0e;
+  border: 1px solid var(--field-border);
+  background: var(--field);
   color: var(--gold);
   font:
     13px Consolas,

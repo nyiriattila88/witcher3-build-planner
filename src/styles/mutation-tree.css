@@ -40,7 +40,7 @@
 }
 
 .mutation.locked .mutation-name {
-  color: #78736a;
+  color: var(--locked);
 }
 
 .mutation.available .mutation-ring {

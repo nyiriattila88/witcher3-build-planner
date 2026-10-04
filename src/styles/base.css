@@ -19,7 +19,7 @@ body {
 
 button {
   padding: 8px 18px;
-  border: 1px solid #5a6068;
+  border: 1px solid var(--button-border);
   background: linear-gradient(#2c3035, #1a1d21);
   color: var(--text);
   font: inherit;

@@ -9,8 +9,8 @@
   width: 100%;
   padding: 4px 24px 4px 6px;
   overflow: hidden;
-  border: 1px solid #555;
-  background: #0b0c0e;
+  border: 1px solid var(--field-border);
+  background: var(--field);
   color: var(--bright);
   font-size: 14px;
   letter-spacing: normal;
@@ -38,8 +38,8 @@
   margin: 0;
   padding: 4px 0;
   overflow-y: auto;
-  border: 1px solid #555;
-  background: #0b0c0e;
+  border: 1px solid var(--field-border);
+  background: var(--field);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
   list-style: none;
 }

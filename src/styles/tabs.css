@@ -29,7 +29,7 @@
 
 .tab-name {
   display: block;
-  color: #cfc8ba;
+  color: var(--label);
   font-size: 14px;
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -63,7 +63,7 @@
   display: flex;
   justify-content: space-between;
   margin: 4px 2px 10px;
-  color: #cfc8ba;
+  color: var(--label);
   font-size: 16px;
   letter-spacing: 0.6px;
   text-transform: uppercase;

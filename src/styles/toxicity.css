@@ -71,7 +71,7 @@
 }
 
 .toxicity-percent.overdosed {
-  color: #ff7a6b;
+  color: var(--warning);
 }
 
 .toxicity-line {
@@ -86,7 +86,7 @@
 
 .toxicity-warning {
   margin-left: 8px;
-  color: #ff7a6b;
+  color: var(--warning);
   font-weight: 600;
 }
 
@@ -99,7 +99,7 @@
 
 .toxicity-sources div {
   padding: 6px 8px;
-  border: 1px solid #2e3237;
+  border: 1px solid var(--card-border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -108,7 +108,7 @@
 }
 
 .toxicity-sources .skill:hover {
-  border-color: #5a6068;
+  border-color: var(--button-border);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -138,8 +138,8 @@
 .toxicity-controls input {
   width: 72px;
   padding: 4px 6px;
-  border: 1px solid #555;
-  background: #0b0c0e;
+  border: 1px solid var(--field-border);
+  background: var(--field);
   color: var(--bright);
   font: inherit;
 }
@@ -171,7 +171,7 @@
   column-gap: 8px;
   align-items: center;
   padding: 6px 8px;
-  border: 1px solid #2e3237;
+  border: 1px solid var(--card-border);
   background: rgba(0, 0, 0, 0.35);
   color: var(--text);
   font: inherit;
@@ -183,7 +183,7 @@ button.elixir {
 }
 
 .elixir:hover {
-  border-color: #5a6068;
+  border-color: var(--button-border);
   background: rgba(255, 255, 255, 0.05);
 }
 

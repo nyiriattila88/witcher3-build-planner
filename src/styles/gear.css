@@ -19,7 +19,7 @@
 
 .gear-totals div {
   padding: 6px 8px;
-  border: 1px solid #2e3237;
+  border: 1px solid var(--card-border);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -59,7 +59,7 @@
 
 /* A set bonus only lights up once enough pieces are worn. */
 .gear-set p.active {
-  color: #ddd6ca;
+  color: var(--description);
 }
 
 .gear-set p span {
@@ -79,12 +79,12 @@
   align-items: center;
   gap: 2px;
   padding: 6px 8px;
-  border: 1px solid #2e3237;
+  border: 1px solid var(--card-border);
   background: rgba(0, 0, 0, 0.35);
 }
 
 .gear-school:hover {
-  border-color: #5a6068;
+  border-color: var(--button-border);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -134,7 +134,7 @@
 
 .gear-enchantment {
   margin: 0;
-  color: #ddd6ca;
+  color: var(--description);
   font-size: 15px;
 }
 

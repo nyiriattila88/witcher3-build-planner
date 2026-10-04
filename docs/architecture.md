@@ -83,8 +83,9 @@ scale before it meets the layout.
 
 The stylesheet is split by part of the page in `src/styles/`, and `src/styles.css` imports the parts in
 cascade order: where two rules tie on specificity, the later file wins, and the phone and touch layouts
-in `responsive.css` come last. The colours of the trees, mutations and mutagens are custom properties in
-`tokens.css`, which the components reach through `src/planner/colours.ts`.
+in `responsive.css` come last. The colours are custom properties in `tokens.css`: the text, border and
+field colours the parts share, and the colours of the trees, mutations and mutagens, which the
+components reach through `src/planner/colours.ts`.
 
 ## Mouse and touch
 

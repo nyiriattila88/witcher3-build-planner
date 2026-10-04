@@ -54,7 +54,7 @@
 }
 
 .node.locked .node-name {
-  color: #78736a;
+  color: var(--locked);
 }
 
 .node.learned {

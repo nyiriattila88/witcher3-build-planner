@@ -23,7 +23,19 @@ export default defineConfig({
     __APP_COMMIT__: JSON.stringify(currentCommit()),
     __APP_BUILT_AT__: JSON.stringify(new Date().toISOString().slice(0, 10)),
   },
+  // The model and the pure UI logic run in Node, only the components need a DOM.
   test: {
-    include: ['src/**/*.test.ts'],
+    projects: [
+      { extends: true, test: { name: 'unit', include: ['src/**/*.test.ts'] } },
+      {
+        extends: true,
+        test: {
+          name: 'components',
+          include: ['src/**/*.test.tsx'],
+          environment: 'jsdom',
+          setupFiles: ['src/component-test-setup.ts'],
+        },
+      },
+    ],
   },
 });

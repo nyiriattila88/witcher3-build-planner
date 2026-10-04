@@ -99,6 +99,10 @@ dragging, which is how it works on a phone.
 
 Vitest runs the tests next to the code they test: the rules of `Build`, the build code with pinned codes
 and random round trips, the catalog's data, the address handling and the drag and drop targets.
+The component tests (`*.test.tsx`) run in jsdom with Testing Library and find elements by role and
+accessible name, the way a screen reader does. They render `App` with the real catalog and codec and an
+address bar kept in memory, so a click can be followed into the code the address shows, and hold
+`ChoiceMenu` to the keyboard and pointer behaviour of a combobox.
 `pnpm check` runs the type check, type-aware ESLint (typescript-eslint `strictTypeChecked`), Prettier and
 knip for unused code.
 

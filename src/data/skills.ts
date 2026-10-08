@@ -291,9 +291,9 @@ export const SKILL_TREES: readonly SkillTreeData[] = [
       {
         name: 'Supercharged Glyphs',
         ranks: [
-          'Enemies under the influence of Yrden lose 10 Vitality or Essence per second. Damage sccales with enemy level and Sign intensity.\nStamina regeneration in combat: +0.5/s',
-          'Enemies under the influence of Yrden lose 20 Vitality or Essence per second. Damage sccales with enemy level and Sign intensity.\nStamina regeneration in combat: +1/s',
-          'Enemies under the influence of Yrden lose 30 Vitality or Essence per second. Damage sccales with enemy level and Sign intensity.\nStamina regeneration in combat: +1.5/s',
+          'Enemies under the influence of Yrden lose 10 Vitality or Essence per second. Damage scales with enemy level and Sign intensity.\nStamina regeneration in combat: +0.5/s',
+          'Enemies under the influence of Yrden lose 20 Vitality or Essence per second. Damage scales with enemy level and Sign intensity.\nStamina regeneration in combat: +1/s',
+          'Enemies under the influence of Yrden lose 30 Vitality or Essence per second. Damage scales with enemy level and Sign intensity.\nStamina regeneration in combat: +1.5/s',
         ],
       },
       {

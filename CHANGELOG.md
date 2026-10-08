@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.12.2 - 2026-10-08
+
+- The Supercharged Glyphs text reads "Damage scales" instead of "Damage sccales" on every rank.
+
 ## 2.12.1 - 2026-10-04
 
 - Nothing changes in how the planner works: this release tidies the code behind it. The game data is

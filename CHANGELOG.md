@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.13.0 - 2026-10-09
+
+- The General tree opens the way the game does: a skill opens once any skill linked to it has a point,
+  from above or from below, so Elemental Attunement also opens from Advanced Pyrotechnics or Element of
+  Surprise. The School Techniques still need nothing.
+- Build codes start with a dot from now on. Links and codes from earlier versions open the same build
+  as before.
+
 ## 2.12.2 - 2026-10-08
 
 - The Supercharged Glyphs text reads "Damage scales" instead of "Damage sccales" on every rank.

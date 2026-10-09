@@ -8,6 +8,23 @@ import { createGameCatalog } from './game-catalog';
 const names = (skills: readonly { readonly name: string }[]): string[] =>
   skills.map((skill) => skill.name).sort();
 
+// The game data with another tree layout, for the tests of broken data.
+const createWithLayout = (treeLayout: typeof TREE_LAYOUT): unknown =>
+  createCatalog({
+    skillTrees: SKILL_TREES,
+    keySkills: KEY_SKILLS,
+    treeLayout,
+    mutagens: MUTAGENS,
+    mutations: MUTATIONS,
+    extraSlotUnlocks: [2, 4, 8, 12],
+    potions: [],
+    decoctions: [],
+    gear: [],
+    setBonuses: [],
+    upgrades: [],
+    enchantments: [],
+  });
+
 describe('createCatalog', () => {
   it('holds every skill of the four trees with the links of the in-game screenshots', () => {
     const catalog = createGameCatalog();
@@ -24,6 +41,20 @@ describe('createCatalog', () => {
 
     expect(names(rend?.requires ?? [])).toEqual(['Crushing Blow', 'Razor Focus', 'Whirl']);
     expect(names(floodOfAnger?.requires ?? [])).not.toContain('Razor Focus');
+  });
+
+  it('opens the General links both ways, but never into a School Techniques', () => {
+    const catalog = createGameCatalog();
+
+    const attunement = catalog.findSkill('General', 'Elemental Attunement');
+    const cat = catalog.findSkill('General', 'Cat School Techniques');
+
+    expect(names(attunement?.requires ?? [])).toEqual([
+      'Advanced Pyrotechnics',
+      'Element of Surprise',
+      'Gourmand',
+    ]);
+    expect(cat?.requires).toEqual([]);
   });
 
   it('marks Strengthened Synapses as the only innate mutation', () => {
@@ -57,21 +88,21 @@ describe('createCatalog', () => {
       },
     };
 
-    const create = (): unknown =>
-      createCatalog({
-        skillTrees: SKILL_TREES,
-        keySkills: KEY_SKILLS,
-        treeLayout: brokenLayout,
-        mutagens: MUTAGENS,
-        mutations: MUTATIONS,
-        extraSlotUnlocks: [2, 4, 8, 12],
-        potions: [],
-        decoctions: [],
-        gear: [],
-        setBonuses: [],
-        upgrades: [],
-        enchantments: [],
-      });
+    const create = (): unknown => createWithLayout(brokenLayout);
+
+    expect(create).toThrow(/Nonexistent/);
+  });
+
+  it('refuses a starting skill its tree does not have', () => {
+    const brokenLayout = {
+      ...TREE_LAYOUT,
+      General: {
+        ...TREE_LAYOUT.General,
+        unlocking: { kind: 'network', starts: ['Nonexistent'] } as const,
+      },
+    };
+
+    const create = (): unknown => createWithLayout(brokenLayout);
 
     expect(create).toThrow(/Nonexistent/);
   });

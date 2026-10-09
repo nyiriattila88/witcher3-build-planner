@@ -38,7 +38,8 @@ rank, which skills a slot accepts, how a mutagen's bonus grows, when an elixir w
 maximum, which runes fit which sockets. Components ask it what is allowed and call its commands instead of
 deciding that themselves.
 Every command ends by normalising the build, so taking the last point from a skill also takes the skills
-that only it kept unlocked, and the build is valid after any sequence of commands.
+that only it tied to a starting skill, and the build is valid after any sequence of commands. In the
+General tree, where a link opens both ways, two skills would otherwise keep each other.
 
 `Build` keeps the skills, slots, mutagens and mutations itself, because their rules reach into each other:
 research opens slots, a slotted mutation decides what they take, a mutagen counts the skills around it. It
@@ -59,12 +60,14 @@ A build is written as one mixed-radix number in base64url (`src/build/build-code
 the build field by field, and each field offers only the choices the rules allow at that point: a rank
 only for a skill that is available, a slot only the learned skills it accepts and no earlier slot holds.
 A build with a few points gets a code of about a dozen characters, and every build has exactly one code.
+Since 2.13 a code starts with `.`: the General links open both ways since then, so the skills are
+offered pass by pass, as the learned skills open them.
 
 Because the walk follows the data and the rules, changing either changes what existing codes mean. New
 fields are only ever appended at the end (the toxicity plan and then the gear came after the skills,
 mutagens and mutations), and the data lists only grow at their end. Codes made by earlier versions are
-pinned in `build-code.test.ts`, and the oldest format, `W3R1.`, still decodes through
-`legacy-build-code.ts`.
+pinned in `build-code.test.ts`: the unmarked codes before 2.13 still decode with every link read one
+way, and the oldest format, `W3R1.`, through `legacy-build-code.ts`.
 
 ## The address is the only state
 

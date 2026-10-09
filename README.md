@@ -27,7 +27,8 @@ a computer or a phone, with nothing to install.
 
 - **Spend points in the four skill trees.** Combat, Signs, Alchemy and General look the way the game draws
   them, with its links, icons and tooltip texts and three ranks per skill. A skill opens once a linked
-  skill before it has a point, and taking that point back closes the branch behind it.
+  skill before it has a point, in General once any linked skill has one, and taking that point back
+  closes the branch behind it.
 - **Slot skills and mutagens.** Twelve skill slots sit in four groups, each with a mutagen whose bonus
   grows with every skill of its colour in the group and with Synergy. The board shows which slots count.
 - **Research mutations.** Research them in order, slot one in the centre, and fill the four extra skill
@@ -72,6 +73,7 @@ release. How it is put together, from the rule model to the build code format, a
   guide.
 - Tree layout, links and backdrops: in-game screenshots published by Mobalytics, which also give the icons
   of the skills that are new in the Remastered. The other skill icons: The Witcher Wiki on Fandom.
+- How the General tree opens, both ways along every link: The Witcher Wiki on Fandom.
 - Mutations, mutagens and the extra slot rules: the rpg-gaming.com Witcher 3 build planner.
 - Mutation discs: cut from an in-game screenshot on the Improved Mutations page on Nexus Mods. Mutagen
   orbs: The Witcher Wiki on Fandom.

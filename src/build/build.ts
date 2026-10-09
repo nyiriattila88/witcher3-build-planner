@@ -158,7 +158,8 @@ export class Build {
     if (this.canAddPoint(skill)) this.#ranks.set(skill, this.rank(skill) + 1);
   }
 
-  // The last point takes along every skill that only this one kept unlocked, so a branch unwinds in one go.
+  // The last point takes along every skill that only this one tied to a starting skill, so a branch
+  // unwinds in one go.
   removePoint(skill: Skill): void {
     if (this.rank(skill) === 0) return;
     const rank = this.rank(skill) - 1;
@@ -403,16 +404,23 @@ export class Build {
     return this.#catalog.mutation(id).requires.every((required) => this.isResearched(required));
   }
 
-  // Drops whatever the rules no longer allow. Removals can cascade, so it repeats until nothing changes.
+  // Keeps a learned skill only while learned skills lead to it from a starting skill. A learned
+  // requirement alone is not enough: in the General network two skills can open each other.
+  #dropUntiedSkills(): void {
+    const tied = new Set([...this.#ranks.keys()].filter((skill) => skill.requires.length === 0));
+    // A Set also visits what is added while it is walked, so this spreads until nothing new is reached.
+    for (const skill of tied) {
+      for (const next of skill.unlocks) if (this.#ranks.has(next)) tied.add(next);
+    }
+    for (const skill of this.#ranks.keys()) if (!tied.has(skill)) this.#ranks.delete(skill);
+  }
+
+  // Drops whatever the rules no longer allow. Removals of research can cascade, so that part repeats
+  // until nothing changes.
   #normalize(): void {
+    this.#dropUntiedSkills();
     for (let changed = true; changed;) {
       changed = false;
-      for (const skill of this.#ranks.keys()) {
-        if (!this.isAvailable(skill)) {
-          this.#ranks.delete(skill);
-          changed = true;
-        }
-      }
       for (const id of this.#researched) {
         if (!this.#requirementsResearched(id)) {
           this.#researched.delete(id);

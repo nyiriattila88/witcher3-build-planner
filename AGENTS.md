@@ -33,8 +33,10 @@ ESLint checks both, so a wrong import fails `pnpm check`.
 - **Build codes follow the data and the rules.** A code walks the skills, mutagens and mutations in
   the order of `src/data/`, and each field offers only what `Build` allows at that point. Reordering the
   data, changing a link or changing a rule silently changes what every shared code means. Such a change
-  needs a new format behind a marker today's codes cannot contain, such as `3.`, and must keep decoding
-  the unmarked codes, the way `W3R1.` codes still decode through `src/build/legacy-build-code.ts`.
+  needs a new format behind a marker today's codes cannot contain, and must keep decoding the older
+  ones. The codes since 2.13 start with `.`, because the General links open both ways since then: the
+  unmarked codes before still decode with every link read one way, its first skill opening the second,
+  and `W3R1.` codes through `src/build/legacy-build-code.ts`. The next change needs a marker such as `~`.
   The toxicity plan (the potions and decoctions of `src/data/alchemy.ts`, Manticore armor pieces and
   known recipes) and then the gear (`src/data/gear.ts` with the runes, glyphs and enchantments of
   `src/data/upgrades.ts`) are walked last, which is why codes written before them still open; anything
@@ -57,6 +59,9 @@ ESLint checks both, so a wrong import fails `pnpm check`.
   leaves the commands out, so the build held in state cannot be changed by mistake: only a draft can.
 - **The tree links come from the in-game screenshots**, not from the Reddit text, which lists a few
   wrong ones (Razor Focus does not unlock Flood of Anger). `src/catalog/catalog.test.ts` pins examples.
+  The General tree is a network, as The Witcher Wiki describes it: a link opens both ways and the School
+  Techniques need nothing (`unlocking` in `src/data/tree-layout.ts`). The Reddit text and Fextralife
+  read it one way only.
 - **Rank texts follow the game.** Rank 1 is the in-game tooltip wording, ranks 2 and 3 put the
   per-rank values into it. The tree bonus of a rank is on its own line after a `\n`, which the info
   panel keeps. The `bonus` of each tree in `src/data/skills.ts` states the same value as a number for

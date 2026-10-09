@@ -26,6 +26,10 @@ type TreePaneProps = {
   readonly onDragStart: (item: DragItem, event: DragEvent) => void;
 };
 
+// A link is lit while a learned skill at one end opens the other end through it.
+const opensThrough = (build: BuildView, from: Skill, to: Skill): boolean =>
+  build.rank(from) > 0 && to.requires.includes(from);
+
 export function TreePane({
   tree,
   build,
@@ -48,13 +52,14 @@ export function TreePane({
         }}
       >
         <svg width={size.width} height={size.height}>
-          {tree.links.map(([parent, child]) => {
-            const [x1, y1] = nodeCentre(parent.position);
-            const [x2, y2] = nodeCentre(child.position);
+          {tree.links.map(([first, second]) => {
+            const [x1, y1] = nodeCentre(first.position);
+            const [x2, y2] = nodeCentre(second.position);
+            const lit = opensThrough(build, first, second) || opensThrough(build, second, first);
             return (
               <line
-                key={`${parent.index}-${child.index}`}
-                className={build.rank(parent) > 0 ? 'link active' : 'link'}
+                key={`${first.index}-${second.index}`}
+                className={lit ? 'link active' : 'link'}
                 x1={x1}
                 y1={y1}
                 x2={x2}

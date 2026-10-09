@@ -122,14 +122,27 @@ export function createCatalog(sources: CatalogSources): Catalog {
       return skill;
     });
 
+    const { unlocking } = layout;
+    const starts: readonly string[] = unlocking.kind === 'network' ? unlocking.starts : [];
+    const unknownStarts = starts.filter((name) => !skillsByKey.has(skillKey(treeData.tree, name)));
+    if (unknownStarts.length > 0) {
+      throw new Error(`Unknown ${treeData.tree} starting skills: ${unknownStarts.join(', ')}`);
+    }
+    // A starting skill needs nothing, so no link opens it.
+    const open = (from: MutableSkill, to: MutableSkill): void => {
+      if (starts.includes(to.name)) return;
+      from.unlocks.push(to);
+      to.requires.push(from);
+    };
+
     const links = layout.links.map(([parentName, childName]): readonly [Skill, Skill] => {
       const parent = skillsByKey.get(skillKey(treeData.tree, parentName));
       const child = skillsByKey.get(skillKey(treeData.tree, childName));
       if (parent === undefined || child === undefined) {
         throw new Error(`Unknown skill in the ${treeData.tree} link ${parentName} -> ${childName}`);
       }
-      parent.unlocks.push(child);
-      child.requires.push(parent);
+      open(parent, child);
+      if (unlocking.kind === 'network') open(child, parent);
       return [parent, child];
     });
 

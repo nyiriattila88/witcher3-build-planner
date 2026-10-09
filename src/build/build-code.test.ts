@@ -11,6 +11,9 @@ const codec = createBuildCodec(catalog);
 const COMBAT_SIGNS_CODE = 'W3R1.yAEABAAgBAAAAAAAAAAAAAEAACAABAbAAAAAAAIAAAAAAAAAABOADAAAAAADAAHBrG';
 const ALCHEMY_GENERAL_CODE =
   'W3R1.AAAAAAAAAAAAADAsIAAAAQAAAMAAvAqAyBNBAAAAuAAAAAAAAAAAAAAAAAAJCHAAAA';
+// The same builds as 2.1 to 2.12 wrote them, without a mark and with every link read one way.
+const COMBAT_SIGNS_UNMARKED = '5yx4ZhzLhrAAYAECABY7';
+const ALCHEMY_GENERAL_UNMARKED = 'OB66AAAcCDjM';
 
 const decodeBuild = (code: string): Build => {
   const build = codec.decode(code);
@@ -104,10 +107,10 @@ const aRandomBuild = (random: () => number): Build => {
 };
 
 describe('createBuildCodec', () => {
-  it('writes an empty build as A', () => {
+  it('writes an empty build as .A', () => {
     const code = codec.encode(new Build(catalog));
 
-    expect(code).toBe('A');
+    expect(code).toBe('.A');
   });
 
   it('writes the 1.x example builds as their pinned codes', () => {
@@ -115,7 +118,7 @@ describe('createBuildCodec', () => {
 
     const newCodes = oldCodes.map((code) => codec.encode(decodeBuild(code)));
 
-    expect(newCodes).toEqual(['5yx4ZhzLhrAAYAECABY7', 'OB66AAAcCDjM']);
+    expect(newCodes).toEqual(['.DnLHhmHMuGsAECABAgEY7', '.OB66AAQMCDjM']);
     expect(newCodes.map((code) => fingerprint(decodeBuild(code)))).toEqual(
       oldCodes.map((code) => fingerprint(decodeBuild(code))),
     );
@@ -144,6 +147,39 @@ describe('createBuildCodec', () => {
       Array.from({ length: build.slotCount }, (_, i) => build.slotAt(i) !== null),
     ).not.toContain(false);
     expect(code.length).toBeLessThan(COMBAT_SIGNS_CODE.length);
+  });
+
+  it('still opens the unmarked codes 2.1 to 2.12 wrote as the same builds', () => {
+    const unmarked = [COMBAT_SIGNS_UNMARKED, ALCHEMY_GENERAL_UNMARKED];
+
+    const reopened = unmarked.map((code) => fingerprint(decodeBuild(code)));
+
+    expect(reopened).toEqual(
+      [COMBAT_SIGNS_CODE, ALCHEMY_GENERAL_CODE].map((code) => fingerprint(decodeBuild(code))),
+    );
+  });
+
+  it('writes and reopens a General build that climbs from Viper School Techniques', () => {
+    const way = [
+      'Viper School Techniques',
+      'Advanced Pyrotechnics',
+      'Elemental Attunement',
+      'Gourmand',
+      'Strong Back',
+      'Battle Frenzy',
+    ];
+    const build = new Build(catalog);
+    for (const name of way) {
+      const skill = catalog.findSkill('General', name);
+      if (skill === undefined) throw new Error(`Test data names an unknown skill: ${name}`);
+      build.addPoint(skill);
+    }
+
+    const code = codec.encode(build);
+
+    expect(build.totalPoints()).toBe(6);
+    expect(code).toBe('.BVEEAI');
+    expect(fingerprint(decodeBuild(code))).toBe(fingerprint(build));
   });
 
   it('gives every build exactly one code and every code exactly one build', () => {
@@ -181,20 +217,28 @@ describe('createBuildCodec', () => {
   });
 
   it('rejects a second spelling of a build', () => {
-    // A leading zero digit, and a tree marked as having points without any.
-    const spellings = ['AA', 'AB', 'B'];
+    // A leading zero digit, and a tree marked as having points without any, with the mark and without.
+    const spellings = ['AA', 'AB', 'B', '.AA', '.AB', '.B'];
 
     const decoded = spellings.map((code) => codec.decode(code));
 
-    expect(decoded).toEqual([null, null, null]);
+    expect(decoded).toEqual([null, null, null, null, null, null]);
   });
 
   it('rejects text that is not a whole build code', () => {
-    const inputs = ['', 'not a code', COMBAT_SIGNS_CODE.slice(0, -1), '2.', '!', 'z'.repeat(100)];
+    const inputs = [
+      '',
+      'not a code',
+      COMBAT_SIGNS_CODE.slice(0, -1),
+      '2.',
+      '.',
+      '!',
+      'z'.repeat(100),
+    ];
 
     const decoded = inputs.map((input) => codec.decode(input));
 
-    expect(decoded).toEqual([null, null, null, null, null, null]);
+    expect(decoded).toEqual([null, null, null, null, null, null, null]);
   });
 
   it('still opens the gear codes 2.6 wrote, when only the final versions existed', () => {
@@ -220,6 +264,6 @@ describe('createBuildCodec', () => {
     const build = decodeBuild(code);
 
     expect(fingerprint(build)).toBe(fingerprint(decodeBuild(ALCHEMY_GENERAL_CODE)));
-    expect(codec.encode(build)).toBe('OB66AAAcCDjM');
+    expect(codec.encode(build)).toBe('.OB66AAQMCDjM');
   });
 });

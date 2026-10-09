@@ -88,6 +88,44 @@ describe('Build skill points', () => {
     ]).toEqual([0, 1]);
   });
 
+  it('opens a General skill from a learned skill linked to it below', () => {
+    const build = withPoints(
+      skill('General', 'Viper School Techniques'),
+      skill('General', 'Advanced Pyrotechnics'),
+    );
+
+    build.addPoint(skill('General', 'Elemental Attunement'));
+
+    expect(build.rank(skill('General', 'Elemental Attunement'))).toBe(1);
+  });
+
+  it('takes the General skills that only kept each other once their way to a School is gone', () => {
+    const way = ['Cat School Techniques', 'Battle Frenzy', 'Strong Back', 'Gourmand'];
+    const build = withPoints(...way.map((name) => skill('General', name)));
+
+    build.removePoint(skill('General', 'Battle Frenzy'));
+
+    expect(way.map((name) => build.rank(skill('General', name)))).toEqual([1, 0, 0, 0]);
+  });
+
+  it('keeps a General skill that a learned way from another School still reaches', () => {
+    const build = withPoints(
+      ...[
+        'Cat School Techniques',
+        'Battle Frenzy',
+        'Strong Back',
+        'Viper School Techniques',
+        'Advanced Pyrotechnics',
+        'Elemental Attunement',
+        'Gourmand',
+      ].map((name) => skill('General', name)),
+    );
+
+    build.removePoint(skill('General', 'Battle Frenzy'));
+
+    expect(build.rank(skill('General', 'Strong Back'))).toBe(1);
+  });
+
   it('stops at the third rank', () => {
     const muscleMemory = skill('Combat', 'Muscle Memory');
     const build = withPoints(muscleMemory, muscleMemory, muscleMemory, muscleMemory);

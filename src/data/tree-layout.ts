@@ -3,13 +3,20 @@
 
 import type { TreeName } from './skills';
 
+// Branches open from parent to child only. A network opens every link both ways, and only its starting
+// skills need nothing.
+type Unlocking =
+  { readonly kind: 'branches' } | { readonly kind: 'network'; readonly starts: readonly string[] };
+
 export type TreeLayout = {
+  readonly unlocking: Unlocking;
   readonly nodes: Readonly<Record<string, readonly [number, number]>>;
   readonly links: readonly (readonly [string, string])[];
 };
 
 export const TREE_LAYOUT: Readonly<Record<TreeName, TreeLayout>> = {
   Combat: {
+    unlocking: { kind: 'branches' },
     nodes: {
       'Muscle Memory': [190, 62],
       'Arrow Deflection': [410, 62],
@@ -63,6 +70,7 @@ export const TREE_LAYOUT: Readonly<Record<TreeName, TreeLayout>> = {
     ],
   },
   Signs: {
+    unlocking: { kind: 'branches' },
     nodes: {
       'Far-reaching Aard': [80, 62],
       'Melt Armor': [190, 62],
@@ -115,6 +123,7 @@ export const TREE_LAYOUT: Readonly<Record<TreeName, TreeLayout>> = {
     ],
   },
   Alchemy: {
+    unlocking: { kind: 'branches' },
     nodes: {
       Refreshment: [155, 62],
       Efficiency: [300, 62],
@@ -169,6 +178,19 @@ export const TREE_LAYOUT: Readonly<Record<TreeName, TreeLayout>> = {
     ],
   },
   General: {
+    // The Witcher Wiki: a General skill opens once any skill linked to it has a point, and the School
+    // Techniques need nothing. The codes before 2.13 read each link one way, so a pair keeps its order.
+    unlocking: {
+      kind: 'network',
+      starts: [
+        'Cat School Techniques',
+        'Wolf School Techniques',
+        'Bear School Techniques',
+        'Griffin School Techniques',
+        'Manticore School Techniques',
+        'Viper School Techniques',
+      ],
+    },
     nodes: {
       'Cat School Techniques': [300, 62],
       'Battle Frenzy': [80, 182],

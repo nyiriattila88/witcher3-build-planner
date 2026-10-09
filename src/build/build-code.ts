@@ -1,4 +1,4 @@
-import type { Catalog } from '../catalog/catalog';
+import type { Catalog, Skill } from '../catalog/catalog';
 import { ALCHEMY_RECIPES, MANTICORE_ARMOR } from '../data/alchemy';
 import { GEAR_SLOTS, type GearItemData } from '../data/gear';
 import type { TreeName } from '../data/skills';
@@ -12,8 +12,11 @@ export type BuildCodec = {
   readonly decode: (text: string) => Build | null;
 };
 
-// 2.1.0 wrote the same codes behind this marker, which read like a version, so it is only read.
-const MARKER = '2.';
+// Codes since 2.13 open with this mark, because the General links open both ways since then. The
+// unmarked codes before them read every link one way and still open as they were written.
+const MARK = '.';
+// 2.1.0 wrote the unmarked codes behind this marker, which read like a version, so it is only read.
+const MARKER_2_1_0 = '2.';
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 // Longer than any build code, so pasted text never turns into a huge number.
 const MAX_BODY_LENGTH = 120;
@@ -26,6 +29,14 @@ const MISSING_RECIPES = upTo(ALCHEMY_RECIPES);
 // Picks one of the options the rules leave open: the encoder writes which one the build holds, the
 // decoder reads it back.
 type Choose = <T>(options: readonly T[], held: T) => T;
+
+// Walks the ranks of the skills in the trees that have points.
+type SkillWalk = (build: Build, choose: Choose, usedTrees: ReadonlySet<TreeName>) => void;
+
+const chooseRank = (build: Build, choose: Choose, skill: Skill): void => {
+  const rank = choose(RANKS, build.rank(skill));
+  for (let added = build.rank(skill); added < rank; added++) build.addPoint(skill);
+};
 
 type Digit = readonly [value: number, base: number];
 
@@ -69,7 +80,6 @@ function requirementsFirst<T>(items: readonly T[], requires: (item: T) => readon
 // earlier slot holds. A field with a single option costs nothing, and empty fields at the end cost
 // nothing either, so a code is only as long as the build is full.
 export function createBuildCodec(catalog: Catalog): BuildCodec {
-  const skills = requirementsFirst(catalog.skills, (skill) => skill.requires);
   const researchable = catalog.mutations.filter((mutation) => !mutation.innate);
   const mutations = requirementsFirst(researchable, (mutation) =>
     researchable.filter((other) => mutation.requires.includes(other.id)),
@@ -77,17 +87,48 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
   const mutagenIds = catalog.mutagens.map((mutagen) => mutagen.id);
   const decodeLegacy = createLegacyDecoder(catalog);
 
+  // Offers a skill once a skill walked before opens it, pass after pass, so links that open both ways
+  // need no order. A skill nothing learned opens is never offered.
+  const walkOpenedSkills: SkillWalk = (build, choose, usedTrees) => {
+    const walked = new Set<Skill>();
+    const opened = (skill: Skill): boolean =>
+      skill.requires.length === 0 ||
+      skill.requires.some((other) => walked.has(other) && build.rank(other) > 0);
+    for (let more = true; more;) {
+      more = false;
+      for (const skill of catalog.skills) {
+        if (walked.has(skill) || !usedTrees.has(skill.tree) || !opened(skill)) continue;
+        walked.add(skill);
+        more = true;
+        chooseRank(build, choose, skill);
+      }
+    }
+  };
+
+  // The unmarked codes read every link one way, its first skill opening the second, and walk the
+  // skills in the order that allows.
+  const oneWayParents = new Map(catalog.skills.map((skill): [Skill, Skill[]] => [skill, []]));
+  for (const tree of catalog.trees) {
+    for (const [first, second] of tree.links) oneWayParents.get(second)?.push(first);
+  }
+  const parentsOf = (skill: Skill): readonly Skill[] => oneWayParents.get(skill) ?? [];
+  const oneWayOrder = requirementsFirst(catalog.skills, parentsOf);
+  const walkOneWaySkills: SkillWalk = (build, choose, usedTrees) => {
+    for (const skill of oneWayOrder) {
+      const parents = parentsOf(skill);
+      if (!usedTrees.has(skill.tree)) continue;
+      if (parents.length > 0 && !parents.some((parent) => build.rank(parent) > 0)) continue;
+      chooseRank(build, choose, skill);
+    }
+  };
+
   // The encoder walks a copy of a full build, the decoder an empty one that the walk fills in.
-  function walk(build: Build, choose: Choose): void {
+  function walk(build: Build, walkSkills: SkillWalk, choose: Choose): void {
     const usedTrees = new Set<TreeName>();
     for (const tree of catalog.trees) {
       if (choose(FLAGS, build.treePoints(tree.name) > 0)) usedTrees.add(tree.name);
     }
-    for (const skill of skills) {
-      if (!usedTrees.has(skill.tree) || !build.isAvailable(skill)) continue;
-      const rank = choose(RANKS, build.rank(skill));
-      for (let added = build.rank(skill); added < rank; added++) build.addPoint(skill);
-    }
+    walkSkills(build, choose, usedTrees);
     for (const mutation of mutations) {
       const researched = build.isResearched(mutation.id);
       if (!researched && !build.canResearch(mutation.id)) continue;
@@ -155,9 +196,9 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
     }
   }
 
-  function encode(build: Build): string {
+  function encodeBody(build: Build, walkSkills: SkillWalk): string {
     const digits: Digit[] = [];
-    walk(build.clone(), (options, held) => {
+    walk(build.clone(), walkSkills, (options, held) => {
       const index = options.indexOf(held);
       if (index < 0) throw new Error('The build holds something its own rules do not allow');
       digits.push([index, options.length]);
@@ -166,19 +207,20 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
     return toBase64Url(pack(digits));
   }
 
-  function decodeBody(body: string): Build | null {
+  function decodeBody(body: string, walkSkills: SkillWalk): Build | null {
     const value = fromBase64Url(body);
     if (value === null) return null;
     let rest = value;
     const build = new Build(catalog);
-    walk(build, (options) => {
+    walk(build, walkSkills, (options) => {
       const base = BigInt(options.length);
       const option = options[Number(rest % base)];
       rest /= base;
       if (option === undefined) throw new Error('A digit is always below its base');
       return option;
     });
-    return rest === 0n ? build : null;
+    // Only the code a build encodes back to is accepted, so a tree flagged without points is refused.
+    return rest === 0n && encodeBody(build, walkSkills) === body ? build : null;
   }
 
   function decode(text: string): Build | null {
@@ -187,11 +229,10 @@ export function createBuildCodec(catalog: Catalog): BuildCodec {
       const snapshot = decodeLegacy(code.slice(LEGACY_PREFIX.length));
       return snapshot === null ? null : Build.fromSnapshot(catalog, snapshot);
     }
-    const body = code.startsWith(MARKER) ? code.slice(MARKER.length) : code;
-    const build = decodeBody(body);
-    // Only the code a build encodes back to is accepted, so a tree flagged without points is refused.
-    return build !== null && encode(build) === body ? build : null;
+    if (code.startsWith(MARK)) return decodeBody(code.slice(MARK.length), walkOpenedSkills);
+    const body = code.startsWith(MARKER_2_1_0) ? code.slice(MARKER_2_1_0.length) : code;
+    return decodeBody(body, walkOneWaySkills);
   }
 
-  return { encode, decode };
+  return { encode: (build) => MARK + encodeBody(build, walkOpenedSkills), decode };
 }

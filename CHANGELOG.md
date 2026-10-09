@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.14.0 - 2026-10-09
+
+- The skills follow patch 5.01: Exploding Shield also reflects 10%, 20% or 30% of the damage Quen
+  absorbs back to the attacker, and the header shows game version 5.01.
+- The General skills write "Vitality gain" the way the game does.
+
 ## 2.13.0 - 2026-10-09
 
 - The General tree opens the way the game does: a skill opens once any skill linked to it has a point,

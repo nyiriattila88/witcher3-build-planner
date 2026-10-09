@@ -89,7 +89,7 @@ export function App({ catalog, codec, address }: AppProps): JSX.Element {
         </h1>
         <p className="masthead-versions">
           <span>Planner v{RELEASE.version}</span>
-          <span title="Skill data from the Remastered release 5.00. Patches 5.00b and 5.00c changed no skills.">
+          <span title="Skill data from the Remastered release 5.00, with the Exploding Shield change of patch 5.01.">
             Game version {GAME_VERSION}
           </span>
         </p>

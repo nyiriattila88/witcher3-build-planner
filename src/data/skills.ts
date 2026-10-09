@@ -235,9 +235,9 @@ export const SKILL_TREES: readonly SkillTreeData[] = [
       {
         name: 'Exploding Shield',
         ranks: [
-          'Whenever Quen shield breaks, it pushes enemies back. Push-back strength increases with skill level.\nStamina regeneration in combat: +0.5/s',
-          'Whenever Quen shield breaks, it pushes enemies back. Push-back strength increases with skill level.\nStamina regeneration in combat: +1/s',
-          'Whenever Quen shield breaks, it pushes enemies back. Push-back strength increases with skill level.\nStamina regeneration in combat: +1.5/s',
+          'Whenever Quen shield breaks, it pushes enemies back. Push-back strength increases with skill level. Reflects 10% of absorbed damage back to the attacker.\nStamina regeneration in combat: +0.5/s',
+          'Whenever Quen shield breaks, it pushes enemies back. Push-back strength increases with skill level. Reflects 20% of absorbed damage back to the attacker.\nStamina regeneration in combat: +1/s',
+          'Whenever Quen shield breaks, it pushes enemies back. Push-back strength increases with skill level. Reflects 30% of absorbed damage back to the attacker.\nStamina regeneration in combat: +1.5/s',
         ],
       },
       {

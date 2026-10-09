@@ -15,7 +15,7 @@
 Plan a character for **The Witcher 3: Wild Hunt Remastered** before you spend a single point in the game.
 The Remastered release reworked the skill trees, renamed skills, moved them and added new ones, so the
 planners made for earlier versions no longer match what the game shows. This one follows the game as it
-is now, version 5.00c, from the skill trees to the mutations, the potions and the witcher gear, and it fits
+is now, version 5.01, from the skill trees to the mutations, the potions and the witcher gear, and it fits
 a whole build into one link you can send to a friend or keep for later.
 
 **[Open the planner](https://nyiriattila88.github.io/witcher3-build-planner/)**. It runs in the browser on
@@ -87,7 +87,8 @@ release. How it is put together, from the rule model to the build code format, a
   Witcher Wiki on Fandom, with the regular game's values since patch 4.0. The set bonuses come with the
   final, grandmaster version of a school's gear.
 - Game version: the Remastered patch notes on thewitcher.com. Patches 5.00b and 5.00c changed no
-  skills.
+  skills, and 5.01 added the damage reflection of Exploding Shield: rank 1 from the in-game tooltip, and
+  10% per rank as the Signs Tweaks Remaster mod reads the game.
 
 ## License
 

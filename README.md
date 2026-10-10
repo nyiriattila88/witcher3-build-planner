@@ -34,7 +34,8 @@ a computer or a phone, with nothing to install.
 - **Research mutations.** Research them in order, slot one in the centre, and fill the four extra skill
   slots around it, which open as you research more and take only the mutation's colours.
 - **Plan potions and decoctions.** Pick what is active together and see it against your maximum Toxicity,
-  which grows with Acquired Tolerance for the recipes you know, Metabolic Control and Manticore armor. The
+  which grows with Acquired Tolerance for the recipes you know (half a point each, as the game really
+  counts them, not what the skill's tooltip promises), Metabolic Control and Manticore armor. The
   overdose threshold is marked, and as in the game nothing goes over the maximum.
 - **Choose witcher gear.** Bear, Cat, Griffin, Wolf, Forgotten Wolf, Manticore and Viper gear in every
   version from basic to grandmaster, mixed freely, with runes and glyphs socket by socket or a runeword or
@@ -82,7 +83,9 @@ release. How it is put together, from the rule model to the build code format, a
   where the two disagree. The effect values are written into the in-game descriptions. The overdose
   threshold at half of the maximum: the list of changes of the next-gen update 4.0. The 167 alchemy
   recipes: what players measured with Acquired Tolerance since 4.0 (148 in the base game, 150 with Hearts
-  of Stone).
+  of Stone). Half a point per recipe, with the enhanced and superior recipes from ranks 2 and 3: the
+  Alchemy Reforged and Acquired Tolerance Nerfix mods, which read the game's scripts, and the 204 players
+  reach with all recipes and Manticore armor. The 5.0 tooltip of the skill promises 1 to 3 per recipe.
 - Witcher gear, set bonuses, runestones, glyphs and the Runewright's runewords and glyphwords: The
   Witcher Wiki on Fandom, with the regular game's values since patch 4.0. The set bonuses come with the
   final, grandmaster version of a school's gear.

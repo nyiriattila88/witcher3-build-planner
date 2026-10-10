@@ -135,6 +135,12 @@
   font-size: 15px;
 }
 
+.toxicity-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
 .toxicity-controls input {
   width: 72px;
   padding: 4px 6px;

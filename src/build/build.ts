@@ -1,5 +1,11 @@
 import type { Catalog, Mutagen, Skill } from '../catalog/catalog';
-import { BASE_MAX_TOXICITY, MANTICORE_ARMOR, SAFE_TOXICITY_SHARE } from '../data/alchemy';
+import {
+  ALCHEMY_RECIPES,
+  BASE_MAX_TOXICITY,
+  MANTICORE_ARMOR,
+  RECIPES_COUNTED_BY_RANK,
+  SAFE_TOXICITY_SHARE,
+} from '../data/alchemy';
 import type { ColourTree, MutagenId, MutationId } from '../data/mutations';
 import type { KeySkill, TreeName } from '../data/skills';
 import type { BuildSnapshot } from './build-snapshot';
@@ -13,9 +19,10 @@ export const SLOTS_PER_GROUP = 3;
 export const MUTAGEN_GROUPS = BASE_SLOTS / SLOTS_PER_GROUP;
 // While it sits in a slot, Synergy raises every mutagen bonus by 10% per rank.
 export const SYNERGY = { skill: 'synergy', bonusPerRank: 0.1 } as const;
-// From a slot, Acquired Tolerance raises maximum Toxicity by 1 per learned recipe and rank, Metabolic
-// Control by 10 per rank.
-export const ACQUIRED_TOLERANCE = { skill: 'acquiredTolerance', perRecipe: 1 } as const;
+// From a slot, Acquired Tolerance raises maximum Toxicity by half a point per known recipe its rank counts,
+// as in patch 4.04, although its 5.0 tooltip promises 1 to 3 (two mods that read the game's scripts say so
+// and players measure it). Metabolic Control raises it by 10 per rank.
+export const ACQUIRED_TOLERANCE = { skill: 'acquiredTolerance', perRecipe: 0.5 } as const;
 export const METABOLIC_CONTROL = { skill: 'metabolicControl', perRank: 10 } as const;
 // From a slot, these start to work at a share of maximum Toxicity, by rank.
 const TOXICITY_THRESHOLD_SKILLS = [
@@ -363,13 +370,12 @@ export class Build {
     );
   }
 
-  // Skills only work from a slot, so an unslotted one adds nothing.
+  // Skills only work from a slot, so an unslotted one adds nothing. The known recipes are taken to be the
+  // basic ones first, because the enhanced and superior formulas come late in the game.
   acquiredTolerance(): number {
-    return (
-      this.#slottedRankOf(ACQUIRED_TOLERANCE.skill) *
-      ACQUIRED_TOLERANCE.perRecipe *
-      this.#toxicityPlan.knownRecipes
-    );
+    const rank = this.#slottedRankOf(ACQUIRED_TOLERANCE.skill);
+    const counted = rank === 0 ? 0 : (RECIPES_COUNTED_BY_RANK[rank - 1] ?? ALCHEMY_RECIPES);
+    return Math.min(this.#toxicityPlan.knownRecipes, counted) * ACQUIRED_TOLERANCE.perRecipe;
   }
 
   metabolicControl(): number {

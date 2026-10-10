@@ -83,7 +83,7 @@ export function ToxicitySummary({
         <span className={over ? 'toxicity-percent overdosed' : 'toxicity-percent'}>{percent}%</span>
       </div>
       <p className="toxicity-line">
-        Active <b>{toxicity}</b> of <b>{max}</b> Toxicity ({percent}%), overdose above{' '}
+        Active <b>{toxicity}</b> of <b>{formatAmount(max)}</b> Toxicity ({percent}%), overdose above{' '}
         <b>{formatAmount(overdose)}</b> ({Math.round(SAFE_TOXICITY_SHARE * 100)}%)
         {warning !== null && <span className="toxicity-warning"> {warning}</span>}
       </p>
@@ -133,6 +133,10 @@ export function ToxicitySummary({
         </label>
         <span>Manticore armor pieces come from the Gear tab.</span>
       </div>
+      <p className="toxicity-note">
+        Acquired Tolerance gives half a point per recipe, whatever its tooltip says: rank 1 counts
+        the basic recipes, rank 2 the enhanced ones too and rank 3 the superior ones as well.
+      </p>
     </section>
   );
 }
@@ -162,7 +166,7 @@ function SkillSource({
       onMouseLeave={tips.hide}
     >
       <dt>{skill.name}</dt>
-      <dd>{rank > 0 ? `+${value} (rank ${rank})` : 'not slotted'}</dd>
+      <dd>{rank > 0 ? `+${formatAmount(value)} (rank ${rank})` : 'not slotted'}</dd>
     </div>
   );
 }

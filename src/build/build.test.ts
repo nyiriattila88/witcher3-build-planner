@@ -326,7 +326,22 @@ describe('Build Toxicity', () => {
 
     build.placeSkill(acquiredTolerance, 0);
 
-    expect([unslotted, build.maxToxicity()]).toEqual([100, 100 + ALCHEMY_RECIPES]);
+    // Rank 1 counts the basic recipes, 103 of the 167, at half a point each.
+    expect([unslotted, build.maxToxicity()]).toEqual([100, 100 + 103 / 2]);
+  });
+
+  it('counts the enhanced recipes from rank 2 and the superior ones from rank 3', () => {
+    const acquiredTolerance = skill('Alchemy', 'Acquired Tolerance');
+    const build = withTrees('Alchemy');
+    build.placeSkill(acquiredTolerance, 0);
+    const byRank = [build.acquiredTolerance()];
+
+    for (let rank = 2; rank <= 3; rank++) {
+      build.addPoint(acquiredTolerance);
+      byRank.push(build.acquiredTolerance());
+    }
+
+    expect(byRank).toEqual([103 / 2, 135 / 2, ALCHEMY_RECIPES / 2]);
   });
 
   it('places a threshold skill at the share of the maximum its rank gives, only from a slot', () => {
@@ -351,7 +366,7 @@ describe('Build Toxicity', () => {
 
     const max = build.maxToxicity();
 
-    expect(max).toBe(100 + 40 + 10 + 4 * 5);
+    expect(max).toBe(100 + 40 / 2 + 10 + 4 * 5);
   });
 
   it('starts an overdose above half of the maximum', () => {

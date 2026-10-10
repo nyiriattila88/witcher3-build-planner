@@ -24,6 +24,13 @@ export const SAFE_TOXICITY_SHARE = 0.5;
 // Every alchemy formula of the game, which is what Acquired Tolerance counts: 148 in the base game, 150
 // with Hearts of Stone and 167 with Blood and Wine, as players measured it since patch 4.0.
 export const ALCHEMY_RECIPES = 167;
+// How many of them Acquired Tolerance counts at ranks 1, 2 and 3: the 32 enhanced potions, oils and bombs
+// only from rank 2 and the 32 superior ones from rank 3 (The Witcher Wiki, since patch 4.0).
+export const RECIPES_COUNTED_BY_RANK = [
+  ALCHEMY_RECIPES - 64,
+  ALCHEMY_RECIPES - 32,
+  ALCHEMY_RECIPES,
+];
 // Each piece of Manticore armor raises maximum Toxicity, by 5 since patch 4.0.
 export const MANTICORE_ARMOR = { pieces: 4, toxicity: 5 } as const;
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.14.1 - 2026-10-10
+
+- Acquired Tolerance adds what the game really gives: half a point of maximum Toxicity per known recipe,
+  the enhanced recipes from rank 2 and the superior ones from rank 3. Its tooltip in the game promises 1,
+  2 or 3 per recipe, which the game does not deliver, so the maximum of over 600 the planner showed was
+  out of reach: with every recipe, rank 3, Metabolic Control and Manticore armor it is 233.5.
+
 ## 2.14.0 - 2026-10-09
 
 - The skills follow patch 5.01: Exploding Shield also reflects 10%, 20% or 30% of the damage Quen

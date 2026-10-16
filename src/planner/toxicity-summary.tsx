@@ -17,8 +17,11 @@ type ToxicitySummaryProps = {
   readonly tips: ToxicityTips;
 };
 
-const formatAmount = (value: number): string =>
-  Number.isInteger(value) ? `${value}` : value.toFixed(1);
+// One decimal at most, which also hides the rounding error of a share such as 0.55 of 100.
+const formatAmount = (value: number): string => {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1);
+};
 
 // What the meter warns about, the worse case first.
 const toxicityWarning = (toxicity: number, max: number, overdose: number): string | null => {

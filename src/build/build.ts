@@ -26,7 +26,7 @@ export const ACQUIRED_TOLERANCE = { skill: 'acquiredTolerance', perRecipe: 0.5 }
 export const METABOLIC_CONTROL = { skill: 'metabolicControl', perRank: 10 } as const;
 // From a slot, these start to work at a share of maximum Toxicity, by rank.
 const TOXICITY_THRESHOLD_SKILLS = [
-  { skill: 'delayedRecovery', shares: [0.7, 0.65, 0.6] },
+  { skill: 'delayedRecovery', shares: [0.7, 0.65, 0.55] },
   { skill: 'highTolerance', shares: [0.8, 0.8, 0.8] },
 ] as const;
 

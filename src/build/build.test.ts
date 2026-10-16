@@ -354,7 +354,7 @@ describe('Build Toxicity', () => {
     build.placeSkill(delayedRecovery, 0);
 
     expect(unslotted).toEqual([]);
-    expect(build.toxicityThresholds()).toEqual([{ skill: delayedRecovery, toxicity: 100 * 0.6 }]);
+    expect(build.toxicityThresholds()).toEqual([{ skill: delayedRecovery, toxicity: 100 * 0.55 }]);
   });
 
   it('counts the known recipes, Metabolic Control and the Manticore armor pieces', () => {

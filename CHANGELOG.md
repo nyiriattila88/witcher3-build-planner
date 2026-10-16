@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.14.2 - 2026-10-16
+
+- Delayed Recovery starts at 55% Toxicity on its third rank, as in the game, not at 60%. Its mark on the
+  Toxicity bar moves with it.
+
 ## 2.14.1 - 2026-10-10
 
 - Acquired Tolerance adds what the game really gives: half a point of maximum Toxicity per known recipe,

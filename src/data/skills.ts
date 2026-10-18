@@ -679,9 +679,9 @@ export const SKILL_TREES: readonly SkillTreeData[] = [
       {
         name: 'Griffin School Techniques',
         ranks: [
-          'Each piece of Medium Armor increases Sign intensity by 2% and Stamina regeneration by 0/s.\nVitality gain: +1%',
-          'Each piece of Medium Armor increases Sign intensity by 4% and Stamina regeneration by 0/s.\nVitality gain: +2%',
-          'Each piece of Medium Armor increases Sign intensity by 6% and Stamina regeneration by 1/s.\nVitality gain: +3%',
+          'Each piece of Medium Armor increases Sign intensity by 2% and Stamina regeneration by 0.2/s.\nVitality gain: +1%',
+          'Each piece of Medium Armor increases Sign intensity by 4% and Stamina regeneration by 0.4/s.\nVitality gain: +2%',
+          'Each piece of Medium Armor increases Sign intensity by 6% and Stamina regeneration by 0.6/s.\nVitality gain: +3%',
         ],
       },
       {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.14.3 - 2026-10-18
+
+- Griffin School Techniques shows the Stamina regeneration it gives per piece of Medium Armor, 0.2/s,
+  0.4/s and 0.6/s by rank, as the game's tooltip does now. The tooltip of patch 5.00 rounded them to
+  0, 0 and 1.
+
 ## 2.14.2 - 2026-10-16
 
 - Delayed Recovery starts at 55% Toxicity on its third rank, as in the game, not at 60%. Its mark on the
